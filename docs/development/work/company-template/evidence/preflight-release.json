@@ -1,0 +1,84 @@
+{
+  "product_candidate": "07c66864a917a18e8a8fdf84f8c01cb30e510b66",
+  "release": "668da43adceb853fe531cef5db9d93aefe7b16cb",
+  "updated_from_v1_0": {
+    "status": "verified-candidate",
+    "candidate": "/home/artem/projects/work/studio/products/company-work-system/.local/acceptance-alpha-1-1-updated",
+    "target": "668da43adceb853fe531cef5db9d93aefe7b16cb",
+    "company_base": "91197f1c1558d8ae41f170b1f26223a35176cd39",
+    "sha256": "94441d8ca36c23d0d3bdb8d316ea289437e42d92",
+    "delivery": "pending"
+  },
+  "initial_preflight": {
+    "status": "ready",
+    "mode": "current",
+    "fresh": true,
+    "local_head": "94441d8ca36c23d0d3bdb8d316ea289437e42d92",
+    "remote_head": "94441d8ca36c23d0d3bdb8d316ea289437e42d92",
+    "branch": "main",
+    "pending_delivery": false,
+    "next_action": "Read context from disk; deliver only authorized local commits through the common route"
+  },
+  "employee_b_received_assignment": {
+    "status": "ready",
+    "mode": "updated",
+    "fresh": true,
+    "local_head": "851a8d97f5e05f80b18df2d259bfbebdec8383e4",
+    "remote_head": "851a8d97f5e05f80b18df2d259bfbebdec8383e4",
+    "branch": "main",
+    "pending_delivery": false,
+    "next_action": "Read context from disk; deliver only authorized local commits through the common route"
+  },
+  "employee_a_received_completion": {
+    "status": "ready",
+    "mode": "updated",
+    "fresh": true,
+    "local_head": "5e8b67c26591dd86166bb5941d7ef15a8fe2030d",
+    "remote_head": "5e8b67c26591dd86166bb5941d7ef15a8fe2030d",
+    "branch": "main",
+    "pending_delivery": false,
+    "next_action": "Read context from disk; deliver only authorized local commits through the common route"
+  },
+  "observed_task": {
+    "id": "sync-note",
+    "status": "verified",
+    "delivery": {
+      "status": "delivered",
+      "commit": "18ee25b710132cdcbdd4854424c6b03a9f07a075",
+      "readback": true,
+      "result_sha256": "7ddbc2dd5af96a55936f22cfc69a5f507dd4223bb128149a394295a244c6a041"
+    },
+    "application": {
+      "status": "unknown"
+    },
+    "effect": {
+      "status": "unknown"
+    }
+  },
+  "both_worktrees_clean": true,
+  "company_history_isolated": true,
+  "scope": "Synthetic local two-employee cycle; not live/native employee integration",
+  "portable_bundle": {
+    "path": "/home/artem/projects/work/studio/products/company-work-system/.local/company-work-system-1.1.0.bundle",
+    "sha256": "d394abfa534b97a13ec4db5dd112b81bc209417c23d6ac85d426842212d39cb9",
+    "tag": "v1.1.0",
+    "git_bundle_verified": true,
+    "previous_1_0_tag_preserved": "e876f5c1931223a3925792dbe2e11a72ea1f660f"
+  },
+  "actual_product_github_preflight": {
+    "status": "ready",
+    "mode": "local-ahead",
+    "fresh": true,
+    "local_head": "07c66864a917a18e8a8fdf84f8c01cb30e510b66",
+    "remote_head": "8c7d455d96425b0abab604b49c0d3f4a514e1258",
+    "branch": "main",
+    "pending_delivery": true,
+    "next_action": "Read context from disk; deliver only authorized local commits through the common route"
+  },
+  "github_code_readback": {
+    "repository": "ArtemArzi/company-work-system",
+    "branch": "main",
+    "sha": "07c66864a917a18e8a8fdf84f8c01cb30e510b66",
+    "matches_accepted_code_candidate": true
+  }
+}
