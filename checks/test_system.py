@@ -291,6 +291,16 @@ class SourcesAndBackground(Fixture):
 
 
 class GitAcceptance(Fixture):
+    def test_release_guide_allowed_but_development_history_rejected(self):
+        release = self.base / "release.git"
+        with patch.object(lifecycle, "git") as command:
+            command.side_effect = ["tree docs\nblob docs/company-system-guide.html", "true"]
+            lifecycle.release_isolated(release)
+        for forbidden in ("docs/development/PLAN.md", "docs/private.html"):
+            with self.subTest(path=forbidden), patch.object(lifecycle, "git", return_value="blob " + forbidden):
+                with self.assertRaisesRegex(Rejected, "non-template history"):
+                    lifecycle.release_isolated(release)
+
     def product_release(self):
         p = self.base / "product"; p.mkdir()
         shutil.copytree(TEMPLATE, p / "template", symlinks=True, ignore=shutil.ignore_patterns("__pycache__"))

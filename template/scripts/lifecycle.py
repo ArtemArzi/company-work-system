@@ -18,7 +18,8 @@ def release_isolated(release):
             relative = row.split(" ", 1)[1]
             if not relative:
                 continue  # Git names the root tree with an empty path.
-            require(relative.split("/", 1)[0] in allowed, "release includes non-template history")
+            guide_path = relative in {"docs", "docs/company-system-guide.html"}
+            require(relative.split("/", 1)[0] in allowed or guide_path, "release includes non-template history")
     require(git(release, "rev-parse", "--is-bare-repository") == "true", "release-only bare repository required")
 
 
