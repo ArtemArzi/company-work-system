@@ -1,0 +1,62 @@
+[
+  {
+    "skill": "company-author",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-context",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-deliver",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-episodes",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-execute",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-incident",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-intake",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-knowledge",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-marketing",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-research",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-source-read",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  },
+  {
+    "skill": "company-summary",
+    "exit_code": 0,
+    "output": "Skill is valid!"
+  }
+]

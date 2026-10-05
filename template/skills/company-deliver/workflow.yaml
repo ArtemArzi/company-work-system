@@ -1,0 +1,29 @@
+schema_version: 1
+id: company-deliver
+version: 1
+owner: process-owner-selected-by-company
+standards:
+- standards/template-update.md
+- standards/task-validation.md
+capabilities:
+- git
+- critical
+inputs:
+- accepted request, company identity/scope, exact versions, allowed sources
+output: deliver output referenced by owning task; provenance and limitations required
+steps:
+- id: read-context
+  operation: context
+  depends_on: []
+- id: perform-operation
+  operation: deliver
+  depends_on:
+  - read-context
+- id: validate-result
+  operation: execute
+  depends_on:
+  - perform-operation
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence

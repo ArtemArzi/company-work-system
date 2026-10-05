@@ -1,0 +1,21 @@
+schema_version: 1
+id: design-basis
+owner: product-maintainer
+origin: Our limited synthesis of primary design references; no third-party code/books
+  bundled
+version: 1
+status: source-summary
+aliases:
+- канонический владелец
+- локализация изменений
+- простые системы
+summary: Single canonical owner, narrow module boundaries, task-specific documentation,
+  feedback, observable behavior, controlled evolution. Our adaptation, not proven
+  business effect. Full books not read; Gall bibliography only; no copyrighted extracts
+  bundled.
+references:
+- https://john.cs.olemiss.edu/~hcc/csci555/notes/localcopy/Parnas_Criteria_Decomposing.pdf
+- https://donellameadows.org/archives/leverage-points-places-to-intervene-in-a-system/
+- https://diataxis.fr/compass/
+- https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle
+links: []

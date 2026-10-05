@@ -1,0 +1,85 @@
+schema_version: 1
+id: codex-explicit-file-read-linux
+harness: codex
+mode: explicit-file-read
+os: Linux
+detected_version: 0.160.0
+native_execution:
+  status: read-smoke-passed; full workflow unverified
+  scope: Product acceptance environment only; every company must verify its own access/version
+  observed_version: 0.160.0
+native_discovery: unverified
+native_memory: optional; never canonical
+capabilities:
+  rules:
+    mechanism: explicit AGENTS.md read
+    status: common-code tested; harness-specific limits remain
+    fallback: stop if inaccessible
+    scenario: new session reads canonical map
+  skills:
+    mechanism: canonical skill; Linux relative symlink projection
+    status: common-code tested; harness-specific limits remain
+    fallback: explicit canonical read
+    scenario: same recipe and relative resources
+  memory:
+    mechanism: task.json File Memory
+    status: common-code tested; harness-specific limits remain
+    fallback: direct read, native recall off
+    scenario: new subprocess and stale memory
+  workflow:
+    mechanism: agent recipe + prepared CLI
+    status: common-code tested; harness-specific limits remain
+    fallback: explicit fixed operations
+    scenario: valid and cyclic recipe
+  tools:
+    mechanism: configured read adapter envelope
+    status: 'limited: program checks tested; host/provider authority not inferred'
+    fallback: approved export or block
+    scenario: scope/missing/account/pagination
+  validation:
+    mechanism: shared validation.py
+    status: common-code tested; harness-specific limits remain
+    fallback: same CLI
+    scenario: known bad result rejected
+  hooks:
+    mechanism: not enabled or claimed
+    status: 'limited: program checks tested; host/provider authority not inferred'
+    fallback: CLI/publication checks; tool authority outside hook
+    scenario: hook absence does not bypass checks
+  independence:
+    mechanism: host independent agent according to policy
+    status: 'limited: program checks tested; host/provider authority not inferred'
+    fallback: block if required role unavailable
+    scenario: author review not accepted as independent
+  permissions:
+    mechanism: host/provider actual scope + operation checks
+    status: 'limited: program checks tested; host/provider authority not inferred'
+    fallback: smaller authorized local operation
+    scenario: configuration is not file ACL
+  git:
+    mechanism: shared delivery.py
+    status: common-code tested; harness-specific limits remain
+    fallback: local candidate if remote missing
+    scenario: two concurrent results, conflict/readback
+  proactive:
+    mechanism: one-shot tick from accepted timer/event
+    status: common-code tested; harness-specific limits remain
+    fallback: manual tick; no timer installed
+    scenario: off/limit/repeat/restart
+  presentation:
+    mechanism: text/JSON/table artifact
+    status: common-code tested; harness-specific limits remain
+    fallback: plain files
+    scenario: recipient uses next action
+  knowledge:
+    mechanism: derived graph/direct files/read connector
+    status: common-code tested; harness-specific limits remain
+    fallback: direct sources or explicit blocked KB
+    scenario: source change updates answer
+  updates:
+    mechanism: release-only Git ancestry and candidate
+    status: common-code tested; harness-specific limits remain
+    fallback: previous compatible version
+    scenario: local methods/data survive update/restore
+common_core: Local behavioral acceptance uses the same canonical procedures/validators
+  for both projections; this is not native Claude execution

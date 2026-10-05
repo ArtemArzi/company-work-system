@@ -1,0 +1,24 @@
+schema_version: 1
+id: unconfigured
+name: null
+owner: null
+decisions: []
+definitions: {}
+sources: {}
+bindings: {}
+permissions:
+  local_work: false
+  external_delivery: false
+  remotes: []
+features:
+  proactive: false
+  graph: true
+  knowledge_base: false
+profiles:
+  codex: explicit-file-read
+  claude: explicit-file-read
+proactive:
+  authorization: null
+  task_id: null
+  max_runs: null
+  interval_seconds: null

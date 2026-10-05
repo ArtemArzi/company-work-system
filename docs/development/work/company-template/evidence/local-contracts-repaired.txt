@@ -1,0 +1,20 @@
+test_clean_template_and_all_pairs (checks.test_system.LocalContracts.test_clean_template_and_all_pairs) ... ok
+test_decimal_sum_is_exact_without_business_rounding_rule (checks.test_system.LocalContracts.test_decimal_sum_is_exact_without_business_rounding_rule) ... ok
+test_episode_denominator_and_cross_source_outcome (checks.test_system.LocalContracts.test_episode_denominator_and_cross_source_outcome) ... ok
+test_independence_and_observation_are_separate (checks.test_system.LocalContracts.test_independence_and_observation_are_separate) ... ok
+test_lock_prevents_parallel_mutation_without_stale_lock_repair (checks.test_system.LocalContracts.test_lock_prevents_parallel_mutation_without_stale_lock_repair) ... ok
+test_new_process_reads_file_memory_and_blocks_changed_method (checks.test_system.LocalContracts.test_new_process_reads_file_memory_and_blocks_changed_method) ... ok
+test_result_rejects_known_bad_provenance_count_null_and_pass (checks.test_system.LocalContracts.test_result_rejects_known_bad_provenance_count_null_and_pass) ... ok
+test_task_id_semantic_conflict_preserves_original (checks.test_system.LocalContracts.test_task_id_semantic_conflict_preserves_original) ... ok
+test_unconfirmed_stale_revision_cancel_and_unknowns (checks.test_system.LocalContracts.test_unconfirmed_stale_revision_cancel_and_unknowns) ... ok
+test_validator_itself_rejects_wrong_place_duplicate_link_cycle (checks.test_system.LocalContracts.test_validator_itself_rejects_wrong_place_duplicate_link_cycle) ... ok
+test_wrong_arithmetic_then_original_case_repairs (checks.test_system.LocalContracts.test_wrong_arithmetic_then_original_case_repairs) ... ok
+test_real_file_export_and_wrong_company_partial_stale (checks.test_system.SourcesAndBackground.test_real_file_export_and_wrong_company_partial_stale) ... ok
+test_stdio_mcp_negotiation_read_tool_and_error (checks.test_system.SourcesAndBackground.test_stdio_mcp_negotiation_read_tool_and_error) ... ok
+test_graph_current_source_aliases_and_disabled_fallback (checks.test_system.SourcesAndBackground.test_graph_current_source_aliases_and_disabled_fallback) ... ok
+test_one_shot_ticks_change_only_limits_off_and_recovery (checks.test_system.SourcesAndBackground.test_one_shot_ticks_change_only_limits_off_and_recovery) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.173s
+
+OK

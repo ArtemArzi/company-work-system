@@ -1,0 +1,33 @@
+schema_version: 1
+id: message-to-action
+version: 1
+owner: company-process-owner
+standards:
+- standards/task-validation.md
+capabilities:
+- files
+- critical
+- validation
+- git
+inputs:
+- allowed message/transcript and company context
+output: Confirmed task or explicit waiting; validated action and recipient summary
+steps:
+- id: accept-message
+  skill: company-intake
+  depends_on: []
+- id: do-action
+  skill: company-execute
+  depends_on:
+  - accept-message
+- id: show-actions
+  skill: company-summary
+  depends_on:
+  - do-action
+- id: share-result
+  skill: company-deliver
+  depends_on:
+  - show-actions
+on_error: Keep task state and owner of missing decision; do not repeat uncertain external
+  write
+stop: Unconfirmed meaning, missing rights/source or version conflict

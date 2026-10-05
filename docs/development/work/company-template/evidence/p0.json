@@ -1,0 +1,9 @@
+{
+  "failed_proof": "/tmp/company-p0-tht1okt2",
+  "failure": "Product refs retained in company clone; clean HEAD insufficient",
+  "first_false_assumption": "Checking out split SHA removes product history",
+  "repair": "Separate release-only bare; clone and fetch only it",
+  "repaired_proof": "/tmp/company-p0-repaired-5te5rbml",
+  "checks": {"all_reachable_history_clean": true, "product_blob_absent": true, "two_companies_preserved": true},
+  "independent_plan_receipt": "company-work-system-p0-plan-pass-20261005-release-isolation-9a74"
+}

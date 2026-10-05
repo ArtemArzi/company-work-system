@@ -1,0 +1,7 @@
+test_copy_update_two_companies_history_and_local_rule (checks.test_system.GitAcceptance.test_copy_update_two_companies_history_and_local_rule) ... ok
+test_semantic_binding_change_stops_even_text_merge_clean (checks.test_system.GitAcceptance.test_semantic_binding_change_stops_even_text_merge_clean) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 40.595s
+
+OK

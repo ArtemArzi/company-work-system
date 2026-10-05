@@ -1,0 +1,6 @@
+schema_version: 1
+version: 1.0.0
+state_format: 1
+workflow_format: 1
+python: '>=3.12'
+git: '>=2.43'

@@ -1,0 +1,34 @@
+{
+  "codex": {
+    "version": "0.160.0",
+    "profile": "Linux explicit-file-read",
+    "exit_code": 0,
+    "observed": "{\n  \"company_id\": \"test-company\",\n  \"task_id\": \"test-task\",\n  \"task_status\": \"active\",\n  \"application_status\": \"unknown\",\n  \"next_action\": \"Execute accepted operation\",\n  \"paths_read\": [\n    \"AGENTS.md\",\n    \"company/config.yaml\",\n    \"work/test-task/task.json\",\n    \"skills/company-context/SKILL.md\",\n    \"skills/company-context/workflow.yaml\"\n  ]\n}",
+    "commands": [
+      {
+        "command": "/bin/bash -lc \"sed -n '1,260p' AGENTS.md && sed -n '1,260p' company/config.yaml && sed -n '1,320p' work/test-task/task.json && sed -n '1,320p' skills/company-context/SKILL.md && sed -n '1,320p' skills/company-context/workflow.yaml\"",
+        "exit_code": 0
+      }
+    ],
+    "limitations": [
+      "Exceeded skills context budget. All skill descriptions were removed and 26 additional skills were not included in the model-visible skills list.",
+      "Native auto-discovery and complete workflow execution are not established by this read smoke"
+    ]
+  },
+  "claude": {
+    "version": "2.1.289",
+    "profile": "Linux explicit-file-read",
+    "exit_code": 1,
+    "observed": "Failed to authenticate: OAuth session expired and could not be refreshed",
+    "status": "blocked-by-auth",
+    "settings_changed": false
+  },
+  "initial_codex_sandbox": {
+    "exit_code": 1,
+    "observed": "Read-only filesystem prevents native app-server initialization"
+  },
+  "short_codex_smoke": {
+    "exit_code": 124,
+    "observed": "Started skill selection, timed out after45 seconds; longer read smoke passed"
+  }
+}

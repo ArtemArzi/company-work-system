@@ -1,0 +1,18 @@
+test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session (checks.test_system.GitAcceptance.test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session) ... ERROR
+
+======================================================================
+ERROR: test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session (checks.test_system.GitAcceptance.test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_system.py", line 365, in test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session
+    rolled = lifecycle.rollback(candidate, self.base / "rollback-candidate")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/lifecycle.py", line 159, in rollback
+    patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, text=True, capture_output=True)
+            ^^^^^^^^^^
+NameError: name 'subprocess' is not defined. Did you forget to import 'subprocess'
+
+----------------------------------------------------------------------
+Ran 1 test in 23.521s
+
+FAILED (errors=1)

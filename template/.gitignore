@@ -1,0 +1,12 @@
+.env
+.env.*
+*.pem
+*.key
+__pycache__/
+*.pyc
+.venv/
+.system/cache/
+.system/lock
+.local/
+.codex/
+.claude/settings.local.json

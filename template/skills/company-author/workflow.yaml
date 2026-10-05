@@ -1,0 +1,29 @@
+schema_version: 1
+id: company-author
+version: 1
+owner: process-owner-selected-by-company
+standards:
+- standards/skill-authoring.md
+- standards/task-validation.md
+capabilities:
+- validation
+- critical
+inputs:
+- accepted request, company identity/scope, exact versions, allowed sources
+output: author output referenced by owning task; provenance and limitations required
+steps:
+- id: read-context
+  operation: context
+  depends_on: []
+- id: perform-operation
+  operation: author
+  depends_on:
+  - read-context
+- id: validate-result
+  operation: execute
+  depends_on:
+  - perform-operation
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence

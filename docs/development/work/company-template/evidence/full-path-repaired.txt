@@ -1,0 +1,7 @@
+test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session (checks.test_system.GitAcceptance.test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session) ... ok
+test_company_method_proposal_uses_same_product_delivery_without_data (checks.test_system.GitAcceptance.test_company_method_proposal_uses_same_product_delivery_without_data) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 42.982s
+
+OK

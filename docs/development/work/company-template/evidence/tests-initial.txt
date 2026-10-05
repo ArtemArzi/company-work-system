@@ -1,0 +1,74 @@
+test_backup_restore_and_corruption_dirty_tree (test_system.GitAcceptance.test_backup_restore_and_corruption_dirty_tree) ... ok
+test_common_delivery_concurrent_results_stale_and_conflict (test_system.GitAcceptance.test_common_delivery_concurrent_results_stale_and_conflict) ... ok
+test_copy_update_two_companies_history_and_local_rule (test_system.GitAcceptance.test_copy_update_two_companies_history_and_local_rule) ... ERROR
+test_result_delivery_ack_and_lost_push_response_readback (test_system.GitAcceptance.test_result_delivery_ack_and_lost_push_response_readback) ... ok
+test_sanitized_proposal_exact_permission_no_company_history (test_system.GitAcceptance.test_sanitized_proposal_exact_permission_no_company_history) ... ok
+test_semantic_binding_change_stops_even_text_merge_clean (test_system.GitAcceptance.test_semantic_binding_change_stops_even_text_merge_clean) ... ERROR
+test_clean_template_and_all_pairs (test_system.LocalContracts.test_clean_template_and_all_pairs) ... ok
+test_episode_denominator_and_cross_source_outcome (test_system.LocalContracts.test_episode_denominator_and_cross_source_outcome) ... ok
+test_independence_and_observation_are_separate (test_system.LocalContracts.test_independence_and_observation_are_separate) ... ok
+test_lock_prevents_parallel_mutation_without_stale_lock_repair (test_system.LocalContracts.test_lock_prevents_parallel_mutation_without_stale_lock_repair) ... ok
+test_new_process_reads_file_memory_and_blocks_changed_method (test_system.LocalContracts.test_new_process_reads_file_memory_and_blocks_changed_method) ... ok
+test_result_rejects_known_bad_provenance_count_null_and_pass (test_system.LocalContracts.test_result_rejects_known_bad_provenance_count_null_and_pass) ... ok
+test_task_id_semantic_conflict_preserves_original (test_system.LocalContracts.test_task_id_semantic_conflict_preserves_original) ... ok
+test_unconfirmed_stale_revision_cancel_and_unknowns (test_system.LocalContracts.test_unconfirmed_stale_revision_cancel_and_unknowns) ... ok
+test_validator_itself_rejects_wrong_place_duplicate_link_cycle (test_system.LocalContracts.test_validator_itself_rejects_wrong_place_duplicate_link_cycle) ... ok
+test_wrong_arithmetic_then_original_case_repairs (test_system.LocalContracts.test_wrong_arithmetic_then_original_case_repairs) ... ok
+test_graph_current_source_aliases_and_disabled_fallback (test_system.SourcesAndBackground.test_graph_current_source_aliases_and_disabled_fallback) ... ok
+test_http_pagination_429_redirect_and_limit (test_system.SourcesAndBackground.test_http_pagination_429_redirect_and_limit) ... ERROR
+test_one_shot_ticks_change_only_limits_off_and_recovery (test_system.SourcesAndBackground.test_one_shot_ticks_change_only_limits_off_and_recovery) ... ok
+test_real_file_export_and_wrong_company_partial_stale (test_system.SourcesAndBackground.test_real_file_export_and_wrong_company_partial_stale) ... ok
+test_stdio_mcp_negotiation_read_tool_and_error (test_system.SourcesAndBackground.test_stdio_mcp_negotiation_read_tool_and_error) ... ok
+
+======================================================================
+ERROR: test_copy_update_two_companies_history_and_local_rule (test_system.GitAcceptance.test_copy_update_two_companies_history_and_local_rule)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_system.py", line 257, in test_copy_update_two_companies_history_and_local_rule
+    p, release = self.product_release()
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_system.py", line 253, in product_release
+    product.release(p, release)
+  File "/home/artem/projects/work/studio/products/company-work-system/scripts/product.py", line 25, in release
+    release_isolated(destination)
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/lifecycle.py", line 18, in release_isolated
+    require(relative.split("/", 1)[0] in allowed, "release includes non-template history")
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/core.py", line 20, in require
+    raise Rejected(message)
+core.Rejected: release includes non-template history
+
+======================================================================
+ERROR: test_semantic_binding_change_stops_even_text_merge_clean (test_system.GitAcceptance.test_semantic_binding_change_stops_even_text_merge_clean)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_system.py", line 284, in test_semantic_binding_change_stops_even_text_merge_clean
+    p, release = self.product_release(); a = self.base / "alpha"; lifecycle.create(release,a,"alpha-company","test-owner")
+                 ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_system.py", line 253, in product_release
+    product.release(p, release)
+  File "/home/artem/projects/work/studio/products/company-work-system/scripts/product.py", line 25, in release
+    release_isolated(destination)
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/lifecycle.py", line 18, in release_isolated
+    require(relative.split("/", 1)[0] in allowed, "release includes non-template history")
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/core.py", line 20, in require
+    raise Rejected(message)
+core.Rejected: release includes non-template history
+
+======================================================================
+ERROR: test_http_pagination_429_redirect_and_limit (test_system.SourcesAndBackground.test_http_pagination_429_redirect_and_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_system.py", line 199, in test_http_pagination_429_redirect_and_limit
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socketserver.py", line 453, in __init__
+    self.socket = socket.socket(self.address_family,
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socket.py", line 233, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+----------------------------------------------------------------------
+Ran 21 tests in 98.236s
+
+FAILED (errors=3)
