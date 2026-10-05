@@ -1,0 +1,62 @@
+{
+  "scope": "bounded instruction change; no runtime or permission changes",
+  "release": "1.1.1",
+  "standard_version": 3,
+  "review_mode": "author inspection; minor instruction clarification requested by owner",
+  "checks": {
+    "product_repository": {
+      "entities": 21,
+      "skills": 12,
+      "tasks": 0,
+      "pass": true
+    },
+    "work_repository": {
+      "entities": 23,
+      "skills": 12,
+      "tasks": 0,
+      "pass": true
+    },
+    "company_context_metadata": [
+      "product pass",
+      "work pass"
+    ],
+    "work_modified_document_links": {
+      "checked": 21,
+      "broken": 0
+    },
+    "work_exact_export_paths": 11
+  },
+  "observed_original_cost": {
+    "candidate": "product-route-final",
+    "changed_paths": 12,
+    "history_blobs_checked": 584,
+    "elapsed_time_measured": false
+  },
+  "recovery": {
+    "observed": "assertion on assumed identical AGENTS pointer; subsequent validator rejected unreconciled binding",
+    "cause": "root AGENTS and company WORKFLOW had different entry text",
+    "fix": "read actual pointers, patch exact strings, reconcile accepted preflight base hash",
+    "recheck": "Work repository validator pass"
+  },
+  "inspection_cases": {
+    "typo_or_link": "author diff/link check, no child",
+    "intermediate_question": "reuse task entry version; no sync",
+    "explicit_latest_request": "new freshness check",
+    "task_completed": "deliver once and trust successful readback",
+    "new_code_behavior": "affected checks and required result review",
+    "complex_or_material_risk": "required independent acceptance retained",
+    "closure_notes": "do not restart content acceptance"
+  },
+  "limits": [
+    "no native instruction obedience proof",
+    "no timing improvement claim",
+    "existing Work history scan unchanged",
+    "no migration of Work installed release",
+    "no secret/export or independent_required relaxation"
+  ],
+  "commit_identity_recovery": {
+    "observed": "git commit rejected: Author identity unknown",
+    "cause": "repository has no persisted user identity",
+    "fix": "reuse previous commit identity through per-command git -c; no config mutation"
+  }
+}

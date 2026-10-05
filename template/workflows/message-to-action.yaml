@@ -1,6 +1,6 @@
 schema_version: 1
 id: message-to-action
-version: 2
+version: 3
 owner: company-process-owner
 standards:
 - standards/task-validation.md
@@ -11,6 +11,7 @@ capabilities:
 - git
 inputs:
 - allowed message/transcript and company context
+- task entry preflight, reused within the same task according to task-validation
 output: Confirmed task or explicit waiting; validated action and recipient summary
 steps:
 - id: receive-shared-state

@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-context
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/runtime.md
@@ -11,6 +11,7 @@ capabilities:
 - git
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
+- task entry preflight, reused within the same task according to task-validation
 output: context output referenced by owning task; provenance and limitations required
 steps:
 - id: receive-shared-state
