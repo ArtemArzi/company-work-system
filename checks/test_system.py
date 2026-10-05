@@ -161,6 +161,25 @@ class LocalContracts(Fixture):
             self.assertIn("already running", rejected["reason"])
         self.assertEqual(self.cli("context")["tasks"], [])
 
+    def test_observations_bound_to_result_and_reset_with_history(self):
+        self.task()
+        first = operations.execute(self.root, "test-task", self.artifact(), self.critical())
+        for layer in ["application", "effect"]:
+            operations.observe(self.root, "test-task", layer, "Owner observed this exact local result", "test-owner")
+        observed = load(task_file(self.root, "test-task"))
+        self.assertEqual(observed["effect"]["result_sha256"], first["output"]["sha256"])
+        self.assertEqual(operations.execute(self.root, "test-task", self.artifact(), self.critical()), observed)
+        candidate = self.artifact(); candidate["summary"] = "Same input calculation, revised presentation"
+        updated = operations.execute(self.root, "test-task", candidate, self.critical())
+        for layer in ["application", "effect"]:
+            self.assertEqual(updated[layer], {"status": "unknown"})
+            stale = copy.deepcopy(updated); stale[layer] = observed[layer]
+            with self.assertRaisesRegex(Rejected, "exact result"):
+                validation.task(self.root, stale)
+        archived = [h["detail"] for h in updated["history"] if h["action"] == "superseded-result"]
+        self.assertEqual(archived[-1]["effect"], observed["effect"])
+        validation.repository(self.root)
+
     def test_episode_denominator_and_cross_source_outcome(self):
         data = self.source([{"id": "one", "scenario": "appointment", "outcome": "completed"}, {"id": "two", "scenario": "appointment", "outcome": "waiting"}])
         self.assertEqual(operations.episodes(data, 3)["missing"], 1)
@@ -367,6 +386,43 @@ class GitAcceptance(Fixture):
         target=self.base/"proposal";self.assertEqual(lifecycle.proposal(self.root,package,target)["status"],"sanitized-candidate");self.assertFalse((target/".git").exists())
         file.write_text("test-company private data")
         with self.assertRaises(Rejected):lifecycle.proposal(self.root,package,self.base/"rejected-proposal")
+
+    def test_proposal_rejects_noncanonical_paths_before_copy_or_candidate(self):
+        package = self.base / "malicious-package"
+        (package / "standards").mkdir(parents=True)
+        file = package / "company/private-note.txt"; file.parent.mkdir(); file.write_text("Generic-looking contents")
+        for index, relative in enumerate(["standards/../company/private-note.txt", "standards/./method.md", "standards//method.md", "standards/../../outside.md"]):
+            write(package / "approval.json", {"approved_by": "test-owner", "permission": "share-sanitized-method", "purpose": "Boundary test", "files": {relative: digest(file)}})
+            dest = self.base / f"bad-proposal-{index}"
+            with self.assertRaisesRegex(Rejected, "canonical relative"):
+                lifecycle.proposal(self.root, package, dest)
+            self.assertFalse(dest.exists())
+        p, release = self.product_release()
+        remote = self.base / "proposal-product.git"; delivery.git(p, "clone", "--bare", str(p), str(remote))
+        write(package / "approval.json", {"approved_by": "test-owner", "permission": "share-sanitized-method", "purpose": "Boundary test", "files": {"standards/../company/private-note.txt": digest(file)}})
+        dest = self.base / "bad-product-candidate"
+        with self.assertRaisesRegex(Rejected, "canonical relative"):
+            lifecycle.proposal_candidate(self.root, package, p, str(remote), dest)
+        self.assertFalse(dest.exists())
+
+    def test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes(self):
+        source_task = self.task(confirmed=False)
+        operations.intake(self.root, "summary-task", "Покажи действия, ответственных и ожидания", "test-owner", {"kind": "action-summary"}, True)
+        artifact = self.cli("summary", "--task", "summary-task")
+        self.assertEqual([entry["id"] for entry in artifact["entries"]], ["test-task"])
+        critical = {"request_alignment": "Shows recorded actions, owner and exact blocker", "counterexample": "A summary referring to its own mutable task would become invalid", "limitations": ["Snapshot of recorded revisions"], "references": [artifact["sources"][0]["path"]]}
+        operations.execute(self.root, "summary-task", artifact, critical)
+        validation.repository(self.root)
+        self.seed(); remote = self.base / "summary-common.git"; delivery.git(self.root, "clone", "--bare", str(self.root), str(remote))
+        delivery.deliver(self.root, str(remote), task_id="summary-task")
+        validation.repository(self.root)
+        operations.decide(self.root, "test-task", source_task["revision"], "confirm", "Owner resolved pending request", "test-owner")
+        operations.execute(self.root, "test-task", self.artifact(), self.critical())
+        validation.repository(self.root)
+        snapshot = self.root / artifact["sources"][0]["path"]
+        changed = load(snapshot); changed["entries"][0]["status"] = "cancelled"; write(snapshot, changed)
+        with self.assertRaisesRegex(Rejected, "source changed"):
+            validation.repository(self.root)
 
     def test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session(self):
         p, release = self.product_release()

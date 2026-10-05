@@ -5,11 +5,15 @@ owner: product-maintainer
 ---
 # Форматы и подготовленные команды
 
+Для сохраняемой action-summary: intake задачи сводки → `summary --task id` → сохранить JSON-кандидат → execute → validate → общий commit/deliver. Sources результата указывают на неизменяемый snapshot в work/id/inputs с наблюдёнными revisions/hashes исходных задач; текущие task.json не являются источником исторического результата. Без --task команда только показывает текущее состояние. Подмена snapshot отвергается общим hash-validator.
+
+Наблюдения application/effect содержат evidence/actor/at/result_sha256 для точного output. Новый результат сбрасывает их в unknown; прежние подтверждения и доставка сохраняются в history. Подтверждение старой версии не переносится на новую.
+
 Одна программа: `python3 scripts/system.py [--root <company>] <operation>`. JSON stdout содержит фактический результат; exit2 и stderr — отказ, не PASS. Python3.12+, PyYAML6.0.1, Git2.43+, Linux flock и relative symlinks. Никаких shell-команд из YAML, собственного scheduler-сервиса или автоматически исполняемых migrations. Нужный метод выбирает агент; CLI выполняет точный известный шаг.
 
 | Действие | Команда / нужный вход |
 | --- | --- |
-| Вход и проверка | `context [--task id]`, `validate`, `self-test` (изолированные known-bad примеры), `summary` |
+| Вход и проверка | `context [--task id]`, `validate`, `self-test` (изолированные known-bad примеры), `summary [--task id]` |
 | Принять сообщение | `intake id --request text --owner name --acceptance file.json [--confirmed] [--unknown text] [--input relative-path] [--independent-required]` |
 | Решение владельца | `decide id confirm/cancel/resume --revision N --reason text --actor owner` |
 | Результат и проверка | `execute id --artifact result.json --critical critical.json [--review review.json]` |

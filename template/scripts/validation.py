@@ -65,6 +65,11 @@ def result(root, value, acceptance):
     require(refs, "result without primary evidence")
     for source in refs:
         require(path(root, source["path"]).is_file() and digest(path(root, source["path"])) == source["sha256"], "result source changed/missing")
+    if value["kind"] == "action-summary":
+        require(len(refs) == 1, "summary needs one immutable input snapshot; use summary --task")
+        snapshot = load(path(root, refs[0]["path"]))
+        require(snapshot.get("kind") == "action-summary-input" and snapshot.get("company_id") == value["company_id"], "summary input snapshot missing")
+        require(snapshot.get("entries") == value.get("entries") and snapshot.get("counts") == value.get("counts"), "summary differs from input snapshot")
     if value["kind"] == "marketing":
         require(all(value.get(k) for k in ["audience", "recipient_action", "material", "measurement_source", "neighbor_handoff"]), "marketing output lacks recipient/context/handoff")
         require(value.get("proposal_status") == "draft" or value.get("decision_id") in {d.get("id") for d in config(root).get("decisions", [])}, "accepted marketing rule lacks company decision")
@@ -99,6 +104,10 @@ def task(root, value, freshness=True):
     require(value.get("delivery", {}).get("status") in {"local", "pending", "delivered"}, "delivery status")
     require(value.get("application", {}).get("status") in {"unknown", "observed"} and value.get("effect", {}).get("status") in {"unknown", "observed"}, "observation status")
     require(value.get("acceptance_hash") == object_hash(value["acceptance"]), "accepted criterion was changed")
+    for layer in ["application", "effect"]:
+        observation = value[layer]
+        if observation["status"] == "observed":
+            require(value.get("output") and observation.get("result_sha256") == value["output"]["sha256"] and observation.get("evidence") and observation.get("actor") == config(root)["owner"] and observation.get("at"), "observation not bound to exact result/owner evidence")
     if value["status"] in {"blocked", "waiting"}:
         require(value.get("blocker"), "missing waiting reason")
     if value["status"] == "verified":

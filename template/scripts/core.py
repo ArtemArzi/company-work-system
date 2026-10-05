@@ -31,7 +31,8 @@ def now():
 
 def path(root, relative):
     root = Path(root).resolve()
-    require(isinstance(relative, str) and not Path(relative).is_absolute(), "relative path required")
+    require(isinstance(relative, str) and relative and not Path(relative).is_absolute(), "relative path required")
+    require(relative == Path(relative).as_posix() and not any(part in {"", ".", ".."} for part in relative.split("/")), "canonical relative path required")
     result = root / relative
     require(result.resolve().is_relative_to(root), "path outside company")
     require(not any(p.is_symlink() for p in [result, *result.parents] if p != root), "symlink source is not canonical")

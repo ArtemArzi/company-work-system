@@ -1,12 +1,18 @@
 # Полная реализация шаблона компании
 
+## Независимая проверка candidate 0f9fc0d: исправления в работе
+
+Whole-result reviewer /root/complete_template_acceptance воспроизвёл три сбоя. (1) Prefix allowlist принимал standards/../company/private-note.txt: первое неверное допущение — строковый prefix определяет реальную категорию файла. Проверить канонический lexical path без .. до exact-file approval/copy. (2) Наблюдения применения/эффекта переходили на новый artifact: первое неверное допущение — evidence относится к задаче независимо от версии результата. Привязать к exact output hash, сохранить прошлое в history и сбросить при новом output. Proof /tmp/company-review-adversarial-8ydzu4e9. (3) Сводка включала свой mutable task.json и другие изменяемые задачи; после execute/global validate source hash менялся. Proof /tmp/company-summary-review-rxd8dd5a. Существующая стратегия immutable result/evidence hashes применима: локальный неизменяемый snapshot входов сводки у её задачи, без ослабления source hashes и без второго текущего состояния. CLI/recipe и исходный end-to-end проверяются вместе. Эти замечания требуют исправления реализации, исходный принятый план/критерии сохраняются.
+
+Исправлено: общий safe-path отвергает lexical .././двойной separator до чтения/копирования; наблюдения привязаны к точному result_sha256, предыдущие output/observations/delivery/review остаются в history, новый результат unknown; summary --task создаёт content-addressed snapshot наблюдённых revisions/hashes и исключает себя. Ссылки/hashes сохраняют строгость; SKILL/YAML/CLI/runtime обновлены вместе. В tick используется helper под существующим lock, повторный flock устранён. Авторские 3 regressions PASS39.874s, исходный ticks PASS. Независимый reviewer повторил пять targeted cases, PASS50.692s и закрыл R1–R3; final SHA/release/full-suite acceptance pending. [Первоначальный verdict и исправления](evidence/result-review-initial.json). Документированные примеры ошибок сохранены, specification/accepted plan не ослаблены.
+
 Общий план/прогресс — [PLAN](../../PLAN.md). Эта задача владеет деталями решений, проверками и ошибками реализации; второй PLAN/STATUS не создаётся.
 
-## Сделано и проверено
+## История P0 и начала реализации
 
-P0: применимые инструкции/принятые документы прочитаны. Отдельный Git расположен в studio/products/company-work-system. Python3.12.3, PyYAML6.0.1, Git2.43.0; CodexCLI0.160.0. ClaudeCode2.1.289 обнаружен по /home/artem/.local/bin/claude, отсутствовавшему в PATH. Модельный доступ обоих новых CLI-сеансов ещё не проверен.
+P0: применимые инструкции/принятые документы прочитаны. Отдельный Git расположен в studio/products/company-work-system. Python3.12.3, PyYAML6.0.1, Git2.43.0; CodexCLI0.160.0. ClaudeCode2.1.289 обнаружен по /home/artem/.local/bin/claude, отсутствовавшему в PATH. На P0 модельный доступ ещё не был проверен; актуальное свидетельство см. «Полный путь P8 и native границы».
 
-Whole-plan P0 task_plan_reviewer /root/implementation_plan_acceptance: первоначальный REJECT, после исправления PASS (company-work-system-p0-plan-pass-20261005-release-isolation-9a74). Проверяющий отдельно подтвердил чистые refs/history release-only repo и двух компаний, сохранение местных файлов при v2. Независимый финальный проверяющий ещё не назначен.
+Whole-plan P0 task_plan_reviewer /root/implementation_plan_acceptance: первоначальный REJECT, после исправления PASS (company-work-system-p0-plan-pass-20261005-release-isolation-9a74). Проверяющий отдельно подтвердил чистые refs/history release-only repo и двух компаний, сохранение местных файлов при v2. Итоговый reviewer /root/complete_template_acceptance назначен отдельно; первые замечания и их исправления выше.
 
 P1–P8 в работе: создан канонический template/ с общей картой AGENTS, пятью стандартами/контрактом данных, базовой конфигурацией и модулями core/validation/operations/connectors/knowledge/delivery/lifecycle/system. Реализуемый путь включает atomic file+lock, task cycle/evidence, Git-доставку, три read adapters, ticks, derived graph и оба потока. Библиотека навыков, бизнес-блоки, runtime справка и полный тестовый набор ещё не завершены. Наличие кода не означает принятую готовность.
 
@@ -23,7 +29,7 @@ P1–P8 в работе: создан канонический template/ с об
 
 ## Что осталось и как продолжать
 
-Следующая разрешённая операция: завершить полный suite и свежую независимую итоговую приёмку; затем выпустить exact local candidate и проверить две копии из release-only repo. Библиотека, блоки и contracts завершены; замечания reviewer исправлять по их evidence. Git release-only выбор уже принят; research заново не проводить. Реальные аккаунты/фон/GitHub/бизнес-правила/поле остаются open. Код ещё не проверен end-to-end, полного результата нет.
+Следующая разрешённая операция: завершить полный suite и свежую независимую итоговую приёмку; затем выпустить exact local candidate и проверить две копии из release-only repo. Библиотека, блоки и contracts завершены; замечания reviewer исправлять по их evidence. Git release-only выбор уже принят; research заново не проводить. Реальные аккаунты/фон/GitHub/бизнес-правила/поле остаются open. End-to-end/suite выполнены (см. ниже); итоговая независимая приёмка после material corrections ещё требуется.
 
 ## Проверки P1–P7 и текущие дефекты
 
@@ -43,3 +49,5 @@ Task Delivery controller сохранён degraded: owner перенёс еди�
 [Native profiles](evidence/native-profiles.json): новый Codex read-only session выполнил реальные чтения пяти канонических файлов и вернул test-company/test-task/active/application unknown/точный следующий шаг. Первоначальный sandbox запрещал native app-server init; узкий read-only запуск разрешён auto-review. 45-секундный лимит прервал первый начатый model-read; более длинный bounded прогон завершён, exit0. В native каталоге было предупреждение о skill context budget; проверен explicit-file-read, auto discovery/full workflow не объявлены. Claude -p read-only permission profile: exit1, OAuth expired could not refresh. Никакого login, изменения credentials/settings или копирования memory не выполнялось.
 
 Реальные company/API/GitHub/полевые действия не запускались; source exports и stdio/loopback transports проверяют программный контракт. Источники/лимиты/бюджет/правила конкретной компании остаются неизвестными до её адаптации. Настоящий native Claude walkthrough блокирует только expired session; общий локальный комплект продолжает проверку. Полный итоговый suite — evidence/tests-candidate.txt: 26 tests passed за149.718s, включая loopback HTTP в разрешённом окружении. Независимая complete-result acceptance pending.
+
+После material corrections полный suite: 29/29 PASS182.165s, evidence/tests-review-repaired.txt; changed company-summary quick_validate PASS, чистый template validate21 entities/12 skills/0tasks. Следующий шаг — exact committed release-only/two-copy proof и финальный independent verdict.

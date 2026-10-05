@@ -1,0 +1,23 @@
+{
+  "reviewer": "/root/complete_template_acceptance",
+  "role": "task_result_reviewer",
+  "candidate": "0f9fc0d506527decff14e39d666589b8fbb6727d",
+  "verdict": "reject",
+  "receipt": "company-template-result-20261005-0f9fc0d-reject-74ea",
+  "findings": {
+    "R1": "Proposal prefix bypass with standards/../company/private-note.txt",
+    "R2": "Observed application/effect inherited by new output without hash binding",
+    "R3": "Mutable task.json summary sources invalidate own and historical results"
+  },
+  "reviewer_proofs": [
+    "/tmp/company-review-adversarial-8ydzu4e9",
+    "/tmp/company-summary-review-rxd8dd5a"
+  ],
+  "same_scope_targeted_revalidation": {
+    "proof": "/tmp/company-review-repair-498jxgpb",
+    "tests": 5,
+    "passed": 5,
+    "seconds": 50.692,
+    "status": "R1-R3 closed; exact final candidate/release acceptance still pending"
+  }
+}

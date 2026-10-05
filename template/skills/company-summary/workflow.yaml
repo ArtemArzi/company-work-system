@@ -10,6 +10,7 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
+- owning task ID with accepted action-summary criterion
 output: summary output referenced by owning task; provenance and limitations required
 steps:
 - id: read-context
@@ -17,6 +18,7 @@ steps:
   depends_on: []
 - id: perform-operation
   operation: summary
+  instruction: Call summary --task owning-id; immutable input snapshot excludes its own task
   depends_on:
   - read-context
 - id: validate-result

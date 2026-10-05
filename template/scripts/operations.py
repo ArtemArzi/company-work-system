@@ -94,6 +94,9 @@ def execute(root, task_id, artifact, critical, independent_review=None):
                 return t
             relative = f"work/{t['id']}/result-{t['revision'] + 1}.json"
             write(path(root, relative), artifact)
+            if t.get("output"):
+                event(t, "superseded-result", {"output": t["output"], "application": t["application"], "effect": t["effect"], "delivery": t["delivery"], "independent_review": t.get("independent_review")})
+            t.update(application={"status": "unknown"}, effect={"status": "unknown"}, independent_review=None)
             t["output"] = {"path": relative, "sha256": digest(path(root, relative))}
             t["critical"] = critical
             t["evidence"] = {"command": "python3 scripts/system.py execute", "exit_code": 0, "output": "structure, provenance and selected result contract passed; semantic assessment recorded separately", "at": now(), "bindings": t["bindings"], "acceptance_sha256": t["acceptance_hash"], "result_sha256": t["output"]["sha256"], "critical_sha256": object_hash(critical)}
@@ -120,13 +123,25 @@ def observe(root, task_id, layer, evidence, actor):
         file = task_file(root, task_id)
         t = load(file)
         require(t["status"] == "verified", "unverified output cannot establish application")
-        t[layer] = {"status": "observed", "evidence": evidence, "actor": actor, "at": now()}
+        validation.task(root, t)
+        t[layer] = {"status": "observed", "evidence": evidence, "actor": actor, "at": now(), "result_sha256": t["output"]["sha256"]}
         event(t, layer, t[layer])
+        validation.task(root, t)
         write(file, t)
         return t
 
 
 def summary(root, exclude=None):
+    if exclude:
+        ident(exclude)
+        with lock(root):
+            config(root, True)
+            require(task_file(root, exclude).is_file(), "summary owning task missing")
+            return _summary(root, exclude)
+    return _summary(root)
+
+
+def _summary(root, exclude=None):
     entries, refs = [], []
     for file in tasks(root):
         t = load(file)
@@ -135,7 +150,17 @@ def summary(root, exclude=None):
         refs.append({"path": str(file.relative_to(root)), "sha256": digest(file)})
         entries.append({"id": t["id"], "owner": t["owner"], "status": t["status"], "next_action": t["next_action"], "waiting_for": t.get("blocker"), "since": t["history"][-1]["at"], "revision": t["revision"]})
     counts = {status: sum(t["status"] == status for t in entries) for status in ["draft", "active", "waiting", "blocked", "verified", "cancelled"]}
-    return {"schema_version": 1, "company_id": config(root)["id"], "kind": "action-summary", "summary": "Current actions and waiting owners", "entries": entries, "counts": counts, "sources": refs or [{"path": "company/config.yaml", "sha256": digest(path(root, "company/config.yaml"))}], "limitations": ["Priorities/WIP limits and team use are not inferred", "History belongs to each task"], "next_action": "Each listed owner can follow the referenced task"}
+    company_id = config(root)["id"]
+    if exclude:
+        snapshot = {"schema_version": 1, "company_id": company_id, "kind": "action-summary-input", "entries": entries, "counts": counts, "observed_sources": refs, "excluded_task": exclude}
+        relative = f"work/{exclude}/inputs/summary-{object_hash(snapshot)}.json"
+        target = path(root, relative)
+        if target.exists():
+            require(load(target) == snapshot, "summary snapshot changed")
+        else:
+            write(target, snapshot)
+        refs = [{"path": relative, "sha256": digest(target)}]
+    return {"schema_version": 1, "company_id": company_id, "kind": "action-summary", "summary": "Current actions and waiting owners", "entries": entries, "counts": counts, "sources": refs or [{"path": "company/config.yaml", "sha256": digest(path(root, "company/config.yaml"))}], "limitations": ["Priorities/WIP limits and team use are not inferred", "History belongs to each task", "Snapshot reflects recorded revisions; later changes need a new summary"], "next_action": "Each listed owner can follow the referenced task"}
 
 
 def reconcile(left, right):
@@ -171,7 +196,7 @@ def tick(root):
             return {"status": "limit", "notify": False}
         if state["last_at"] and (dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(state["last_at"])).total_seconds() < specification["interval_seconds"]:
             return {"status": "too-early", "notify": False}
-        output = summary(root, t["id"])
+        output = _summary(root, t["id"])
         fingerprint = object_hash(output)
         changed = fingerprint != state["fingerprint"]
         state.update(runs=state["runs"] + 1, fingerprint=fingerprint, last_at=now())
