@@ -1,0 +1,29 @@
+{
+  "verdict": "pass",
+  "reviewer": "/root/complete_template_acceptance",
+  "role": "task_result_reviewer",
+  "receipt": "company-template-result-20261005-6713909-pass-c68f",
+  "candidate": "6713909380a96dce3e8ca42058c05ebdd777594b",
+  "template_tree": "72ddf46bdb31c71e653609b2428c250a7df3e43e",
+  "release": "e876f5c1931223a3925792dbe2e11a72ea1f660f",
+  "scope": "Full local P0-P8 template plus same-scope R1-R3 revalidation",
+  "author_suite": {
+    "tests": 29,
+    "passed": 29,
+    "seconds": 182.165
+  },
+  "reviewer_targeted_suite": {
+    "tests": 5,
+    "passed": 5,
+    "seconds": 50.692
+  },
+  "independent_release_check": "Exact template tree/reachable history and both clean real copies validated; 24 projections; proactive disabled; product development/PLAN/CLAUDE absent",
+  "independent_bundle_check": "git bundle verify: complete history; main/tag/HEAD exact release SHA",
+  "repair_list": [],
+  "residual_boundaries": [
+    "Codex native read-smoke only; full native workflow/autodiscovery unverified",
+    "Claude native blocked by expired OAuth; common core is not native proof",
+    "Live providers/GitHub/real timers/team field use/business effect open",
+    "Product PASS does not verify the preserved degraded Task Delivery controller"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "product_candidate": "6713909380a96dce3e8ca42058c05ebdd777594b",
+  "release": "/home/artem/projects/work/studio/products/company-work-system/.local/release-candidate.git",
+  "release_sha": "e876f5c1931223a3925792dbe2e11a72ea1f660f",
+  "all_reachable_release_paths_isolated": true,
+  "copies": [
+    {
+      "path": "/home/artem/projects/work/studio/products/company-work-system/.local/acceptance-alpha",
+      "created": {
+        "path": "/home/artem/projects/work/studio/products/company-work-system/.local/acceptance-alpha",
+        "base": "e876f5c1931223a3925792dbe2e11a72ea1f660f",
+        "company": "acceptance-alpha"
+      },
+      "head": "91197f1c1558d8ae41f170b1f26223a35176cd39",
+      "validate": {
+        "checked": true,
+        "entities": 21,
+        "skills": 12,
+        "tasks": 0
+      },
+      "development_files_and_history_absent": true,
+      "only_AGENTS_entry": true,
+      "proactive_disabled": true,
+      "working_tree_clean": true
+    },
+    {
+      "path": "/home/artem/projects/work/studio/products/company-work-system/.local/acceptance-beta",
+      "created": {
+        "path": "/home/artem/projects/work/studio/products/company-work-system/.local/acceptance-beta",
+        "base": "e876f5c1931223a3925792dbe2e11a72ea1f660f",
+        "company": "acceptance-beta"
+      },
+      "head": "7cca1c6ffecb90e994bce79c0a5abc06f708190a",
+      "validate": {
+        "checked": true,
+        "entities": 21,
+        "skills": 12,
+        "tasks": 0
+      },
+      "development_files_and_history_absent": true,
+      "only_AGENTS_entry": true,
+      "proactive_disabled": true,
+      "working_tree_clean": true
+    }
+  ],
+  "limits": [
+    "Synthetic local companies; no live integration/native workflow/field acceptance claimed"
+  ],
+  "portable_bundle": {
+    "path": "/home/artem/projects/work/studio/products/company-work-system/.local/company-work-system-1.0.0.bundle",
+    "sha256": "d2491109b3d01acf1248194dcdd5b1ed8e110e9a89497b239a8c9c21eab4fd99",
+    "complete_history_verified": true,
+    "local_release_tag": "v1.0.0",
+    "restored_release_only_repo": "/tmp/company-release-bundle-0k57bebb/release.git",
+    "restored_exact_sha_verified": true
+  }
+}

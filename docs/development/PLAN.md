@@ -1,6 +1,6 @@
 # Рабочая система компании — реализация
 
-План и общий прогресс разработки. 05.10.2026, active, P8 local candidate; независимая итоговая приёмка pending. Детали/ошибки/проверки — work/company-template/task.md.
+План и общий прогресс разработки. 05.10.2026, P0–P8 complete в разрешённом локальном объёме; независимая итоговая приёмка PASS. Детали/ошибки/проверки — work/company-template/task.md.
 
 ## Основание и полномочия
 
@@ -42,8 +42,8 @@ Scope Task Delivery: только этот отдельный продукт п�
 
 ## Текущее состояние
 
-P0 принят независимым task_plan_reviewer после исправления release-only isolation (company-work-system-p0-plan-pass-20261005-release-isolation-9a74). P1–P7 реализованы в полном локальном комплекте: общая карта/File Memory, восемь блоков, 12 SKILL/YAML, task cycle и общие проверки, три read adapters, Git delivery, ticks/incident, graph/KB и thin profiles. P8 два потока, rollback, backup/restore и новый файловый сеанс прошли отдельные end-to-end проверки. Полный suite после трёх исправленных замечаний независимого reviewer: 29/29 PASS182.165s. Final candidate/release proof и итоговая независимая приёмка pending; готовность полного результата ещё не заявляется.
+P0 принят независимым task_plan_reviewer после исправления release-only isolation (company-work-system-p0-plan-pass-20261005-release-isolation-9a74). P1–P7 реализованы в полном локальном комплекте: общая карта/File Memory, восемь блоков, 12 SKILL/YAML, task cycle и общие проверки, три read adapters, Git delivery, ticks/incident, graph/KB и thin profiles. P8 два потока, rollback, backup/restore и новый файловый сеанс прошли отдельные end-to-end проверки. Полный suite после трёх исправленных замечаний независимого reviewer: 29/29 PASS182.165s. Exact candidate6713909/releasee876f5c и две чистые копии приняты независимым task_result_reviewer; receipt company-template-result-20261005-6713909-pass-c68f. Переносимый выпуск v1.0.0 проверен; template tree72ddf46b. Полный локальный комплект готов, native/live/полевые границы ниже остаются открытыми.
 
 Выпуск содержит только template и его split-историю; внутренняя разработка в docs/development. AGENTS.md — единственный вход компании, CLAUDE.md исключён по уточнению владельца. CodexCLI0.160.0 реально прочитал общую карту/skill/workflow/состояние в новом read-only сеансе. ClaudeCode2.1.289 установлен, запуск отказал из-за expired OAuth; login не выполнялся. Common-core/projection проверки не объявляются native Claude. Live providers/GitHub, реальные таймеры и полевой/коммерческий эффект отсутствуют в этой локальной проверке.
 
-Конкретный следующий шаг: проверить exact committed release-only пакет и две копии из него, получить итоговый независимый verdict; зафиксировать точный локальный выпуск с honest boundaries. Детали и командный вывод — [задача](work/company-template/task.md), без второго STATUS.
+Конкретный следующий шаг: адаптация отдельной реальной компании по её принятым правилам и полномочиям; до native Claude walkthrough восстановить OAuth владельцем, до live/расписаний подтвердить соответствующий доступ. Это отдельные operational проверки; текущий разрешённый локальный выпуск завершён. Способ копирования, SHA и bundle — в задаче; итоговая независимая приёмка — evidence/result-review-final.json. Детали и командный вывод — [задача](work/company-template/task.md), без второго STATUS.

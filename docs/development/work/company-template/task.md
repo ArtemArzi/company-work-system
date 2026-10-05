@@ -1,6 +1,12 @@
 # Полная реализация шаблона компании
 
-## Независимая проверка candidate 0f9fc0d: исправления в работе
+## Итог задачи
+
+P0–P8 завершены в разрешённом локальном объёме. Независимый whole-result reviewer /root/complete_template_acceptance (не автор и не plan acceptor) принял code6713909, template tree72ddf46b и releasee876f5c: [PASS](evidence/result-review-final.json), receipt company-template-result-20261005-6713909-pass-c68f. 29/29 полного suite и 5/5 независимых targeted checks прошли; замечания R1–R3 закрыты. После принятого code SHA изменены только developer evidence/заметки; канонический шаблон остаётся exact accepted tree. Локальный v1.0.0/bundle готов для копирования, developer memory не входит в компанию.
+
+Продолжение: применять шаги «Точный локальный выпуск» для отдельной компании с известным владельцем, потом проверять её реальные sources/rights/native среду. Claude auth expired, Codex только read-smoke, live/реальное расписание/полевое применение/эффект — open; внешний доступ не активирован. Controller сохранён degraded, его verified completion не заявляется. Исследование не повторять и требования не ослаблять.
+
+## История независимой проверки candidate 0f9fc0d и исправлений
 
 Whole-result reviewer /root/complete_template_acceptance воспроизвёл три сбоя. (1) Prefix allowlist принимал standards/../company/private-note.txt: первое неверное допущение — строковый prefix определяет реальную категорию файла. Проверить канонический lexical path без .. до exact-file approval/copy. (2) Наблюдения применения/эффекта переходили на новый artifact: первое неверное допущение — evidence относится к задаче независимо от версии результата. Привязать к exact output hash, сохранить прошлое в history и сбросить при новом output. Proof /tmp/company-review-adversarial-8ydzu4e9. (3) Сводка включала свой mutable task.json и другие изменяемые задачи; после execute/global validate source hash менялся. Proof /tmp/company-summary-review-rxd8dd5a. Существующая стратегия immutable result/evidence hashes применима: локальный неизменяемый snapshot входов сводки у её задачи, без ослабления source hashes и без второго текущего состояния. CLI/recipe и исходный end-to-end проверяются вместе. Эти замечания требуют исправления реализации, исходный принятый план/критерии сохраняются.
 
@@ -51,3 +57,11 @@ Task Delivery controller сохранён degraded: owner перенёс еди�
 Реальные company/API/GitHub/полевые действия не запускались; source exports и stdio/loopback transports проверяют программный контракт. Источники/лимиты/бюджет/правила конкретной компании остаются неизвестными до её адаптации. Настоящий native Claude walkthrough блокирует только expired session; общий локальный комплект продолжает проверку. Полный итоговый suite — evidence/tests-candidate.txt: 26 tests passed за149.718s, включая loopback HTTP в разрешённом окружении. Независимая complete-result acceptance pending.
 
 После material corrections полный suite: 29/29 PASS182.165s, evidence/tests-review-repaired.txt; changed company-summary quick_validate PASS, чистый template validate21 entities/12 skills/0tasks. Следующий шаг — exact committed release-only/two-copy proof и финальный independent verdict.
+
+## Точный локальный выпуск
+
+Code candidate 6713909380a96dce3e8ca42058c05ebdd777594b; release main/tag v1.0.0 — e876f5c1931223a3925792dbe2e11a72ea1f660f. [Packaging proof](evidence/release-final.json): fresh acceptance-alpha/beta из actual release, clean working tree, validate21/12/0, developer docs/PLAN/CLAUDE отсутствуют во всех reachable paths. Bundle .local/company-work-system-1.0.0.bundle проверен git bundle verify и восстановлен в новый release-only bare repo с тем же SHA. Результат — локальный кандидат; external publication не выполнялась.
+
+Повторить упаковку из чистого продукта: `python3 scripts/product.py <new-or-existing-release-only.git>`. Для переноса использовать bundle: `git clone --bare --branch main <bundle-path> <new-release.git>`. Для отдельной компании вызвать из продукта `python3 template/scripts/system.py create <release.git> <new-company-directory> --id <agreed-company-id> --owner <agreed-owner>`, затем открыть агентную среду в новой компании и прочитать AGENTS.md. Угловые скобки обозначают значения, которые сопровождающий подставляет по принятому решению; существующие каталоги не перезаписываются. Источники/полномочия/бизнес-определения заполняются только подтверждёнными значениями. Product code/docs в компанию не клонировать.
+
+Что проверено: полный P0–P8 программный путь, две компании/местные правила, forward/reverse flows, exact packaging. Что осталось за локальной приёмкой: Claude OAuth/live accounts/real timer/полевой эффект конкретной компании имеют отдельные открытые границы. Следующему агенту: читать PLAN и эту задачу, не повторять исследования или пройденный suite без нового изменения/сбоя; не активировать внешние функции по факту наличия шаблона.
