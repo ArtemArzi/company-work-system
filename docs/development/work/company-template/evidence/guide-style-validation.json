@@ -1,0 +1,35 @@
+{
+  "guide": "template/docs/company-system-guide.html",
+  "sha256": "f2f44b6dc3c7d8c4bf73d3577091d97120bbf8ad3c9df06a608d0e3658e25998",
+  "source": "stop hook13; bounded correction of original guide",
+  "six_families": [
+    "side-tab",
+    "hero-eyebrow-chip",
+    "all-caps-body",
+    "extreme-negative-tracking",
+    "cramped-padding",
+    "overused-font"
+  ],
+  "fixes": [
+    "remove decorative side border and eyebrow",
+    "heading tracking -0.03em",
+    "source rows have12px inset or more at all breakpoints",
+    "system-ui font; no external font dependency"
+  ],
+  "warnings_after": 0,
+  "advisories_after": {
+    "numbered-section-labels": 9
+  },
+  "advisory_triage": "Section numbers retained as guide navigation; optional advisory only, outside six reported warnings. No ignore/suppression configured.",
+  "checks": {
+    "viewports": [
+      1365,
+      390,
+      320
+    ],
+    "horizontal_overflow": false,
+    "tabs": "pass",
+    "desktop_mobile_visual_inspection": "pass"
+  },
+  "scope": "CSS and decorative eyebrow only; factual content, schemas, business rules and rights unchanged"
+}
