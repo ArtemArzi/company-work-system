@@ -1,0 +1,13 @@
+{
+  "status": "pass",
+  "from": "1.1.1",
+  "to": "1.1.2",
+  "old_release": "a5456039c0c9a310dbe57931f89f5e6a26d9c5ed",
+  "new_release": "2885af5dce67d1dab08f2c4ed973f8ca04b2c835",
+  "update_status": "verified-candidate",
+  "company_work_delta": false,
+  "retained_work": true,
+  "guide_identical": true,
+  "release_isolated": "pass",
+  "scope": "local synthetic copy/update; no native/live/business proof"
+}

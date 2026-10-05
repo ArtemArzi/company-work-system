@@ -55,6 +55,7 @@
     "fix": "exact docs/company-system-guide.html and its tree only; developer/private paths rejected",
     "independent_verdict": "PASS /root/system_consistency_review; actual release plus six forbidden paths",
     "targeted_tests": "2/2 PASS; two-company copy/update preserves work and local method",
-    "pointer": "guide link in managed template README; company-owned map unchanged from1.1.1"
+    "pointer": "guide link in managed template README; company-owned map unchanged from1.1.1",
+    "actual_upgrade": "guide-actual-upgrade.json: released1.1.1→1.1.2 verified-candidate, company/work retained"
   }
 }
