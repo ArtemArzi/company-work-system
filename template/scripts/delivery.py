@@ -1,8 +1,10 @@
 """The single Git delivery path. Updates and proposals prepare different candidates."""
 from __future__ import annotations
 from pathlib import Path
+import os
 import subprocess
-from core import config, digest, ident, load, path, require
+import sys
+from core import config, digest, ident, load, lock, path, require
 import validation
 
 
@@ -11,9 +13,10 @@ def scope_root(root):
     return root / "template" if not (root / "company/config.yaml").exists() and (root / "template/company/config.yaml").exists() else root
 
 
-def git(root, *arguments, check=True):
+def git(root, *arguments, check=True, timeout=None, noninteractive=False):
     command = ["git", "-C", str(root), *arguments]
-    value = subprocess.run(command, capture_output=True, text=True)
+    environment = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"} if noninteractive else None
+    value = subprocess.run(command, capture_output=True, text=True, timeout=timeout, env=environment)
     if check:
         require(value.returncode == 0, "Git operation failed: " + value.stderr.strip()[:1500])
     return value.stdout.strip() if check else value
@@ -49,6 +52,75 @@ def prepare(root, remote, branch, destination):
     git(root, "clone", "--no-local", "--single-branch", "--branch", branch, remote, str(destination))
     identity(destination)
     return {"path": str(destination), "base": git(destination, "rev-parse", "HEAD"), "branch": branch}
+
+
+def preflight(root, remote=None, branch="main", authorize=remote_allowed):
+    """Receive shared state without staging, publishing or discarding local work."""
+    root = Path(root).resolve()
+    ident(branch)
+    require(git(root, "rev-parse", "--show-toplevel") == str(root), "preflight requires the repository root")
+    with lock(scope_root(root)):
+        head = git(root, "rev-parse", "HEAD")
+        def blocked(reason, **extra):
+            return {"status": "blocked", "reason": reason, "local_head": head, "fresh": False, "next_action": "Preserve local work; resolve the stated prerequisite before dependent work", **extra}
+        if remote is None:
+            configured = git(root, "remote", "get-url", "origin", check=False)
+            if configured.returncode:
+                return blocked("Shared repository is not configured")
+            remote = configured.stdout.strip()
+        authorize(root, remote)
+        dirty = git(root, "status", "--porcelain", "--untracked-files=all")
+        for marker in ["MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "rebase-merge", "rebase-apply"]:
+            location = Path(git(root, "rev-parse", "--git-path", marker))
+            if not location.is_absolute():
+                location = root / location
+            if location.exists():
+                return blocked("An unfinished Git operation requires reconciliation", operation=marker)
+        if git(root, "symbolic-ref", "--quiet", "HEAD", check=False).returncode:
+            return blocked("Detached HEAD; choose the accepted working branch")
+        try:
+            fetched = git(root, "-c", "credential.interactive=false", "fetch", "--no-tags", remote, f"refs/heads/{branch}", check=False, timeout=30, noninteractive=True)
+        except subprocess.TimeoutExpired:
+            return blocked("Shared version fetch timed out; local snapshot is not confirmed fresh")
+        if fetched.returncode:
+            return blocked("Shared version unavailable; local snapshot is not confirmed fresh")
+        actual = git(root, "rev-parse", "FETCH_HEAD")
+        relative = "template/company/config.yaml" if scope_root(root) != root else "company/config.yaml"
+        observed = git(root, "show", f"{actual}:{relative}", check=False)
+        import yaml
+        try:
+            other = yaml.safe_load(observed.stdout) if observed.returncode == 0 else None
+        except yaml.YAMLError:
+            return blocked("Shared repository identity is unreadable", remote_head=actual)
+        if not isinstance(other, dict) or other.get("id") != config(scope_root(root))["id"]:
+            return blocked("Shared repository belongs to a different company/product scope", remote_head=actual)
+        if dirty:
+            return blocked("Uncommitted local work; do not auto-commit, stash or overwrite it", remote_head=actual)
+        # A Git process outside our lock may have changed the checkout during fetch.
+        if git(root, "rev-parse", "HEAD") != head or git(root, "status", "--porcelain", "--untracked-files=all"):
+            return blocked("Checkout changed during preflight; repeat against the preserved current state", remote_head=actual)
+        if head == actual:
+            mode = "current"
+        elif git(root, "merge-base", "--is-ancestor", actual, head, check=False).returncode == 0:
+            mode = "local-ahead"
+        elif git(root, "merge-base", "--is-ancestor", head, actual, check=False).returncode == 0:
+            merged = git(root, "merge", "--ff-only", "--no-autostash", "--no-overwrite-ignore", actual, check=False)
+            if merged.returncode:
+                return blocked("Fast-forward refused; preserve checkout and reconcile", remote_head=actual)
+            mode = "updated"
+        else:
+            return blocked("Local and shared histories diverged; prepare a reconciliation candidate", remote_head=actual)
+        if mode == "updated":
+            actual_root = scope_root(root)
+            try:
+                validated = subprocess.run([sys.executable, str(actual_root / "scripts/system.py"), "--root", str(actual_root), "validate"], capture_output=True, text=True, timeout=30)
+            except subprocess.TimeoutExpired:
+                return blocked("Received version validator timed out; dependent work is blocked", local_head=git(root, "rev-parse", "HEAD"), remote_head=actual)
+            if validated.returncode:
+                return blocked("Received version failed its own validator; dependent work is blocked", local_head=git(root, "rev-parse", "HEAD"), remote_head=actual)
+        else:
+            validation.repository(scope_root(root))
+        return {"status": "ready", "mode": mode, "fresh": True, "local_head": git(root, "rev-parse", "HEAD"), "remote_head": actual, "branch": branch, "pending_delivery": mode == "local-ahead", "next_action": "Read context from disk; deliver only authorized local commits through the common route"}
 
 
 def commit(root, relative_paths, message):

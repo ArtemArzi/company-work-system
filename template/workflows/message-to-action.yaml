@@ -1,6 +1,6 @@
 schema_version: 1
 id: message-to-action
-version: 1
+version: 2
 owner: company-process-owner
 standards:
 - standards/task-validation.md
@@ -13,9 +13,13 @@ inputs:
 - allowed message/transcript and company context
 output: Confirmed task or explicit waiting; validated action and recipient summary
 steps:
+- id: receive-shared-state
+  operation: preflight
+  depends_on: []
 - id: accept-message
   skill: company-intake
-  depends_on: []
+  depends_on:
+  - receive-shared-state
 - id: do-action
   skill: company-execute
   depends_on:

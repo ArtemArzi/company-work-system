@@ -312,7 +312,7 @@ class GitAcceptance(Fixture):
         delivery.commit(a, [local, "company/config.yaml"], "Accept local alternative")
         for company in [a,b]:
             (company / "work").mkdir(exist_ok=True); (company / "work/retained.txt").write_text("Synthetic company work retained\n"); delivery.commit(company, ["work/retained.txt"], "Retain work")
-        release_meta = load(p / "template/release.yaml"); release_meta["version"] = "1.0.1"; write(p / "template/release.yaml", release_meta)
+        release_meta = load(p / "template/release.yaml"); release_meta["version"] = ".".join([*release_meta["version"].split(".")[:2], str(int(release_meta["version"].split(".")[2]) + 1)]); write(p / "template/release.yaml", release_meta)
         method = p / "template/standards/runtime.md"; method.write_text(method.read_text() + "\nTechnical documentation improvement\n")
         delivery.git(p, "add", "template"); delivery.git(p, "commit", "-m", "New clean release"); product.release(p, release)
         for company in [a,b]:
@@ -437,7 +437,7 @@ class GitAcceptance(Fixture):
         remote = self.base / "alpha-common.git"; delivery.git(a, "clone", "--bare", str(a), str(remote))
         delivery.deliver(a, str(remote), task_id="first-process")
         note = p / "template/standards/runtime.md"; note.write_text(note.read_text() + "\nNew method documentation; same result criteria.\n")
-        meta = load(p / "template/release.yaml"); meta["version"] = "1.0.1"; write(p / "template/release.yaml", meta)
+        meta = load(p / "template/release.yaml"); meta["version"] = ".".join([*meta["version"].split(".")[:2], str(int(meta["version"].split(".")[2]) + 1)]); write(p / "template/release.yaml", meta)
         delivery.git(p, "add", "template"); delivery.git(p, "commit", "-m", "Method release"); product.release(p, release)
         updated = lifecycle.update(a, release, self.base / "update-candidate")
         self.assertEqual(updated["status"], "verified-candidate", updated)
@@ -450,7 +450,7 @@ class GitAcceptance(Fixture):
         self.assertEqual(rolled["status"], "verified-candidate", rolled)
         rollback = Path(rolled["candidate"])
         self.assertTrue((rollback / "work/new-result.txt").exists())
-        self.assertEqual(load(rollback / "release.yaml")["version"], "1.0.0")
+        self.assertEqual(load(rollback / "release.yaml")["version"], load(TEMPLATE / "release.yaml")["version"])
         backup = self.base / "complete-backup"; lifecycle.backup(rollback, backup)
         restored = self.base / "complete-restored"; lifecycle.restore(backup, restored)
         self.assertEqual(self.cli("context", "--task", "first-process", root=restored)["tasks"][0]["next_action"], artifact["next_action"])

@@ -20,6 +20,7 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("validate")
     sub.add_parser("self-test")
+    p = sub.add_parser("preflight"); p.add_argument("--remote"); p.add_argument("--branch", default="main")
     p = sub.add_parser("context"); p.add_argument("--task")
     p = sub.add_parser("intake"); p.add_argument("id"); p.add_argument("--request", required=True); p.add_argument("--owner", required=True); p.add_argument("--acceptance", type=Path, required=True); p.add_argument("--confirmed", action="store_true"); p.add_argument("--unknown", action="append", default=[]); p.add_argument("--input", action="append", default=[]); p.add_argument("--independent-required", action="store_true")
     p = sub.add_parser("decide"); p.add_argument("id"); p.add_argument("action", choices=["confirm", "cancel", "resume"]); p.add_argument("--revision", type=int, required=True); p.add_argument("--reason", required=True); p.add_argument("--actor", required=True)
@@ -49,6 +50,7 @@ def main():
     c = args.command
     if c == "validate": result = validation.repository(root)
     elif c == "self-test": result = validation.self_test()
+    elif c == "preflight": result = delivery.preflight(root, args.remote, args.branch)
     elif c == "context": result = operations.context(root, args.task)
     elif c == "intake": result = operations.intake(root, args.id, args.request, args.owner, load(args.acceptance), args.confirmed, args.unknown, args.input, args.independent_required)
     elif c == "decide": result = operations.decide(root, args.id, args.revision, args.action, args.reason, args.actor)
@@ -74,6 +76,9 @@ def main():
     elif c == "proposal": result = lifecycle.proposal(root, args.package, args.destination)
     elif c == "proposal-candidate": result = lifecycle.proposal_candidate(root, args.package, args.product, args.remote, args.destination)
     else: raise ValueError("unsupported operation")
+    if c == "preflight" and result["status"] == "blocked":
+        print(json.dumps(result, ensure_ascii=False, indent=2), file=sys.stderr)
+        sys.exit(2)
     print(json.dumps(result, ensure_ascii=False, indent=2))
 
 

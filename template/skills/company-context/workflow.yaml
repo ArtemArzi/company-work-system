@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-context
-version: 1
+version: 2
 owner: process-owner-selected-by-company
 standards:
 - standards/runtime.md
@@ -8,13 +8,18 @@ standards:
 capabilities:
 - files
 - critical
+- git
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
 output: context output referenced by owning task; provenance and limitations required
 steps:
+- id: receive-shared-state
+  operation: preflight
+  depends_on: []
 - id: read-context
   operation: context
-  depends_on: []
+  depends_on:
+  - receive-shared-state
 - id: perform-operation
   operation: context
   depends_on:

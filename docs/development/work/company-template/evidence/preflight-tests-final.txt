@@ -1,0 +1,14 @@
+test_dirty_staged_and_untracked_preserved_even_with_new_remote (checks.test_preflight.Preflight.test_dirty_staged_and_untracked_preserved_even_with_new_remote) ... ok
+test_diverged_keeps_both_committed_histories (checks.test_preflight.Preflight.test_diverged_keeps_both_committed_histories) ... ok
+test_fast_forward_uses_received_validator_and_blocks_invalid_version (checks.test_preflight.Preflight.test_fast_forward_uses_received_validator_and_blocks_invalid_version) ... ok
+test_fetch_timeout_is_bounded_and_preserves_snapshot (checks.test_preflight.Preflight.test_fetch_timeout_is_bounded_and_preserves_snapshot) ... ok
+test_ignored_local_file_cannot_be_overwritten_by_fast_forward (checks.test_preflight.Preflight.test_ignored_local_file_cannot_be_overwritten_by_fast_forward) ... ok
+test_offline_reports_local_snapshot_without_freshness (checks.test_preflight.Preflight.test_offline_reports_local_snapshot_without_freshness) ... ok
+test_receive_latest_and_deliver_other_employee_without_manual_sync (checks.test_preflight.Preflight.test_receive_latest_and_deliver_other_employee_without_manual_sync) ... ok
+test_unfinished_git_and_detached_and_no_remote_do_not_change_head (checks.test_preflight.Preflight.test_unfinished_git_and_detached_and_no_remote_do_not_change_head) ... ok
+test_wrong_company_and_unapproved_external_are_rejected (checks.test_preflight.Preflight.test_wrong_company_and_unapproved_external_are_rejected) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 165.599s
+
+OK

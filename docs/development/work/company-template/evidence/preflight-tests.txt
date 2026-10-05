@@ -1,0 +1,20 @@
+test_dirty_staged_and_untracked_preserved_even_with_new_remote (checks.test_preflight.Preflight.test_dirty_staged_and_untracked_preserved_even_with_new_remote) ... ok
+test_diverged_keeps_both_committed_histories (checks.test_preflight.Preflight.test_diverged_keeps_both_committed_histories) ... ok
+test_ignored_local_file_cannot_be_overwritten_by_fast_forward (checks.test_preflight.Preflight.test_ignored_local_file_cannot_be_overwritten_by_fast_forward) ... ok
+test_offline_reports_local_snapshot_without_freshness (checks.test_preflight.Preflight.test_offline_reports_local_snapshot_without_freshness) ... ok
+test_receive_latest_and_deliver_other_employee_without_manual_sync (checks.test_preflight.Preflight.test_receive_latest_and_deliver_other_employee_without_manual_sync) ... ok
+test_unfinished_git_and_detached_and_no_remote_do_not_change_head (checks.test_preflight.Preflight.test_unfinished_git_and_detached_and_no_remote_do_not_change_head) ... ok
+test_wrong_company_and_unapproved_external_are_rejected (checks.test_preflight.Preflight.test_wrong_company_and_unapproved_external_are_rejected) ... FAIL
+
+======================================================================
+FAIL: test_wrong_company_and_unapproved_external_are_rejected (checks.test_preflight.Preflight.test_wrong_company_and_unapproved_external_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_preflight.py", line 94, in test_wrong_company_and_unapproved_external_are_rejected
+    delivery.preflight(b,'https://github.com/ArtemArzi/company-work-system.git')
+AssertionError: Rejected not raised
+
+----------------------------------------------------------------------
+Ran 7 tests in 145.929s
+
+FAILED (failures=1)

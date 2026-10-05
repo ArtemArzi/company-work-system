@@ -1,0 +1,18 @@
+{
+  "reviewer": "/root/preflight_review",
+  "role": "block_reviewer",
+  "verdict": "pass",
+  "scope": "Bounded Git preflight, both entry instructions/recipes, thin product adapter and release1.1.0",
+  "independent_checks": [
+    "7 original preflight tests passed",
+    "2 new negatives passed: fetch-timeout, new-process validator rejection",
+    "Additional patched old in-process validator proves fresh subprocess on ff",
+    "Invalid received method blocks dependent work and preserves received SHA",
+    "git diff --check passed"
+  ],
+  "findings": [],
+  "boundaries": [
+    "Product push/readback/packaging owned by main agent",
+    "No native-agent walkthrough, SessionStart hook, scheduler or live employee integration claimed"
+  ]
+}

@@ -1,9 +1,11 @@
 ---
 id: runtime
-version: 1
+version: 2
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
+
+Для компании origin должен указывать на её общий операционный Git, а не release-only основу продукта. External URL допускается только по permissions.external_delivery/remotes; нового права preflight не выдаёт. При отсутствии общего remote сначала адаптация владельцем. Новая компания из create сохраняет release provenance отдельно; источник обновлений не является общей очередью сотрудников. Product adapter `python3 scripts/product.py preflight` использует ту же функцию для явно разрешённого репозитория продукта, без переноса этого права в компании.
 
 Для сохраняемой action-summary: intake задачи сводки → `summary --task id` → сохранить JSON-кандидат → execute → validate → общий commit/deliver. Sources результата указывают на неизменяемый snapshot в work/id/inputs с наблюдёнными revisions/hashes исходных задач; текущие task.json не являются источником исторического результата. Без --task команда только показывает текущее состояние. Подмена snapshot отвергается общим hash-validator.
 
@@ -13,6 +15,7 @@ owner: product-maintainer
 
 | Действие | Команда / нужный вход |
 | --- | --- |
+| Проверка перед работой | `preflight [--remote allowed-url-or-local-path] [--branch main]`: ready/blocked, local/remote SHA; только safe fast-forward, exit2 при blocked |
 | Вход и проверка | `context [--task id]`, `validate`, `self-test` (изолированные known-bad примеры), `summary [--task id]` |
 | Принять сообщение | `intake id --request text --owner name --acceptance file.json [--confirmed] [--unknown text] [--input relative-path] [--independent-required]` |
 | Решение владельца | `decide id confirm/cancel/resume --revision N --reason text --actor owner` |
