@@ -2,4 +2,6 @@
 
 Повторяемый комплект для отдельного репозитория компании. Канонический код и память шаблона — template/; внутренние документы разработки в компанию не поставляются.
 
+Репозиторий продукта: [ArtemArzi/company-work-system](https://github.com/ArtemArzi/company-work-system) (private).
+
 Разработка: [карта](docs/development/README.md) → [план и прогресс](docs/development/PLAN.md) → задача и её свидетельства. Инструкции агента — [AGENTS.md](AGENTS.md). Состояние готовности проверять по плану.
