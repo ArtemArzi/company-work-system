@@ -4,4 +4,6 @@
 
 Репозиторий продукта: [ArtemArzi/company-work-system](https://github.com/ArtemArzi/company-work-system) (private).
 
+[Визуальное руководство для команды](template/docs/company-system-guide.html) — стандарты, навыки, задачи, совместная работа и пример развития процесса встреч.
+
 Разработка: [карта](docs/development/README.md) → [план и прогресс](docs/development/PLAN.md) → задача и её свидетельства. Инструкции агента — [AGENTS.md](AGENTS.md). Состояние готовности проверять по плану.

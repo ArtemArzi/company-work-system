@@ -1,6 +1,6 @@
 ---
 id: runtime
-version: 2
+version: 3
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
@@ -42,4 +42,6 @@ Git delivery не очищает dirty tree и не включает чужие 
 
 Sanitized-package создаётся заново вне истории компании: approval.json имеет approved_by, permission=share-sanitized-method, purpose, files {relative-path:sha256}. Только standards/skills/workflows/checks. Владелец подтверждает обезличивание exact файлов; scanner не доказывает анонимность. Предложение не является принятым общим методом.
 
-Рецепт workflow v1: id/version/owner/standards/capabilities/inputs/output/steps/on_error/stop. Steps имеют уникальный ID, operation из фиксированного каталога либо skill существующего канонического пакета, depends_on только предыдущих шагов. На каждом шаге агент применяет общий task-validation; full recipe не запускается автоматически по имени YAML. Возможности не выдаются декларацией, ограничения профиля проверяются до действия.
+Рецепт workflow v1: id/version/owner/standards/capabilities/inputs/output/steps/on_error/stop. Steps имеют уникальный ID, operation из фиксированного каталога либо skill существующего канонического пакета, depends_on только предыдущих шагов. instruction задаёт агенту входы и условную ветку: просмотр не требует задачи результата, execute применяется один раз к подготовленному Result принятой задачи, successful deliver/readback завершает доставку. Вложенный навык использует уже выполненный вход задачи по task-validation. YAML читает агент; программного движка/автоматического вызова CLI по operation нет. Возможности не выдаются декларацией, ограничения профиля проверяются до действия.
+
+operation описывает фазу, а не обязательно имя команды. author/research/marketing — подготовка агентом через разрешённые инструменты; таких subcommands system.py не предоставляет. knowledge выбирает реальные search или kb-read. Остальные команды и их параметры — в таблице выше. Перед execute нужен Result v1/critical/обязательный review; транспортный envelope, receipt доставки и receipt инцидента не являются Result. Сохранение и простой просмотр явно разделены в соответствующих рецептах.

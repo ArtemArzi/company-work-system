@@ -1,0 +1,34 @@
+{
+  "guide": "template/docs/company-system-guide.html",
+  "sha256": "07cef5dab11917d4ab82ed0486d93a28f4ef40fad1db3df24f92f509673ab85b",
+  "sections": 9,
+  "self_contained_bytes": 38107,
+  "checked_viewports": [
+    1365,
+    390,
+    320
+  ],
+  "horizontal_overflow": false,
+  "anchors_and_relative_links": "pass",
+  "svg_references": "pass",
+  "interaction": "single/repeated meeting tabs and ArrowLeft keyboard pass",
+  "contrast": {
+    "text_runs": 213,
+    "minimum_ratio": 5.15,
+    "failures": 0
+  },
+  "design_hook": {
+    "initial": [
+      "low-contrast",
+      "tiny-text"
+    ],
+    "fix": "darker secondary text, larger body text; no font smaller than12px",
+    "latest": "no deterministic issues",
+    "suppressions": []
+  },
+  "browser_boundaries": [
+    "file protocol blocked; inspected through temporary loopback HTTP only",
+    "first screenshot absolute /tmp path refused; repeated into tool-owned directory",
+    "no public hosting or native visible browser requested"
+  ]
+}

@@ -9,4 +9,6 @@ description: Для разрешённого внутреннего резуль
 
 Создать свежий отдельный candidate командой prepare; commit только explicit paths после validate; deliver normal fast-forward и remote readback. Нельзя reset чужую работу/force push/победить смысловой спор чистым merge. Для update/proposal сначала соответствующая подготовка; generic доставку не дублировать.
 
+Успешный readback завершает доставку. Receipt не является новым Result; последующий execute для него не нужен.
+
 Общий цикл и evidence — [task-validation](../../standards/task-validation.md). Неизвестное/локальное/проверенное/live/применение различать. Результат и продолжение сохраняются у work/<id>/task.json.

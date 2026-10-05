@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-context
-version: 3
+version: 4
 owner: process-owner-selected-by-company
 standards:
 - standards/runtime.md
@@ -12,24 +12,18 @@ capabilities:
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
 - task entry preflight, reused within the same task according to task-validation
-output: context output referenced by owning task; provenance and limitations required
+output: Company identity, permitted scope and actual state owner; read-only context, not a task artifact
 steps:
 - id: receive-shared-state
   operation: preflight
+  instruction: Один вход на самостоятельную задачу. При вложенном вызове использовать уже подтверждённую версию
+    по task-validation; не выполнять повторный fetch без основания.
   depends_on: []
 - id: read-context
   operation: context
+  instruction: Прочитать фактический контекст/владельца с диска; вернуть контекст. Просмотр не создаёт отдельную
+    задачу результата и не вызывает execute.
   depends_on:
   - receive-shared-state
-- id: perform-operation
-  operation: context
-  depends_on:
-  - read-context
-- id: validate-result
-  operation: execute
-  depends_on:
-  - perform-operation
-on_error: Record observed failure at owning task; block dependent action; preserve
-  candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts
-  without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence

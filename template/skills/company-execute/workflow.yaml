@@ -1,29 +1,26 @@
 schema_version: 1
 id: company-execute
-version: 1
+version: 2
 owner: process-owner-selected-by-company
 standards:
-- standards/task-validation.md
 - standards/task-validation.md
 capabilities:
 - validation
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: execute output referenced by owning task; provenance and limitations required
+output: One verified result bound to accepted criterion, exact inputs and required review
 steps:
 - id: read-context
   operation: context
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation.
   depends_on: []
-- id: perform-operation
+- id: execute-result
   operation: execute
+  instruction: Подготовить artifact, critical и обязательный review для уже принятой active задачи. Один вызов
+    execute проверяет их и сохраняет результат. Не вызывать execute второй раз для проверки собственного receipt.
   depends_on:
   - read-context
-- id: validate-result
-  operation: execute
-  depends_on:
-  - perform-operation
-on_error: Record observed failure at owning task; block dependent action; preserve
-  candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts
-  without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence

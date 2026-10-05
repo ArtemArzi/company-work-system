@@ -1,31 +1,34 @@
 schema_version: 1
 id: company-summary
-version: 1
+version: 2
 owner: process-owner-selected-by-company
 standards:
-- standards/task-validation.md
 - standards/task-validation.md
 capabilities:
 - files
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-- owning task ID with accepted action-summary criterion
-output: summary output referenced by owning task; provenance and limitations required
+- 'For saved branch only: accepted owning task ID and action-summary criterion'
+output: Read-only observed summary OR verified action-summary artifact owned by an accepted task
 steps:
 - id: read-context
   operation: context
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation.
   depends_on: []
-- id: perform-operation
+- id: prepare-summary
   operation: summary
-  instruction: Call summary --task owning-id; immutable input snapshot excludes its own task
+  instruction: 'Просмотр: summary без --task, вернуть наблюдённое состояние без execute. Сохранение отдельного
+    результата: только для принятой задачи с action-summary критерием вызвать summary --task owning-id; immutable
+    snapshot исключает собственную задачу.'
   depends_on:
   - read-context
-- id: validate-result
+- id: execute-saved-summary
   operation: execute
+  instruction: 'Только ветка сохранения: передать подготовленный action-summary artifact, critical и обязательный
+    review в один execute. При простом просмотре этот шаг пропустить.'
   depends_on:
-  - perform-operation
-on_error: Record observed failure at owning task; block dependent action; preserve
-  candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts
-  without new evidence
+  - prepare-summary
+on_error: Record observed failure at owning task; block dependent action; preserve candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence

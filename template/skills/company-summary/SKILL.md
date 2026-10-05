@@ -11,4 +11,6 @@ summary читает историю задач; показывать что из
 
 Для сохраняемой сводки принять запрос через intake с acceptance `{"kind":"action-summary"}`. Вызвать `python3 scripts/system.py summary --task <id>`: исключается сама задача сводки, неизменяемый снимок наблюдавшихся revisions/hashes создаётся в work/<id>/inputs. Полученный JSON сохранить как кандидат и передать execute вместе с конкретным critical. Обычный summary без --task — текущий просмотр; он не является кандидатом долговечной сводки. После execute вызвать validate и общий commit/deliver; поздние изменения исходных задач не переписывают исторический снимок. Для новых фактов создать новую сводку или новый результат той же задачи.
 
-Общий цикл и evidence — [task-validation](../../standards/task-validation.md). Неизвестное/локальное/проверенное/live/применение различать. Результат и продолжение сохраняются у work/<id>/task.json.
+Простой просмотр: summary без --task, ответ по наблюдённой версии; отдельная задача/execute не нужны. Для сохраняемой сводки нужен принятый owning task и action-summary критерий: summary --task id → подготовленный artifact/critical → один execute.
+
+Общий цикл и evidence — [task-validation](../../standards/task-validation.md). Неизвестное/локальное/проверенное/live/применение различать. Сохраняемый результат и продолжение остаются у work/<id>/task.json.
