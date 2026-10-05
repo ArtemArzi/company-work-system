@@ -1,0 +1,22 @@
+{
+  "repository": "ArtemArzi/company-work-system",
+  "url": "https://github.com/ArtemArzi/company-work-system",
+  "private": true,
+  "default_branch": "main",
+  "origin": "https://github.com/ArtemArzi/company-work-system.git",
+  "local_branch": "codex/company-work-system",
+  "tracking": "origin/main",
+  "verified_history_tip": "1e0e3e80e4058c3aa1e7f8abb7ee159d552c2b4d",
+  "verification": "GitHub commits/main exact SHA equals local HEAD after normal push; repository API private=true; working tree clean",
+  "before_push": {
+    "tracked_product_paths": 108,
+    "reachable_history_blobs_scanned": 113,
+    "high_signal_secret_scan": "pass",
+    "scope": "Only generated product/code/development evidence, no client data or parent work changes"
+  },
+  "limits": [
+    "Pattern scan is bounded, not a secrecy guarantee",
+    "This is actual product GitHub backup; it does not verify live company/provider integrations",
+    "No GitHub release/artifact publication, credentials/settings changes or real background activation"
+  ]
+}
