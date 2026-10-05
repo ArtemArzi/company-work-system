@@ -10,7 +10,7 @@ P0–P8 завершены в разрешённом локальном объё
 
 Whole-result reviewer /root/complete_template_acceptance воспроизвёл три сбоя. (1) Prefix allowlist принимал standards/../company/private-note.txt: первое неверное допущение — строковый prefix определяет реальную категорию файла. Проверить канонический lexical path без .. до exact-file approval/copy. (2) Наблюдения применения/эффекта переходили на новый artifact: первое неверное допущение — evidence относится к задаче независимо от версии результата. Привязать к exact output hash, сохранить прошлое в history и сбросить при новом output. Proof /tmp/company-review-adversarial-8ydzu4e9. (3) Сводка включала свой mutable task.json и другие изменяемые задачи; после execute/global validate source hash менялся. Proof /tmp/company-summary-review-rxd8dd5a. Существующая стратегия immutable result/evidence hashes применима: локальный неизменяемый snapshot входов сводки у её задачи, без ослабления source hashes и без второго текущего состояния. CLI/recipe и исходный end-to-end проверяются вместе. Эти замечания требуют исправления реализации, исходный принятый план/критерии сохраняются.
 
-Исправлено: общий safe-path отвергает lexical .././двойной separator до чтения/копирования; наблюдения привязаны к точному result_sha256, предыдущие output/observations/delivery/review остаются в history, новый результат unknown; summary --task создаёт content-addressed snapshot наблюдённых revisions/hashes и исключает себя. Ссылки/hashes сохраняют строгость; SKILL/YAML/CLI/runtime обновлены вместе. В tick используется helper под существующим lock, повторный flock устранён. Авторские 3 regressions PASS39.874s, исходный ticks PASS. Независимый reviewer повторил пять targeted cases, PASS50.692s и закрыл R1–R3; final SHA/release/full-suite acceptance pending. [Первоначальный verdict и исправления](evidence/result-review-initial.json). Документированные примеры ошибок сохранены, specification/accepted plan не ослаблены.
+Исправлено: общий safe-path отвергает lexical .././двойной separator до чтения/копирования; наблюдения привязаны к точному result_sha256, предыдущие output/observations/delivery/review остаются в history, новый результат unknown; summary --task создаёт content-addressed snapshot наблюдённых revisions/hashes и исключает себя. Ссылки/hashes сохраняют строгость; SKILL/YAML/CLI/runtime обновлены вместе. В tick используется helper под существующим lock, повторный flock устранён. Авторские 3 regressions PASS39.874s, исходный ticks PASS. Независимый reviewer повторил пять targeted cases, PASS50.692s и закрыл R1–R3; На этом шаге ещё ожидалась приёмка final SHA/release/full-suite; впоследствии она получена (см. итог задачи). [Первоначальный verdict и исправления](evidence/result-review-initial.json). Документированные примеры ошибок сохранены, specification/accepted plan не ослаблены.
 
 Общий план/прогресс — [PLAN](../../PLAN.md). Эта задача владеет деталями решений, проверками и ошибками реализации; второй PLAN/STATUS не создаётся.
 
@@ -33,9 +33,9 @@ P1–P8 в работе: создан канонический template/ с об
 
 Документы разработки перенесены в docs/development. Главный вход компании только AGENTS.md; CLAUDE.md удалён по прямому уточнению пользователя. Claude Code адаптация сохраняет explicit-file-read общей карты, без дублирующего файла инструкций. Native discovery/реальная новая сессия проверяются отдельно, не приписываются Python subprocess.
 
-## Что осталось и как продолжать
+## Продолжение после локальной приёмки
 
-Следующая разрешённая операция: завершить полный suite и свежую независимую итоговую приёмку; затем выпустить exact local candidate и проверить две копии из release-only repo. Библиотека, блоки и contracts завершены; замечания reviewer исправлять по их evidence. Git release-only выбор уже принят; research заново не проводить. Реальные аккаунты/фон/GitHub/бизнес-правила/поле остаются open. End-to-end/suite выполнены (см. ниже); итоговая независимая приёмка после material corrections ещё требуется.
+Локальный комплект, полный suite, exact выпуск/две копии и независимая приёмка завершены. Для следующей отдельной компании использовать принятый release-only путь ниже; исследование заново не проводить. Реальные аккаунты/фон/GitHub/бизнес-правила/поле остаются open и зависят от её адаптации/полномочий.
 
 ## Проверки P1–P7 и текущие дефекты
 
@@ -45,7 +45,7 @@ P1–P8 в работе: создан канонический template/ с об
 
 HTTP transport test внутри sandbox отказал до сервера: socket PermissionError. Причина — окружение, не source contract. Узкий запуск того же теста вне socket sandbox автоматически разрешён: 127.0.0.1 pagination/429/redirect rejection/cursor loop, 1 test passed. Никакого live аккаунта/внешнего запроса. MCP stdio, file export, known-bad result, state/lock, derived graph, ticks, common Git concurrency/readback/backup/proposal прошли первый прогон; после code corrections затронутое повторить.
 
-Task Delivery controller сохранён degraded: owner перенёс единственный план; у released controller нет supported plan-path relocation. Старые state/pending obligations не переписаны. Implementation и native plan/result review продолжаются; controller verified completion не заявляется. Это служебная несовместимость и не блокирует разрешённую работу продукта.
+Task Delivery controller сохранён degraded: owner перенёс единственный план; у released controller нет supported plan-path relocation. Старые state/pending obligations не переписаны. Implementation и native plan/result review завершены вне degraded controller; его verified completion не заявляется. Это служебная несовместимость и не блокирует разрешённую работу продукта.
 
 
 ## Полный путь P8 и native границы
@@ -54,9 +54,9 @@ Task Delivery controller сохранён degraded: owner перенёс еди�
 
 [Native profiles](evidence/native-profiles.json): новый Codex read-only session выполнил реальные чтения пяти канонических файлов и вернул test-company/test-task/active/application unknown/точный следующий шаг. Первоначальный sandbox запрещал native app-server init; узкий read-only запуск разрешён auto-review. 45-секундный лимит прервал первый начатый model-read; более длинный bounded прогон завершён, exit0. В native каталоге было предупреждение о skill context budget; проверен explicit-file-read, auto discovery/full workflow не объявлены. Claude -p read-only permission profile: exit1, OAuth expired could not refresh. Никакого login, изменения credentials/settings или копирования memory не выполнялось.
 
-Реальные company/API/GitHub/полевые действия не запускались; source exports и stdio/loopback transports проверяют программный контракт. Источники/лимиты/бюджет/правила конкретной компании остаются неизвестными до её адаптации. Настоящий native Claude walkthrough блокирует только expired session; общий локальный комплект продолжает проверку. Полный итоговый suite — evidence/tests-candidate.txt: 26 tests passed за149.718s, включая loopback HTTP в разрешённом окружении. Независимая complete-result acceptance pending.
+Реальные company/API/GitHub/полевые действия не запускались; source exports и stdio/loopback transports проверяют программный контракт. Источники/лимиты/бюджет/правила конкретной компании остаются неизвестными до её адаптации. Настоящий native Claude walkthrough блокирует только expired session; common core проверен независимо от native Claude. Первый полный suite — evidence/tests-candidate.txt: 26 tests passed за149.718s, включая loopback HTTP в разрешённом окружении. На момент этого первого прогона independent acceptance ещё ожидалась; итоговый PASS выше.
 
-После material corrections полный suite: 29/29 PASS182.165s, evidence/tests-review-repaired.txt; changed company-summary quick_validate PASS, чистый template validate21 entities/12 skills/0tasks. Следующий шаг — exact committed release-only/two-copy proof и финальный independent verdict.
+После material corrections полный suite: 29/29 PASS182.165s, evidence/tests-review-repaired.txt; changed company-summary quick_validate PASS, чистый template validate21 entities/12 skills/0tasks. После этого прогона выполнены exact committed release-only/two-copy proof и финальная independent acceptance, см. ниже/итог задачи.
 
 ## Точный локальный выпуск
 
