@@ -1,6 +1,6 @@
 ---
 id: hook-authoring
-version: 1
+version: 2
 owner: product-maintainer
 ---
 # Создание и изменение хуков
@@ -100,3 +100,7 @@ Update/rollback сохраняют company activation/disabled/чужие defini
 выполнить fallback; proof/cache не переносить в публичный release. Обратное предложение
 содержит только разрешённый обезличенный метод/код/tests, без company tasks,
 host credentials, transcripts или истории компании.
+
+## Переносимость
+
+Handlers используют общий platform_runtime для path/UTF-8/lock и участвуют в fingerprint. Точный Windows command объявляет PowerShell: Codex commandWindows с явным PowerShell launcher, Claude shell=powershell. Не считать shlex argv fixture native shell запуском. Process deadline завершает только собственный hook handler без поздней записи; никакого Stop retry loop. Перенос root/interpreter требует preview/re-project и штатной trust-проверки. Cloud orchestration не запускает местные command hooks; общий CLI сохраняет обязательные проверки. Native events/discovery обеих сред не доказаны OS suite и отмечаются отдельно.

@@ -1,0 +1,12 @@
+{
+  "posix": {
+    "exit": 1,
+    "stdout": "",
+    "stderr_present": true
+  },
+  "powershell": {
+    "exit": 0,
+    "stdout": "git version 2.54.0.windows.1",
+    "stderr_present": false
+  }
+}

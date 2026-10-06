@@ -1,6 +1,6 @@
 ---
 id: template-update
-version: 2
+version: 3
 owner: product-maintainer
 ---
 # Общий выпуск и местное развитие
@@ -23,3 +23,5 @@ native settings/proof попадут только после explicit commit р�
 ignored dedup/trust не копируются и не являются необходимой памятью бизнеса.
 
 Обратное предложение hooks: отдельно написанные обезличенные hooks/manifest.yaml, hooks/README.md, scripts/hooks.py и checks проходят exact owner hash approval и общий content/path guard. Компания, native settings, ownership proof и её Git history исключены. proposal-candidate готовит отдельную product копию; для точных hook replacements возвращает base/candidate hashes, исходный метод остаётся в Git base. Trusted structural validator не импортирует donated handler и не запускает donated tests. До maintainer review это предложение, не выпуск и не подтверждение нового native handler.
+
+Backup schema1 сохраняется: exact tracked bytes в проверенном tar + Git bundle. Restore в новый каталог проверяет состав manifest/Git/tar, пути, modes и SHA; не выполняет extractall. Единственное допустимое различие представления — доказанный canonical skills symlink/точный Windows Git placeholder. Исторические задачи/receipts/settings остаются byte-exact; ignored runtime/cache не копируются. Восстановление старого выпуска не расширяет его прежнюю совместимость с ОС. Перенесённым native settings нужны re-project/trust; Git filters/EOL не разрешают пересчитать доказательства.

@@ -4,18 +4,21 @@ Native output is a provider protocol, never a substitute for CLI admission.
 """
 from __future__ import annotations
 import argparse
+import base64
 import copy
 import hashlib
 import json
 from pathlib import Path
 import re
 import shlex
-import signal
+import os
+import threading
 import sys
 import time
 
 from core import Rejected, changed_bindings, config, config_snapshot, digest, ident, load, lock, object_hash, path, require, write
 import validation
+import platform_runtime as platform
 
 NAMESPACE = "company-work-system/hooks/v1"
 MAX_INPUT = 262144
@@ -75,7 +78,7 @@ def definition_hash(root, harness):
     require(harness in TARGETS or harness == "common", "unsupported harness")
     _, base, _ = roots(root)
     declaration = manifest(root)
-    files = {"hooks/manifest.yaml", "scripts/hooks.py", "scripts/core.py", "scripts/validation.py", "scripts/dependencies.py"}
+    files = {"hooks/manifest.yaml", "scripts/hooks.py", "scripts/core.py", "scripts/platform_runtime.py", "scripts/validation.py", "scripts/dependencies.py"}
     files.update(relative for item in declaration["hooks"] for relative in item["dependencies"])
     if harness != "common":
         files.add(f"adapters/{harness}/profile.yaml")
@@ -89,7 +92,7 @@ def _relative(root, cwd, value):
     require(".." not in candidate.parts, "tool path traversal")
     candidate = candidate if candidate.is_absolute() else cwd / candidate
     require(candidate.resolve().is_relative_to(root), "tool path outside explicit root")
-    return str(path(root, candidate.relative_to(root).as_posix()).relative_to(root))
+    return path(root, candidate.relative_to(root).as_posix()).relative_to(root).as_posix()
 
 
 def _changes(root, payload):
@@ -106,7 +109,7 @@ def _changes(root, payload):
         require(isinstance(data.get("old_string"), str) and isinstance(data.get("new_string"), str), "Edit strings required")
         file = path(root, relative)
         require(file.is_file() and file.stat().st_size <= MAX_FILE, "Edit target missing/oversize")
-        text = file.read_text()
+        text = file.read_text(encoding="utf-8")
         old = data["old_string"]
         if not old or (not data.get("replace_all") and text.count(old) != 1) or old not in text:
             return [{"path": relative, "content": None}]
@@ -142,14 +145,14 @@ def _task(root, base, kind, task_id):
     if kind == "product":
         require(isinstance(task_id, str) and re.fullmatch(r"[a-z0-9][a-z0-9-]{1,127}", task_id), "invalid development task slug")
         file = path(root, f"docs/development/work/{task_id}/task.md")
-        return {"path": str(file.relative_to(root)), "development": True} if file.is_file() else None
+        return {"path": file.relative_to(root).as_posix(), "development": True} if file.is_file() else None
     ident(task_id)
     file = path(base, f"work/{task_id}/task.json")
     if not file.is_file():
         return None
     value = bounded_load(file)
     require(isinstance(value, dict) and value.get("id") == task_id and value.get("company_id") == config(base)["id"], "task identity mismatch")
-    return {**value, "path": str(file.relative_to(root))}
+    return {**value, "path": file.relative_to(root).as_posix()}
 
 
 def _navigation(kind, task):
@@ -327,7 +330,17 @@ def _projection(root, harness, fingerprint, enabled):
     result = []
     for event in EVENTS:
         args = [sys.executable, str(base / "scripts/hooks.py"), "--root", str(root), "--namespace", NAMESPACE, "--harness", harness, "--event", event, "--definition-hash", fingerprint]
-        group = {"hooks": [{"type": "command", "command": shlex.join(args), "timeout": 3}]}
+        handler = {"type": "command", "command": platform.shell_command(args), "timeout": 3}
+        if platform.WINDOWS:
+            windows = platform.shell_command(args, windows=True)
+            if harness == "claude":
+                handler.update(command=windows, shell="powershell")
+            else:
+                # Explicit shell inside the Windows override; no assumption about
+                # the provider's outer shell. EncodedCommand is UTF-16LE PowerShell.
+                encoded = base64.b64encode(windows.encode("utf-16le")).decode("ascii")
+                handler["commandWindows"] = "powershell.exe -NoProfile -NonInteractive -EncodedCommand " + encoded
+        group = {"hooks": [handler]}
         if event in {"PreToolUse", "PostToolUse"}:
             tools = sorted({tool for item in declaration["hooks"] if event in item["events"] for tool in item["tools"]})
             group["matcher"] = "^(" + "|".join(re.escape(tool) for tool in tools) + ")$"
@@ -446,24 +459,27 @@ def main(argv=None):
     parser.add_argument("--definition-hash", required=True)
     parser.add_argument("--task")
     args = parser.parse_args(argv)
-    def timed_out(_signum, _frame):
-        raise TimeoutError("hook timeout; required CLI checks remain pending")
-    signal.signal(signal.SIGALRM, timed_out)
-    signal.setitimer(signal.ITIMER_REAL, 3)
+    finished = threading.Event()
+    def deadline():
+        if not finished.wait(3):
+            message = {"systemMessage": "Hook handler failure; use shared CLI fallback: TimeoutError: hook timeout; required CLI checks remain pending"}
+            os.write(sys.stdout.fileno(), (json.dumps(message) + "\n").encode("utf-8"))
+            os._exit(1)  # Only this owned hook process; no worker can write later.
+    threading.Thread(target=deadline, daemon=True).start()
     try:
         require(args.namespace == NAMESPACE, "unknown hook namespace")
         raw = sys.stdin.buffer.read(MAX_INPUT + 1)
         require(len(raw) <= MAX_INPUT, "oversize hook payload")
         payload = json.loads(raw)
         result = dispatch(args.root, args.harness, args.event, payload, args.task, definition_hash_expected=args.definition_hash, native=True)
-        print(json.dumps(native_output(args.event, result), ensure_ascii=False))
+        print(json.dumps(native_output(args.event, result), ensure_ascii=True), flush=True)
         return 0
     except Exception as exc:
         # Exit 1 is failure, never provider denial/automatic continuation.
         print(json.dumps({"systemMessage": "Hook handler failure; use shared CLI fallback: " + type(exc).__name__ + ": " + str(exc)[:500]}), flush=True)
         return 1
     finally:
-        signal.setitimer(signal.ITIMER_REAL, 0)
+        finished.set()
 
 
 if __name__ == "__main__":

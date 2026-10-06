@@ -13,7 +13,7 @@ def context(root, task_id=None):
         t = load(file)
         if task_id and t["id"] != task_id:
             continue
-        result["tasks"].append({"path": str(file.relative_to(root)), "id": t["id"], "status": t["status"], "revision": t["revision"], "next_action": t["next_action"], "blocker": t.get("blocker"), "changed_dependencies": changed_bindings(root, t["bindings"], t.get("binding_scope"))})
+        result["tasks"].append({"path": file.relative_to(root).as_posix(), "id": t["id"], "status": t["status"], "revision": t["revision"], "next_action": t["next_action"], "blocker": t.get("blocker"), "changed_dependencies": changed_bindings(root, t["bindings"], t.get("binding_scope"))})
     if task_id:
         require(result["tasks"], "task not found")
     return result
@@ -181,7 +181,7 @@ def _summary(root, exclude=None):
         t = load(file)
         if t["id"] == exclude:
             continue
-        refs.append({"path": str(file.relative_to(root)), "sha256": digest(file)})
+        refs.append({"path": file.relative_to(root).as_posix(), "sha256": digest(file)})
         entries.append({"id": t["id"], "owner": t["owner"], "status": t["status"], "next_action": t["next_action"], "waiting_for": t.get("blocker"), "since": t["history"][-1]["at"], "revision": t["revision"]})
     counts = {status: sum(t["status"] == status for t in entries) for status in ["draft", "active", "waiting", "blocked", "verified", "cancelled"]}
     company_id = config(root)["id"]

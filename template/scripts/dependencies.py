@@ -5,7 +5,7 @@ from core import Rejected, config_snapshot, digest, ident, load, method_bindings
 
 KINDS = {'metrics': 'company-source-read', 'marketing': 'company-marketing',
          'research': 'company-research', 'action-summary': 'company-summary'}
-KERNEL = {'scripts/core.py', 'scripts/dependencies.py', 'scripts/operations.py',
+KERNEL = {'scripts/platform_runtime.py', 'scripts/core.py', 'scripts/dependencies.py', 'scripts/operations.py',
           'scripts/validation.py', 'scripts/system.py', 'scripts/hooks.py',
           'hooks/manifest.yaml', 'standards/task-validation.md', 'standards/runtime.md'}
 ADMISSION_FIELDS = ('type', 'approved_by', 'account', 'scope', 'period', 'unit',
@@ -74,7 +74,7 @@ def projected(root, cfg, selection):
     if 'knowledge' in operations:
         files.add('scripts/connectors.py')
         for source_file in sorted(Path(root, 'company/sources').glob('*/source.yaml')):
-            relative = str(source_file.relative_to(root))
+            relative = source_file.relative_to(root).as_posix()
             files.add(relative)
             meta = load(source_file)
             if meta.get('material'):

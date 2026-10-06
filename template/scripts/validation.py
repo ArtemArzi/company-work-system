@@ -13,7 +13,7 @@ OPERATIONS = {"preflight", "context", "intake", "execute", "summary", "episodes"
 
 
 def frontmatter(file):
-    return frontmatter_text(Path(file).read_text())
+    return frontmatter_text(Path(file).read_text(encoding="utf-8"))
 
 
 def frontmatter_text(text):
@@ -106,7 +106,7 @@ def entity_changes(root, changes, before=False):
             try:
                 meta = frontmatter(file) if file.suffix == '.md' else load(file)
                 name = meta.get('id', meta.get('name'))
-                if name: existing.setdefault(name, []).append(str(file.relative_to(root)))
+                if name: existing.setdefault(name, []).append(file.relative_to(root).as_posix())
             except Exception:
                 continue
     proposed = {}
@@ -120,7 +120,7 @@ def entity_changes(root, changes, before=False):
                 advisories.append(relative+': incomplete edit; check actual file after write'); continue
             if not file.is_file():
                 advisories.append(relative+': file removed; update its map and consumers'); continue
-            content = file.read_text()
+            content = file.read_text(encoding="utf-8")
         try:
             meta = frontmatter_text(content) if file.suffix == '.md' else yaml.safe_load(content)
             require(isinstance(meta, dict), 'entity metadata missing')
@@ -141,7 +141,7 @@ def entity_changes(root, changes, before=False):
         if index:
             map_file = path(root, index)
             targets = [(map_file.parent/t.strip('<>').split('#')[0]).resolve()
-                       for t in re.findall(r'\]\(([^)]+)\)', map_file.read_text()) if not re.match(r'[a-z]+://', t)]
+                       for t in re.findall(r'\]\(([^)]+)\)', map_file.read_text(encoding="utf-8")) if not re.match(r'[a-z]+://', t)]
             if file.resolve() not in targets: advisories.append(relative+': entity missing from map '+index)
         if file.suffix == '.md':
             for target in re.findall(r'\]\(([^)]+)\)', content):
@@ -314,6 +314,19 @@ def repository(root, freshness=True):
         require(release.get("schema_version") == 1 and release.get("state_format") == 1 and release.get("workflow_format") == 1, "unsupported release/state/workflow version")
         require(isinstance(release.get("version"), str) and re.fullmatch(r"\d+\.\d+\.\d+", release["version"]), "release version missing")
     check(release_contract, "release")
+    def platform_profiles():
+        if tuple(map(int, load(root / 'release.yaml')['version'].split('.'))) < (1, 3, 0):
+            return  # Legacy archive preserves original profile and runtime contract.
+        for harness in ['codex', 'claude']:
+            value = load(root / ('adapters/' + harness + '/profile.yaml'))
+            require(value.get('harness') == harness and value.get('mode') == 'explicit-file-read', 'harness profile identity')
+            require(set(value.get('platforms', {})) == {'linux', 'wsl2', 'macos', 'windows', 'cloud'}, 'platform profile coverage missing')
+            for platform_name, declaration in value['platforms'].items():
+                require(set(declaration) == {'runtime', 'instructions', 'native_discovery', 'native_hooks', 'provider_access'}, 'platform evidence layers missing: ' + platform_name)
+                require(all(isinstance(v, str) and v for v in declaration.values()), 'platform status empty')
+    # Legacy installed releases without a matrix retain their prior validator;
+    # only this new runtime's profiles carry the explicit platform contract.
+    check(platform_profiles, 'platform profiles')
     if (root / 'hooks/manifest.yaml').is_file():
         def hooks_contract():
             from hooks import manifest
@@ -330,37 +343,38 @@ def repository(root, freshness=True):
                 entity = meta.get('id', meta.get('name'))
                 ident(entity)
                 require(entity not in identities, f"duplicate entity ID {entity}")
-                identities[entity] = str(file.relative_to(root))
-                entity_contract(root, str(file.relative_to(root)), kind, meta)
+                identities[entity] = file.relative_to(root).as_posix()
+                entity_contract(root, file.relative_to(root).as_posix(), kind, meta)
                 if kind == "skill":
                     canonical_skills.add(entity)
-            check(inspect, str(file.relative_to(root)))
-    for file in root.rglob("SKILL.md"):
+            check(inspect, file.relative_to(root).as_posix())
+    for file in documents(root, "SKILL.md"):
         if not file.is_relative_to(root / "skills") and not file.is_relative_to(root / ".agents") and not file.is_relative_to(root / ".claude") and not file.is_relative_to(root / ".git"):
             errors.append(f"skill outside canonical directory: {file.relative_to(root)}")
-    for file in root.rglob("*.md"):
+    for file in documents(root, "*.md"):
         if any(p in {".git", ".local", ".system", ".agents", ".claude"} for p in file.relative_to(root).parts):
             continue
-        for target in re.findall(r"\]\(([^)]+)\)", file.read_text()):
+        for target in re.findall(r"\]\(([^)]+)\)", file.read_text(encoding="utf-8")):
             if re.match(r"[a-z]+://", target) or target.startswith("#"):
                 continue
             target = target.strip("<>").split("#")[0]
-            check(lambda file=file, target=target: require((file.parent / target).resolve().is_relative_to(root) and (file.parent / target).exists(), f"broken/outside link {target}"), str(file.relative_to(root)))
+            check(lambda file=file, target=target: require((file.parent / target).resolve().is_relative_to(root) and (file.parent / target).exists(), f"broken/outside link {target}"), file.relative_to(root).as_posix())
     for directory, pattern, index in [("standards", "*.md", "standards/README.md"), ("skills", "*/SKILL.md", "skills/README.md"), ("company/sources", "*/source.yaml", "company/sources/README.md")]:
         map_file = root / index
         if not map_file.exists():
             errors.append("missing entity map: " + index)
             continue
-        targets = [(map_file.parent / t.split("#")[0]).resolve() for t in re.findall(r"\]\(([^)]+)\)", map_file.read_text()) if not re.match(r"[a-z]+://", t)]
+        targets = [(map_file.parent / t.split("#")[0]).resolve() for t in re.findall(r"\]\(([^)]+)\)", map_file.read_text(encoding="utf-8")) if not re.match(r"[a-z]+://", t)]
         for entity in (root / directory).glob(pattern):
             if entity.name != "README.md" and entity.resolve() not in targets:
-                errors.append("independent entity missing from map: " + str(entity.relative_to(root)))
+                errors.append("independent entity missing from map: " + entity.relative_to(root).as_posix())
     for file in tasks(root):
-        check(lambda file=file: (require(file.parent.name == load(file)["id"], "task place"), task(root, load(file), freshness)), str(file.relative_to(root)))
+        check(lambda file=file: (require(file.parent.name == load(file)["id"], "task place"), task(root, load(file), freshness)), file.relative_to(root).as_posix())
+    import platform_runtime as platform
     for harness, directory in [("codex", ".agents/skills"), ("claude", ".claude/skills")]:
         for name in canonical_skills:
             projected = root / directory / name
-            check(lambda projected=projected, name=name: require(projected.is_symlink() and projected.resolve() == root / "skills" / name, "projection missing/changed"), f"{harness}:{name}")
+            check(lambda projected=projected, name=name, directory=directory: platform.projection(root, directory, name), f"{harness}:{name}")
     try:
         bindings = config(root).get("bindings", {})
         for operation, binding in bindings.items():
@@ -398,3 +412,14 @@ def self_test():
                 rejected.append(field)
         require(len(rejected) == 3, "validator accepted a deliberately bad example")
         return {"status": "passed", "correct_example": True, "bad_examples_rejected": rejected, "boundary": "validator behavior only; no live/harness/business proof"}
+
+
+def documents(root, pattern):
+    """Do not inspect installed runtimes, Git internals or derived projections."""
+    import fnmatch
+    import os
+    from platform_runtime import alias
+    for directory, dirs, names in os.walk(root, followlinks=False):
+        dirs[:] = [d for d in dirs if d not in {'.git', '.local', '.venv', '.system', '.agents', '.claude', '.codex', '__pycache__'} and not alias(Path(directory) / d)]
+        for name in names:
+            if fnmatch.fnmatch(name, pattern): yield Path(directory) / name

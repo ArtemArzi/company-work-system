@@ -23,7 +23,7 @@ class Preflight(Fixture):
     def change(self, root, relative, text):
         file = root / relative
         file.parent.mkdir(parents=True, exist_ok=True)
-        file.write_text(text)
+        file.write_text(text, encoding="utf-8")
         delivery.commit(root, [relative], 'Synthetic authorized change')
 
     def test_receive_latest_and_deliver_other_employee_without_manual_sync(self):
@@ -34,28 +34,28 @@ class Preflight(Fixture):
         delivery.deliver(a, str(remote))
         fresh = self.cli('preflight', root=b)
         self.assertEqual(fresh['mode'], 'updated')
-        self.assertEqual((b/'work/alice.txt').read_text(), 'Alice completed an artifact')
+        self.assertEqual((b/'work/alice.txt').read_text(encoding="utf-8"), 'Alice completed an artifact')
         self.assertEqual(self.cli('preflight', root=b)['mode'], 'current')
         self.change(b, 'work/bob.txt', 'Bob next action')
         ahead = self.cli('preflight', root=b)
         self.assertTrue(ahead['pending_delivery'])
         delivery.deliver(b, str(remote))
         self.assertEqual(self.cli('preflight', root=a)['mode'], 'updated')
-        self.assertEqual((a/'work/bob.txt').read_text(), 'Bob next action')
+        self.assertEqual((a/'work/bob.txt').read_text(encoding="utf-8"), 'Bob next action')
 
     def test_dirty_staged_and_untracked_preserved_even_with_new_remote(self):
         remote, a, b = self.common()
         self.change(a, 'work/shared.txt', 'New remote work'); delivery.deliver(a,str(remote))
         head = delivery.git(b,'rev-parse','HEAD')
-        (b/'company/projects/README.md').write_text('Unfinished local work')
-        (b/'work').mkdir(exist_ok=True); (b/'work/untracked.txt').write_text('Never auto-commit this')
+        (b/'company/projects/README.md').write_text('Unfinished local work', encoding="utf-8")
+        (b/'work').mkdir(exist_ok=True); (b/'work/untracked.txt').write_text('Never auto-commit this', encoding="utf-8")
         delivery.git(b,'add','company/projects/README.md')
         before = delivery.git(b,'status','--porcelain','--untracked-files=all')
         blocked = self.cli('preflight',root=b,success=False)
         self.assertIn('Uncommitted',blocked['reason'])
         self.assertEqual(delivery.git(b,'rev-parse','HEAD'),head)
         self.assertEqual(delivery.git(b,'status','--porcelain','--untracked-files=all'),before)
-        self.assertEqual((b/'work/untracked.txt').read_text(),'Never auto-commit this')
+        self.assertEqual((b/'work/untracked.txt').read_text(encoding="utf-8"),'Never auto-commit this')
         self.assertFalse((b/'work/shared.txt').exists())
 
     def test_diverged_keeps_both_committed_histories(self):
@@ -66,7 +66,7 @@ class Preflight(Fixture):
         blocked=self.cli('preflight',root=b,success=False)
         self.assertIn('diverged',blocked['reason'])
         self.assertEqual(delivery.git(b,'rev-parse','HEAD'),before)
-        self.assertEqual((b/'work/b.txt').read_text(),'B')
+        self.assertEqual((b/'work/b.txt').read_text(encoding="utf-8"),'B')
         self.assertFalse((b/'work/a.txt').exists())
 
     def test_offline_reports_local_snapshot_without_freshness(self):
@@ -132,10 +132,10 @@ class Preflight(Fixture):
         head=delivery.git(self.root,'rev-parse','HEAD')
         self.assertIn('not configured',self.cli('preflight',success=False)['reason'])
         remote,a,b=self.common_after_seed()
-        marker=b/'.git/MERGE_HEAD';marker.write_text(head+'\n')
+        marker=b/'.git/MERGE_HEAD';marker.write_text(head+'\n', encoding="utf-8")
         blocked=self.cli('preflight',root=b,success=False)
         self.assertEqual(blocked['operation'],'MERGE_HEAD')
-        self.assertEqual(marker.read_text(),head+'\n')
+        self.assertEqual(marker.read_text(encoding="utf-8"),head+'\n')
         delivery.git(a,'checkout','--detach',head)
         self.assertIn('Detached',self.cli('preflight',root=a,success=False)['reason'])
         self.assertEqual(delivery.git(a,'rev-parse','HEAD'),head)
@@ -149,15 +149,15 @@ class Preflight(Fixture):
 
     def test_ignored_local_file_cannot_be_overwritten_by_fast_forward(self):
         remote,a,b=self.common()
-        (b/'.local').mkdir();(b/'.local/preserved.txt').write_text('Untracked ignored personal work')
-        (a/'.local').mkdir();(a/'.local/preserved.txt').write_text('Tracked collision')
+        (b/'.local').mkdir();(b/'.local/preserved.txt').write_text('Untracked ignored personal work', encoding="utf-8")
+        (a/'.local').mkdir();(a/'.local/preserved.txt').write_text('Tracked collision', encoding="utf-8")
         delivery.git(a,'add','-f','.local/preserved.txt')
         delivery.git(a,'commit','-m','Synthetic ignored-path collision')
         delivery.deliver(a,str(remote))
         head=delivery.git(b,'rev-parse','HEAD')
         blocked=self.cli('preflight',root=b,success=False)
         self.assertIn('Fast-forward refused',blocked['reason'])
-        self.assertEqual((b/'.local/preserved.txt').read_text(),'Untracked ignored personal work')
+        self.assertEqual((b/'.local/preserved.txt').read_text(encoding="utf-8"),'Untracked ignored personal work')
         self.assertEqual(delivery.git(b,'rev-parse','HEAD'),head)
 
 

@@ -64,7 +64,7 @@ def update(root, release, destination):
     if target == metadata["installed"]:
         return {"status": "already-installed", "candidate": str(candidate), "target": target}
     require(git(candidate, "merge-base", "--is-ancestor", metadata["installed"], previous_head, check=False).returncode == 0, "company lost template ancestry")
-    protected = {str(p.relative_to(candidate)): digest(p) for directory in ["company", "work"] for p in Path(candidate, directory).rglob("*") if p.is_file()}
+    protected = {p.relative_to(candidate).as_posix(): digest(p) for directory in ["company", "work"] for p in Path(candidate, directory).rglob("*") if p.is_file()}
     changes = git(candidate, "diff", "--name-only", metadata["installed"], target).splitlines()
     require(not any(p.startswith(("company/", "work/")) for p in changes), "release changes company-owned paths; separate adaptation decision required")
     merged = git(candidate, "merge", "--no-ff", "--no-commit", target, check=False)
@@ -137,21 +137,78 @@ def backup(root, destination):
 
 
 def restore(backup_path, destination):
+    """Read legacy schema1 archives without trusting tar extraction or checkout EOL."""
+    import platform_runtime as platform
     backup_path, destination = Path(backup_path).resolve(), Path(destination).resolve()
     require(not destination.exists(), "restore cannot overwrite existing company")
     manifest = load(backup_path / "manifest.json")
+    require(manifest.get("schema_version") == 1 and isinstance(manifest.get("files"), dict), "unsupported backup manifest")
     require(digest(backup_path / "history.bundle") == manifest["bundle_sha256"] and digest(backup_path / "files.tar") == manifest["tar_sha256"], "backup corrupted")
-    git(backup_path, "clone", str(backup_path / "history.bundle"), str(destination))
+    files = manifest["files"]
+    try: platform.path_collisions(files)
+    except ValueError as exc: require(False, str(exc))
+    require(not any(p.split('/')[0] in {'.git', '.local', '.venv'} for p in files), "backup contains control/runtime paths")
+    # Validate complete tar inventory before any destination writes.
+    with tarfile.open(backup_path / "files.tar", "r") as archive:
+        members = archive.getmembers()
+        require(len(members) == len(files) and len({m.name for m in members}) == len(members) and {m.name for m in members} == set(files), "backup archive inventory differs")
+        for member in members:
+            item = files[member.name]
+            if "symlink" in item:
+                require(set(item) == {"symlink"} and member.issym() and member.linkname == item["symlink"], "backup projection differs")
+            else:
+                require(set(item) == {"sha256"} and member.isfile(), "backup file must be regular")
+                with archive.extractfile(member) as stream:
+                    checksum = hashlib.file_digest(stream, 'sha256').hexdigest()
+                require(checksum == item['sha256'], "backup archived bytes differ")
+    git(backup_path, "clone", "--no-checkout", "-c", "core.autocrlf=false", str(backup_path / "history.bundle"), str(destination))
     require(git(destination, "rev-parse", "HEAD") == manifest["head"], "restore version differs")
-    # Git reconstructs the files and safe declared projections; tar isn't blindly extracted.
-    for relative, item in manifest["files"].items():
-        file = Path(destination, relative)
-        if "symlink" in item:
-            require(file.is_symlink() and str(file.readlink()) == item["symlink"] and file.resolve().is_relative_to(destination.resolve()), "restored projection unsafe")
+    inventory = {}
+    for row in git(destination, 'ls-tree', '-r', '-z', 'HEAD', binary=True).split(b'\x00'):
+        if row:
+            header, relative = row.split(b'\t', 1)
+            mode, kind, oid = header.decode('ascii').split()
+            inventory[relative.decode('utf-8')] = (mode, kind, oid)
+    require(set(inventory) == set(files), "backup manifest differs from tracked Git paths")
+    projections = {}
+    for relative, (mode, kind, oid) in inventory.items():
+        require(kind == 'blob' and mode in {'100644', '100755', '120000'}, "backup mode unsupported")
+        item = files[relative]
+        if mode == '120000':
+            import re
+            match = re.fullmatch(r'\.(?:agents|claude)/skills/([a-z][a-z0-9-]{1,63})', relative)
+            require(match is not None, "backup noncanonical projection")
+            expected = '../../skills/' + match[1]
+            raw = git(destination, 'cat-file', 'blob', oid, binary=True)
+            require(raw == expected.encode() and 'skills/' + match[1] + '/SKILL.md' in files, "backup projection target changed")
+            require(item == {'symlink': expected} or item == {'sha256': hashlib.sha256(raw).hexdigest()}, "backup placeholder changed")
+            projections[relative] = (match[1], expected)
         else:
-            require(path(destination, relative).is_file() and digest(file) == item["sha256"], "restored file differs")
+            require('symlink' not in item, "backup regular mode mismatch")
+    git(destination, 'read-tree', 'HEAD')
+    # Rehydrate exact tracked bytes only, no extractall or archive permissions.
+    with tarfile.open(backup_path / "files.tar", "r") as archive:
+        for relative, item in files.items():
+            if relative in projections:
+                continue
+            target = path(destination, relative)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with archive.extractfile(relative) as source, target.open('xb') as output:
+                shutil.copyfileobj(source, output, 65536)
+            if inventory[relative][0] == '100755':
+                target.chmod(target.stat().st_mode | 0o111)
+            require(digest(target) == item['sha256'], "restored file differs")
+    for relative, (name, expected) in projections.items():
+        file = destination / relative
+        file.parent.mkdir(parents=True, exist_ok=True)
+        if __import__('os').name == 'nt':
+            file.write_bytes(expected.encode())
+            git(destination, 'config', 'core.symlinks', 'false')
+        else:
+            file.symlink_to(expected, target_is_directory=True)
+        platform.projection(destination, relative.rsplit('/', 1)[0], name, allow_absent=False)
     validation.repository(destination, freshness=False)
-    return {"path": str(destination), "status": "restored-and-verified", "head": manifest["head"]}
+    return {"path": str(destination), "status": "restored-and-verified", "head": manifest["head"], "boundary": "exact tracked bytes; native settings/trust may require re-projection at the new root; restored old runtime keeps its original OS limitations"}
 
 
 def rollback(root, destination):
@@ -163,10 +220,10 @@ def rollback(root, destination):
     git(root, "clone", "--no-local", str(Path(root).resolve()), str(candidate))
     identity(candidate)
     current, previous = metadata["installed"], metadata["previous"]
-    protected = {str(p.relative_to(candidate)): digest(p) for d in ["company", "work"] for p in Path(candidate, d).rglob("*") if p.is_file()}
-    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "hooks", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude/skills", ".gitignore", "requirements.txt", "docs/company-system-guide.html", check=False)
+    protected = {p.relative_to(candidate).as_posix(): digest(p) for d in ["company", "work"] for p in Path(candidate, d).rglob("*") if p.is_file()}
+    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "hooks", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude/skills", ".gitignore", "requirements.txt", ".gitattributes", "docs/company-system-guide.html", check=False)
     require(delta.returncode == 0, "rollback diff unavailable")
-    patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, text=True, capture_output=True, env=git_environment())
+    patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, text=True, encoding="utf-8", capture_output=True, env=git_environment())
     if patch.returncode:
         return {"status": "conflict", "candidate": str(candidate), "next_action": "Preserve local methods and resolve reverse patch"}
     require(all(path(candidate, r).is_file() and digest(path(candidate, r)) == sha for r, sha in protected.items()), "rollback touched company data")
@@ -250,10 +307,10 @@ def proposal_candidate(root, package, product_root, product_remote, destination)
         standards = [f for f in approved["files"] if f.startswith("standards/")]
         if standards:
             index = destination / "template/standards/README.md"
-            text = index.read_text() if index.exists() else "# Карта стандартов\n\n"
+            text = index.read_text(encoding="utf-8") if index.exists() else "# Карта стандартов\n\n"
             for relative in standards:
                 text += f"- [{Path(relative).stem}]({Path(relative).name}) — proposal, maintainer acceptance pending\n"
-            index.write_text(text)
+            index.write_text(text, encoding="utf-8")
             changed.append("template/standards/README.md")
         # This process uses its trusted validator/handler allowlist, not donated
         # scripts. New executable contracts still require maintainer review.

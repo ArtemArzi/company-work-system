@@ -49,7 +49,7 @@ class Consistency(Fixture):
         self.seed(); original_head = delivery.git(self.root, 'rev-parse', 'HEAD')
         alien_index = self.base / 'foreign.index'
         alien_index.write_bytes((self.root / '.git/index').read_bytes()); before = digest(alien_index)
-        f = self.root / 'README.md'; f.write_text(f.read_text() + '\nPermitted result\n')
+        f = self.root / 'README.md'; f.write_text(f.read_text(encoding="utf-8") + '\nPermitted result\n', encoding="utf-8")
         with patch.dict(os.environ, {'GIT_INDEX_FILE': str(alien_index)}):
             head = delivery.commit(self.root, ['README.md'], 'Scoped result')
         self.assertNotEqual(head, original_head); self.assertEqual(digest(alien_index), before)
@@ -72,7 +72,7 @@ class Consistency(Fixture):
         cache = self.root / '.system/cache/graph.json'; cache.parent.mkdir(parents=True)
         for malformed in ['{', '[]', '{"schema_version":99}']:
             with self.subTest(cache=malformed):
-                cache.write_text(malformed)
+                cache.write_text(malformed, encoding="utf-8")
                 self.assertEqual(len(knowledge.search(self.root, 'needle')['hits']), 1)
                 self.assertEqual(load(cache), knowledge.build(self.root))
         data = load(file); data['material'] = 'company/sources/missing.txt'; write(file, data)
@@ -109,7 +109,7 @@ class EvolutionConsistency(GitAcceptance):
         p, release = self.product_release(); company = self.base / 'client'
         lifecycle.create(release, company, 'client-company', 'test-owner')
         previous = load(company / '.system/base.json')['installed']; head = delivery.git(company, 'rev-parse', 'HEAD')
-        f = p / 'template/standards/runtime.md'; f.write_text(f.read_text() + '\nSynthetic compatible update\n')
+        f = p / 'template/standards/runtime.md'; f.write_text(f.read_text(encoding="utf-8") + '\nSynthetic compatible update\n', encoding="utf-8")
         delivery.git(p, 'add', 'template'); delivery.git(p, 'commit', '-m', 'Synthetic update')
         import product
         product.release(p, release); target = delivery.git(release, 'rev-parse', 'main')
@@ -132,8 +132,8 @@ class EvolutionConsistency(GitAcceptance):
             lifecycle.backup(company, 'relative-backup')
             lifecycle.restore('relative-backup', 'relative-restored')
             guide = p / 'template/docs/company-system-guide.html'; original_guide = digest(guide)
-            guide.write_text(guide.read_text() + '\n<!-- Synthetic release guide change -->\n')
-            f = p / 'template/standards/runtime.md'; f.write_text(f.read_text() + '\nSynthetic compatible addition\n')
+            guide.write_text(guide.read_text(encoding="utf-8") + '\n<!-- Synthetic release guide change -->\n', encoding="utf-8")
+            f = p / 'template/standards/runtime.md'; f.write_text(f.read_text(encoding="utf-8") + '\nSynthetic compatible addition\n', encoding="utf-8")
             delivery.git(p, 'add', 'template'); delivery.git(p, 'commit', '-m', 'Synthetic addition')
             import product
             product.release(p, release)
@@ -171,7 +171,7 @@ class EvolutionConsistency(GitAcceptance):
         operations.incident(company, 'blocked-task', 'missing data', 'data available', 'request data')
         delivery.commit(company, ['work/blocked-task/task.json'], 'Record blocked work')
         head = delivery.git(company, 'rev-parse', 'HEAD')
-        f = p / 'template/standards/runtime.md'; f.write_text(f.read_text() + '\nSynthetic compatible addition\n')
+        f = p / 'template/standards/runtime.md'; f.write_text(f.read_text(encoding="utf-8") + '\nSynthetic compatible addition\n', encoding="utf-8")
         delivery.git(p, 'add', 'template'); delivery.git(p, 'commit', '-m', 'Synthetic addition')
         import product
         product.release(p, release); target = delivery.git(release, 'rev-parse', 'main')

@@ -61,7 +61,7 @@ class Hooks(unittest.TestCase):
         payload["cwd"] = str(self.root / "company")
         payload["tool_input"]["file_path"] = "projects/test.md"
         self.assertEqual(hooks._changes(self.root, payload)[0]["path"], "company/projects/test.md")
-        file = self.root / "company/projects/test.md"; file.write_text("old once")
+        file = self.root / "company/projects/test.md"; file.write_text("old once", encoding="utf-8")
         value = {"tool_name": "Edit", "tool_input": {"file_path": str(file), "old_string": "old", "new_string": "new"}}
         self.assertEqual(hooks._changes(self.root, value)[0]["content"], "new once")
         patch = {"tool_name": "apply_patch", "tool_input": {"command": "*** Begin Patch\n*** Add File: standards/new-standard.md\n+# Literal\n*** End Patch"}}
@@ -109,7 +109,7 @@ class Hooks(unittest.TestCase):
         self.assertFalse((self.root / ".codex/hooks.json").exists())
 
     def test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed(self):
-        content = (self.root / "skills/company-context/SKILL.md").read_text()
+        content = (self.root / "skills/company-context/SKILL.md").read_text(encoding="utf-8")
         for relative in ["work/misplaced/SKILL.md", "skills/duplicate/SKILL.md"]:
             with self.subTest(relative=relative):
                 result = hooks.dispatch(self.root, "common", "PreToolUse", self.write_payload(relative, content))
@@ -122,7 +122,7 @@ class Hooks(unittest.TestCase):
     def test_add_patch_and_edit_use_shared_validator(self):
         payload = {"tool_name": "apply_patch", "tool_input": {"command": "*** Begin Patch\n*** Add File: standards/not-the-id.md\n" + "\n".join("+" + line for line in self.standard().splitlines()) + "\n*** End Patch"}}
         self.assertEqual(hooks.dispatch(self.root, "common", "PreToolUse", payload)["status"], "proved-violation")
-        relative = "standards/new-standard.md"; (self.root / relative).write_text(self.standard())
+        relative = "standards/new-standard.md"; (self.root / relative).write_text(self.standard(), encoding="utf-8")
         payload = {"tool_name": "Edit", "tool_input": {"file_path": relative, "old_string": "new-standard", "new_string": "wrong-id"}}
         self.assertEqual(hooks.dispatch(self.root, "common", "PreToolUse", payload)["status"], "proved-violation")
 
@@ -132,18 +132,18 @@ class Hooks(unittest.TestCase):
 
     def test_post_write_missing_map_advisory_and_linked_positive(self):
         relative = "standards/new-standard.md"; content = self.standard()
-        (self.root / relative).write_text(content)
+        (self.root / relative).write_text(content, encoding="utf-8")
         result = hooks.dispatch(self.root, "common", "PostToolUse", self.write_payload(relative, content))
         self.assertEqual(result["status"], "advisory", result)
         self.assertIn("map", " ".join(result["messages"]).lower())
-        index = self.root / "standards/README.md"; index.write_text(index.read_text() + "\n[New](new-standard.md)\n")
+        index = self.root / "standards/README.md"; index.write_text(index.read_text(encoding="utf-8") + "\n[New](new-standard.md)\n", encoding="utf-8")
         result = hooks.dispatch(self.root, "common", "PostToolUse", self.write_payload(relative, content))
         self.assertNotIn("map", " ".join(result["messages"]).lower())
         self.assertNotIn("permissionDecision", json.dumps(hooks.native_output("PostToolUse", result)))
 
     def test_post_write_reads_actual_bytes_instead_of_proposed_payload(self):
         relative = "standards/new-standard.md"; file = self.root / relative
-        file.write_text("Actual incomplete write without frontmatter")
+        file.write_text("Actual incomplete write without frontmatter", encoding="utf-8")
         result = hooks.dispatch(self.root, "common", "PostToolUse", self.write_payload(relative, self.standard()))
         self.assertIn("missing frontmatter", " ".join(result["messages"]))
         self.assertEqual(result["status"], "advisory")
@@ -204,7 +204,7 @@ class Hooks(unittest.TestCase):
         self.assertTrue(result["legacy_migration"])
         self.assertEqual(proof.read_bytes(), old)
         self.assertEqual(legacy.read_bytes(), old)
-        legacy.write_text("{malformed ignored legacy")
+        legacy.write_text("{malformed ignored legacy", encoding="utf-8")
         original_load = hooks.bounded_load
         def forbid_legacy(file):
             self.assertNotEqual(file, legacy, "new proof must prevent legacy reads")
@@ -237,9 +237,9 @@ class Hooks(unittest.TestCase):
         self.assertEqual(hooks.project(self.root, "claude", apply=True, enabled=True)["status"], "conflict")
         self.assertEqual(target.read_bytes(), before_target); self.assertEqual(legacy.read_bytes(), before_legacy)
         self.assertFalse(proof.exists())
-        legacy.write_text("{malformed")
+        legacy.write_text("{malformed", encoding="utf-8")
         self.assertEqual(hooks.project(self.root, "claude", apply=True, enabled=True)["status"], "conflict")
-        self.assertEqual(legacy.read_text(), "{malformed"); self.assertEqual(target.read_bytes(), before_target)
+        self.assertEqual(legacy.read_text(encoding="utf-8"), "{malformed"); self.assertEqual(target.read_bytes(), before_target)
 
     def test_interruption_between_settings_and_proof_detectable_on_retry(self):
         proof = self.root / ".system/hooks-project-codex.json"
@@ -267,9 +267,9 @@ class Hooks(unittest.TestCase):
     def test_malformed_native_settings_preserved_as_conflict(self):
         file = self.root / ".claude/settings.json"; file.parent.mkdir(exist_ok=True)
         for raw in ["{bad", "[]", '{"hooks":{"Stop":"wrong"}}', '{"hooks":{"Stop":[{"matcher":"x"}]}}']:
-            file.write_text(raw)
+            file.write_text(raw, encoding="utf-8")
             self.assertEqual(hooks.project(self.root, "claude", apply=True, enabled=True)["status"], "conflict")
-            self.assertEqual(file.read_text(), raw)
+            self.assertEqual(file.read_text(encoding="utf-8"), raw)
 
     def test_concurrent_foreign_settings_edit_not_overwritten(self):
         file = self.root / ".claude/settings.json"; write(file, {"other": "initial"})
@@ -286,7 +286,7 @@ class Hooks(unittest.TestCase):
     def test_code_dependency_change_invalidates_command_and_old_dispatch(self):
         old = hooks.definition_hash(self.root, "codex")
         hooks.project(self.root, "codex", apply=True, enabled=True)
-        file = self.root / "scripts/core.py"; file.write_text(file.read_text() + "\n# changed helper\n")
+        file = self.root / "scripts/core.py"; file.write_text(file.read_text(encoding="utf-8") + "\n# changed helper\n", encoding="utf-8")
         self.assertNotEqual(hooks.definition_hash(self.root, "codex"), old)
         with self.assertRaisesRegex(Rejected, "fingerprint changed"):
             hooks.dispatch(self.root, "codex", "SessionStart", {}, definition_hash_expected=old)
@@ -324,7 +324,7 @@ class Hooks(unittest.TestCase):
     def test_native_timeout_explicit_failure_without_stop_block(self):
         self.enable()
         file = self.root / "scripts/hooks.py"
-        file.write_text(file.read_text().replace("    start = time.monotonic()", "    time.sleep(4)\n    start = time.monotonic()", 1))
+        file.write_text(file.read_text(encoding="utf-8").replace("    start = time.monotonic()", "    time.sleep(4)\n    start = time.monotonic()", 1), encoding="utf-8")
         value = self.native("claude", "Stop", {})
         self.assertEqual(value.returncode, 1)
         self.assertIn("TimeoutError", json.loads(value.stdout)["systemMessage"])
@@ -342,7 +342,7 @@ class Hooks(unittest.TestCase):
         with self.assertRaisesRegex(Rejected, "stale"): hooks.dispatch(self.root, "common", "Stop", {"task_revision": 0}, "test-task")
         output = hooks.native_output("Stop", first)
         self.assertEqual(set(output), {"systemMessage"})
-        cache = (self.root / ".system/cache/hooks-continuation.json").read_text()
+        cache = (self.root / ".system/cache/hooks-continuation.json").read_text(encoding="utf-8")
         self.assertNotIn("Read current input", cache)
 
     def test_interrupt_subagent_recursive_stop_never_continues(self):
@@ -363,7 +363,7 @@ class Hooks(unittest.TestCase):
 
     def test_method_impact_only_explicit_dependencies_and_publication_hint(self):
         self.task()
-        payload = self.write_payload("standards/task-validation.md", (self.root / "standards/task-validation.md").read_text())
+        payload = self.write_payload("standards/task-validation.md", (self.root / "standards/task-validation.md").read_text(encoding="utf-8"))
         result = hooks.dispatch(self.root, "common", "method-impact", payload)
         self.assertEqual(result["impact"][0]["task"], "test-task")
         result = hooks.dispatch(self.root, "common", "method-impact", self.write_payload("standards/unrelated.md", self.standard("unrelated")))
@@ -392,7 +392,7 @@ class Hooks(unittest.TestCase):
         hooks.project(self.root, "codex", apply=True, enabled=True)
         target = self.root / ".codex/hooks.json"; proof = self.root / ".system/hooks-project-codex.json"
         before_target = target.read_bytes(); before_proof = proof.read_bytes()
-        method = self.root / "scripts/core.py"; method.write_text(method.read_text() + "\n# method update awaiting projection\n")
+        method = self.root / "scripts/core.py"; method.write_text(method.read_text(encoding="utf-8") + "\n# method update awaiting projection\n", encoding="utf-8")
         original_hash = hooks.definition_hash
         calls = 0
         def revoke(root, harness):
@@ -441,12 +441,12 @@ class Hooks(unittest.TestCase):
     def test_product_root_routes_development_and_template_paths(self):
         product = Path(self.tmp.name) / "main product"
         product.mkdir(); shutil.move(str(self.root), product / "template")
-        (product / "AGENTS.md").write_text("# Product\n")
+        (product / "AGENTS.md").write_text("# Product\n", encoding="utf-8")
         (product / ".git").mkdir()
-        (product / "scripts").mkdir(); (product / "scripts/product.py").write_text("# Product route marker\n")
+        (product / "scripts").mkdir(); (product / "scripts/product.py").write_text("# Product route marker\n", encoding="utf-8")
         (product / "docs/development/work/2026-10-06-hooks").mkdir(parents=True)
-        (product / "docs/development/PLAN.md").write_text("# Plan\n")
-        (product / "docs/development/work/2026-10-06-hooks/task.md").write_text("# Existing owner\n")
+        (product / "docs/development/PLAN.md").write_text("# Plan\n", encoding="utf-8")
+        (product / "docs/development/work/2026-10-06-hooks/task.md").write_text("# Existing owner\n", encoding="utf-8")
         result = hooks.dispatch(product, "common", "SessionStart", {}, "2026-10-06-hooks")
         self.assertIn("docs/development/work/2026-10-06-hooks/task.md", result["messages"][0])
         self.assertFalse((product / "work").exists())

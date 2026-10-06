@@ -1,8 +1,7 @@
 schema_version: 1
-id: claude-explicit-file-read-linux
+id: claude-explicit-file-read
 harness: claude
 mode: explicit-file-read
-os: Linux
 detected_version: 2.1.289
 native_execution:
   status: blocked-by-expired-OAuth; execution unverified
@@ -12,12 +11,13 @@ native_discovery: unverified
 native_memory: optional; never canonical
 capabilities:
   rules:
-    mechanism: explicit AGENTS.md read
+    mechanism: AGENTS.md native >=2.1.277 when not shadowed; explicit read fallback
     status: common-code tested; harness-specific limits remain
-    fallback: stop if inaccessible
+    fallback: explicit read; do not add duplicate CLAUDE.md
     scenario: new session reads canonical map
   skills:
-    mechanism: canonical skill; Linux relative symlink projection
+    mechanism: canonical skills; validated relative symlink or explicit-read fallback
+      with absent/exact Git placeholder
     status: common-code tested; harness-specific limits remain
     fallback: explicit canonical read
     scenario: same recipe and relative resources
@@ -42,7 +42,8 @@ capabilities:
     fallback: same CLI
     scenario: known bad result rejected
   hooks:
-    mechanism: canonical hooks/manifest.yaml + fixed scripts/hooks.py + project-local projection
+    mechanism: canonical hooks/manifest.yaml + fixed scripts/hooks.py + project-local
+      projection
     status: common-code-tested; native-unverified; disabled by default
     fallback: shared CLI hooks-check and mandatory validation/publication checks
     scenario: six scenarios; exact ownership/fingerprint; failure never grants authority
@@ -83,13 +84,51 @@ capabilities:
     scenario: local methods/data survive update/restore
 common_core: Local behavioral acceptance uses the same canonical procedures/validators
   for both projections; this is not native Claude execution
-
 hook_protocol:
-  fixture_contract: command JSON stdin; event-specific JSON stdout; schema reviewed 2026-10-06
+  fixture_contract: command JSON stdin; event-specific JSON stdout; schema reviewed
+    2026-10-06
   observed_version: 2.1.289
   source: https://code.claude.com/docs/en/hooks
   native_status: unverified
   activation: explicit company/config.yaml hooks.enabled; false by default
   projection: .claude/settings.json
   trust: project settings/access reviewed by owner; expired OAuth remains blocker
-  ownership_proof: .system/hooks-project-claude.json; tracked company-owned derived state
+  ownership_proof: .system/hooks-project-claude.json; tracked company-owned derived
+    state
+platforms:
+  linux:
+    runtime: verification-pending
+    instructions: explicit AGENTS.md read
+    native_discovery: unverified
+    native_hooks: unverified; default off
+    provider_access: verify per company/session
+  wsl2:
+    runtime: verification-pending
+    instructions: explicit AGENTS.md read
+    native_discovery: unverified
+    native_hooks: unverified; default off
+    provider_access: verify per company/session
+  macos:
+    runtime: verification-pending
+    instructions: explicit AGENTS.md read
+    native_discovery: unverified
+    native_hooks: unverified; default off
+    provider_access: verify per company/session
+  windows:
+    runtime: verification-pending
+    instructions: explicit AGENTS.md read
+    native_discovery: unverified
+    native_hooks: unverified; default off
+    provider_access: verify per company/session
+  cloud:
+    runtime: verification-pending
+    instructions: explicit AGENTS.md read
+    native_discovery: unverified
+    native_hooks: command hooks unavailable under cloud orchestration; shared CLI
+      fallback
+    provider_access: verify per company/session
+bootstrap:
+  entry: scripts/run.ps1 setup on Windows; scripts/run.sh setup on POSIX
+  source: scripts/bootstrap.lock
+  scope: project-local runtime/.venv only; explicit setup permits download
+  git: required separately; install only within actual rights

@@ -1,0 +1,15 @@
+# Preserve exact business inputs, results, task evidence and native settings.
+* -text -filter
+# Only shared method sources have a declared LF text representation.
+/scripts/** text eol=lf
+/standards/** text eol=lf
+/skills/** text eol=lf
+/workflows/** text eol=lf
+/adapters/** text eol=lf
+/hooks/** text eol=lf
+/README.md text eol=lf
+/AGENTS.md text eol=lf
+/requirements.txt text eol=lf
+/release.yaml text eol=lf
+/.gitignore text eol=lf
+/.gitattributes text eol=lf

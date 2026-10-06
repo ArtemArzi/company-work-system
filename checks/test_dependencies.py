@@ -17,8 +17,8 @@ class Dependencies(fixtures.Fixture):
         cfg['sources']['unrelated-source'] = {'type': 'export', 'path': 'elsewhere', 'account': 'other'}
         cfg['profiles']['claude'] = 'other-profile'
         write(self.root/'company/config.yaml', cfg)
-        file = self.root/'adapters/claude/README.md'; file.write_text(file.read_text()+'\nUnrelated change\n')
-        file = self.root/'skills/company-marketing/SKILL.md'; file.write_text(file.read_text()+'\nUnrelated method\n')
+        file = self.root/'adapters/claude/README.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated change\n', encoding="utf-8")
+        file = self.root/'skills/company-marketing/SKILL.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated method\n', encoding="utf-8")
         self.assertEqual(changed_bindings(self.root, task['bindings'], task['binding_scope']), [])
         verified = operations.execute(self.root, task['id'], self.artifact(), self.critical())
         self.assertEqual(verified['status'], 'verified')
@@ -97,7 +97,7 @@ class Dependencies(fixtures.Fixture):
 
     def test_legacy_read_and_resume_preserve_scope_history(self):
         task = self.task(); previous = copy.deepcopy(task)
-        file=self.root/'standards/data-access.md';file.write_text(file.read_text()+'\nChanged selected rule\n')
+        file=self.root/'standards/data-access.md';file.write_text(file.read_text(encoding="utf-8")+'\nChanged selected rule\n', encoding="utf-8")
         current=operations.decide(self.root,task['id'],task['revision'],'resume','Accept changed rule','test-owner')
         self.assertEqual(current['history'][-1]['detail']['previous_dependencies']['binding_scope'],previous['binding_scope'])
         self.assertNotEqual(current['bindings']['standards/data-access.md'],previous['bindings']['standards/data-access.md'])

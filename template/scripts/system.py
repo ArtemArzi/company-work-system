@@ -5,6 +5,13 @@ import argparse
 import json
 from pathlib import Path
 import sys
+# Keep doctor available before third-party dependencies exist.
+if __name__ == "__main__" and (sys.argv[1:] == ["doctor"] or len(sys.argv) == 4 and sys.argv[1] == "--root" and sys.argv[3] == "doctor"):
+    from doctor import diagnose
+    target = Path(sys.argv[2]) if len(sys.argv) == 4 else Path(__file__).resolve().parents[1]
+    report = diagnose(target)
+    print(json.dumps(report, ensure_ascii=True, indent=2))
+    raise SystemExit(2 if report["blockers"] else 0)
 from core import load, require
 import delivery
 import operations
@@ -15,6 +22,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
     sub = parser.add_subparsers(dest="command", required=True)
+    sub.add_parser("doctor")
     sub.add_parser("validate")
     sub.add_parser("self-test")
     p = sub.add_parser("preflight"); p.add_argument("--remote"); p.add_argument("--branch", default="main")
@@ -47,6 +55,9 @@ def main():
     args = parser.parse_args()
     root = args.root.resolve()
     c = args.command
+    if c == "doctor":
+        from doctor import diagnose
+        return diagnose(root)
     if c == 'source-read':
         import connectors
     if c in {'search', 'kb-read'}:

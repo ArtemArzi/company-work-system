@@ -92,11 +92,15 @@ class History(unittest.TestCase):
         with self.assertRaisesRegex(Rejected,'credential-like'):history.scan(self.root,self.policy)
 
     def test_noncanonical_names_modes_and_symlinks(self):
-        self.commit('public/new\nline.md')
+        # Malformed Git paths must be testable without creating a Windows-invalid file.
+        import subprocess
+        blob = subprocess.run(['git', '-C', str(self.root), 'hash-object', '-w', '--stdin'], input=b'Synthetic', capture_output=True, check=True, env=delivery.git_environment()).stdout.decode().strip()
+        delivery.git(self.root, 'update-index', '--add', '--cacheinfo', '100644', blob, 'public/new\nline.md')
+        delivery.git(self.root, 'commit', '-m', 'Synthetic invalid Git path')
         with self.assertRaisesRegex(Rejected,'control character'):history.scan(self.root,self.policy)
         other=self.root.parent/'symlink';other.mkdir();delivery.git(other,'init','-b','main');delivery.identity(other)
-        (other/'skills/test-skill').mkdir(parents=True);(other/'skills/test-skill/SKILL.md').write_text('Synthetic')
-        (other/'.agents/skills').mkdir(parents=True);(other/'.agents/skills/test-skill').symlink_to('../../skills/test-skill')
+        (other/'skills/test-skill').mkdir(parents=True);(other/'skills/test-skill/SKILL.md').write_text('Synthetic', encoding="utf-8")
+        (other/'.agents/skills').mkdir(parents=True);(other/'.agents/skills/test-skill').symlink_to('../../skills/test-skill', target_is_directory=True)
         delivery.git(other,'add','.');delivery.git(other,'commit','-m','Canonical projection')
         history.scan(other,history.release_policy())
         (other/'skills/outside').symlink_to('/etc/passwd');delivery.git(other,'add','.');delivery.git(other,'commit','-m','Bad projection')
@@ -111,9 +115,9 @@ class History(unittest.TestCase):
         with self.assertRaisesRegex(Rejected,'replace refs'):history.scan(self.root,self.policy)
 
     def test_shallow_and_alternate_store_rejected(self):
-        head=self.commit();file=self.root/'.git/shallow';file.write_text(head+'\n')
+        head=self.commit();file=self.root/'.git/shallow';file.write_text(head+'\n', encoding="utf-8")
         with self.assertRaisesRegex(Rejected,'incomplete'):history.scan(self.root,self.policy)
-        file.unlink();file=self.root/'.git/objects/info/alternates';file.write_text('/missing\n')
+        file.unlink();file=self.root/'.git/objects/info/alternates';file.write_text('/missing\n', encoding="utf-8")
         with self.assertRaisesRegex(Rejected,'alternate'):history.scan(self.root,self.policy)
 
     def test_truncated_reader_detects_eof(self):
@@ -129,7 +133,7 @@ class History(unittest.TestCase):
         self.commit('README.md');release=self.root.parent/'release.git'
         delivery.git(self.root,'clone','--bare',str(self.root),str(release))
         bad=self.root.parent/'bad-source';bad.mkdir();delivery.git(bad,'init','-b','main');delivery.identity(bad)
-        (bad/'PRIVATE-DEVELOPMENT.md').write_text('Synthetic private development')
+        (bad/'PRIVATE-DEVELOPMENT.md').write_text('Synthetic private development', encoding="utf-8")
         delivery.git(bad,'add','.');delivery.git(bad,'commit','-m','Private fixture history')
         original=fixtures.product.git
         def racing(root,*args,**kwargs):
@@ -145,10 +149,10 @@ class GuardedDelivery(fixtures.Fixture):
     def test_author_new_skill_pair_and_safe_projections_use_common_commit(self):
         self.seed();name='company-local-feature';directory=self.root/'skills'/name
         shutil.copytree(self.root/'skills/company-context',directory)
-        file=directory/'SKILL.md';file.write_text(file.read_text().replace('name: company-context','name: '+name))
+        file=directory/'SKILL.md';file.write_text(file.read_text(encoding="utf-8").replace('name: company-context','name: '+name), encoding="utf-8")
         value=__import__('core').load(directory/'workflow.yaml');value['id']=name;write(directory/'workflow.yaml',value)
-        index=self.root/'skills/README.md';index.write_text(index.read_text()+f'\n[Local feature]({name}/SKILL.md)\n')
-        for relative in ('.agents/skills/','.claude/skills/'):(self.root/relative/name).symlink_to('../../skills/'+name)
+        index=self.root/'skills/README.md';index.write_text(index.read_text(encoding="utf-8")+f'\n[Local feature]({name}/SKILL.md)\n', encoding="utf-8")
+        for relative in ('.agents/skills/','.claude/skills/'):(self.root/relative/name).symlink_to('../../skills/'+name, target_is_directory=True)
         relatives=[f'skills/{name}/SKILL.md',f'skills/{name}/workflow.yaml','skills/README.md',f'.agents/skills/{name}',f'.claude/skills/{name}']
         head=delivery.commit(self.root,relatives,'Share new canonical method through common delivery')
         self.assertEqual(delivery.git(self.root,'show',f'{head}:.agents/skills/{name}'),'../../skills/'+name)
@@ -164,20 +168,20 @@ class GuardedDelivery(fixtures.Fixture):
         delivery.git(self.root,'add','company/config.yaml');delivery.git(self.root,'commit','-m','Approve fixture paths')
 
     def test_rejection_preserves_working_file_and_index(self):
-        self.seed();self.export_policy();file=self.root/'company/projects/secret.md';file.write_text('gh'+'p_'+'A'*35)
+        self.seed();self.export_policy();file=self.root/'company/projects/secret.md';file.write_text('gh'+'p_'+'A'*35, encoding="utf-8")
         before=delivery.git(self.root,'write-tree')
         with self.assertRaises(Rejected):delivery.commit(self.root,['company/projects/secret.md'],'Attempt rejected')
         self.assertEqual(delivery.git(self.root,'write-tree'),before);self.assertTrue(file.exists())
 
     def test_preview_tree_uses_owned_index_and_safe_commit_passes(self):
-        self.seed();self.export_policy();file=self.root/'company/README.md';file.write_text(file.read_text()+'\nSynthetic allowed change\n')
+        self.seed();self.export_policy();file=self.root/'company/README.md';file.write_text(file.read_text(encoding="utf-8")+'\nSynthetic allowed change\n', encoding="utf-8")
         before=delivery.git(self.root,'write-tree');candidate=history.preview_tree(self.root,['company/README.md'],delivery.git(self.root,'rev-parse','HEAD'))
         self.assertNotEqual(candidate,before);self.assertEqual(delivery.git(self.root,'write-tree'),before)
         head=delivery.commit(self.root,['company/README.md'],'Allowed fixture change')
         self.assertEqual(delivery.git(self.root,'rev-parse','HEAD'),head)
 
     def test_concurrent_policy_change_before_index_blocks(self):
-        self.seed();self.export_policy();file=self.root/'company/README.md';file.write_text(file.read_text()+'\nAllowed candidate\n')
+        self.seed();self.export_policy();file=self.root/'company/README.md';file.write_text(file.read_text(encoding="utf-8")+'\nAllowed candidate\n', encoding="utf-8")
         old=delivery.git(self.root,'write-tree');scan=history.scan
         def race(*args,**kwargs):
             result=scan(*args,**kwargs);cfg=config(self.root);cfg['export']['approved_by']='different-owner';write(self.root/'company/config.yaml',cfg);return result
@@ -186,14 +190,14 @@ class GuardedDelivery(fixtures.Fixture):
         self.assertEqual(delivery.git(self.root,'write-tree'),old)
 
     def test_foreign_staged_work_is_preserved(self):
-        self.seed();file=self.root/'company/README.md';file.write_text(file.read_text()+'\nForeign staged bytes\n');delivery.git(self.root,'add','company/README.md')
+        self.seed();file=self.root/'company/README.md';file.write_text(file.read_text(encoding="utf-8")+'\nForeign staged bytes\n', encoding="utf-8");delivery.git(self.root,'add','company/README.md')
         staged=delivery.git(self.root,'write-tree')
         with self.assertRaisesRegex(Rejected,'foreign staged'):delivery.commit(self.root,['release.yaml'],'Must stop')
         self.assertEqual(delivery.git(self.root,'write-tree'),staged)
 
     def test_index_race_before_actual_staging_preserves_foreign_bytes(self):
-        self.seed();file=self.root/'company/README.md';file.write_text(file.read_text()+'\nOwn candidate\n')
-        other=self.root/'release.yaml';other.write_text(other.read_text()+'\n# Foreign bytes\n')
+        self.seed();file=self.root/'company/README.md';file.write_text(file.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
+        other=self.root/'release.yaml';other.write_text(other.read_text(encoding="utf-8")+'\n# Foreign bytes\n', encoding="utf-8")
         preview=history.preview_tree;seen=[]
         def racing(*args,**kwargs):
             tree=preview(*args,**kwargs);delivery.git(self.root,'add','release.yaml');seen.append(delivery.git(self.root,'write-tree'));return tree
@@ -204,7 +208,7 @@ class GuardedDelivery(fixtures.Fixture):
 
     def test_head_race_does_not_attach_own_result_to_new_parent(self):
         self.seed();old=delivery.git(self.root,'rev-parse','HEAD')
-        file=self.root/'company/README.md';file.write_text(file.read_text()+'\nOwn candidate\n')
+        file=self.root/'company/README.md';file.write_text(file.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
         preview=history.preview_tree
         def racing(*args,**kwargs):
             tree=preview(*args,**kwargs)
@@ -219,26 +223,26 @@ class GuardedDelivery(fixtures.Fixture):
     def test_commit_lock_cleanup_preserves_consumed_or_replaced_foreign_locks(self):
         admin=self.base/'lock-admin';admin.mkdir()
         with delivery.commit_locks(admin) as index_lock:
-            index_lock.write_text('Own candidate index')
+            index_lock.write_text('Own candidate index', encoding="utf-8")
             delivery.install_commit_index(index_lock,admin/'index')
-            index_lock.write_text('Foreign next actor lock')
+            index_lock.write_text('Foreign next actor lock', encoding="utf-8")
             # Model replacement by an independent actor, without touching its file.
             head=admin/'HEAD.lock';saved=admin/'consumed-own-head-lock';head.rename(saved)
-            head.write_text('Foreign HEAD lock')
-        self.assertEqual((admin/'index.lock').read_text(),'Foreign next actor lock')
-        self.assertEqual((admin/'HEAD.lock').read_text(),'Foreign HEAD lock')
-        self.assertEqual((admin/'index').read_text(),'Own candidate index')
+            head.write_text('Foreign HEAD lock', encoding="utf-8")
+        self.assertEqual((admin/'index.lock').read_text(encoding="utf-8"),'Foreign next actor lock')
+        self.assertEqual((admin/'HEAD.lock').read_text(encoding="utf-8"),'Foreign HEAD lock')
+        self.assertEqual((admin/'index').read_text(encoding="utf-8"),'Own candidate index')
         with self.assertRaisesRegex(Rejected,'concurrent Git operation'):
             with delivery.commit_locks(admin):pass
-        self.assertEqual((admin/'index.lock').read_text(),'Foreign next actor lock')
+        self.assertEqual((admin/'index.lock').read_text(encoding="utf-8"),'Foreign next actor lock')
         clean_admin=self.base/'clean-lock-admin';clean_admin.mkdir()
         with delivery.commit_locks(clean_admin):pass
         self.assertFalse((clean_admin/'index.lock').exists());self.assertFalse((clean_admin/'HEAD.lock').exists())
 
     def test_late_foreign_staging_cannot_enter_checked_commit(self):
         self.seed(); self.export_policy()
-        own=self.root/'company/README.md';own.write_text(own.read_text()+'\nOwn candidate\n')
-        foreign=self.root/'company/projects/foreign.txt';foreign.write_text('Unapproved preserved bytes')
+        own=self.root/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
+        foreign=self.root/'company/projects/foreign.txt';foreign.write_text('Unapproved preserved bytes', encoding="utf-8")
         location=history.repository_location; calls=0; staged=[]
         def racing(*args,**kwargs):
             nonlocal calls
@@ -253,14 +257,14 @@ class GuardedDelivery(fixtures.Fixture):
                 delivery.commit(self.root,['company/README.md'],'Checked candidate only')
         self.assertEqual(delivery.git(self.root,'rev-parse','HEAD'),old)
         self.assertEqual(delivery.git(self.root,'write-tree'),staged[0])
-        self.assertEqual(foreign.read_text(),'Unapproved preserved bytes')
+        self.assertEqual(foreign.read_text(encoding="utf-8"),'Unapproved preserved bytes')
 
     def test_native_hook_tree_change_rejects_before_publication(self):
         self.seed();old=delivery.git(self.root,'rev-parse','HEAD');original=delivery.git
-        own=self.root/'company/README.md';own.write_text(own.read_text()+'\nOwn candidate\n')
+        own=self.root/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
         def changed(root,*args,**kwargs):
             if Path(root)!=self.root and 'commit' in args:
-                extra=Path(root)/'company/projects/native-added.txt';extra.write_text('Native changed candidate')
+                extra=Path(root)/'company/projects/native-added.txt';extra.write_text('Native changed candidate', encoding="utf-8")
                 original(root,'add','company/projects/native-added.txt')
             return original(root,*args,**kwargs)
         with patch.object(delivery,'git',side_effect=changed):
@@ -271,7 +275,7 @@ class GuardedDelivery(fixtures.Fixture):
 
     def test_native_commit_rejection_preserves_original_branch_and_index(self):
         self.seed();old=delivery.git(self.root,'rev-parse','HEAD');tree=delivery.git(self.root,'write-tree');original=delivery.git
-        own=self.root/'company/README.md';own.write_text(own.read_text()+'\nOwn candidate\n')
+        own=self.root/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
         def reject(root,*args,**kwargs):
             if Path(root)!=self.root and 'commit' in args:raise Rejected('Native commit hook rejected fixture')
             return original(root,*args,**kwargs)
@@ -282,7 +286,7 @@ class GuardedDelivery(fixtures.Fixture):
 
     def test_config_drift_after_scratch_commit_blocks_publication(self):
         self.seed();old=delivery.git(self.root,'rev-parse','HEAD');original=delivery.git
-        own=self.root/'company/README.md';own.write_text(own.read_text()+'\nOwn candidate\n')
+        own=self.root/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
         def drift(root,*args,**kwargs):
             value=original(root,*args,**kwargs)
             if Path(root)!=self.root and 'commit' in args:original(self.root,'config','company.fixtureChanged','true')
@@ -295,28 +299,28 @@ class GuardedDelivery(fixtures.Fixture):
     def test_compare_and_swap_preserves_external_new_head(self):
         self.seed();old=delivery.git(self.root,'rev-parse','HEAD');other=self.base/'concurrent-clone'
         delivery.git(self.root,'clone','--no-local',str(self.root),str(other));delivery.identity(other)
-        (other/'company/projects/concurrent.txt').write_text('Concurrent actor')
+        (other/'company/projects/concurrent.txt').write_text('Concurrent actor', encoding="utf-8")
         delivery.git(other,'add','company/projects/concurrent.txt');delivery.git(other,'commit','-m','Concurrent actor')
         foreign=delivery.git(other,'rev-parse','HEAD');delivery.git(self.root,'fetch',str(other),'HEAD')
-        own=self.root/'company/README.md';own.write_text(own.read_text()+'\nOwn candidate\n');original=delivery.git
+        own=self.root/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8");original=delivery.git
         def moved(root,*args,**kwargs):
             if 'update-ref' in args and '--no-deref' in args:original(root,*args[:args.index('update-ref')],'update-ref','--no-deref','refs/heads/main',foreign,old)
             return original(root,*args,**kwargs)
         with patch.object(delivery,'git',side_effect=moved):
             with self.assertRaises(Rejected):delivery.commit(self.root,['company/README.md'],'Must reject moved parent')
         self.assertEqual(delivery.git(self.root,'rev-parse','HEAD'),foreign)
-        self.assertIn('Own candidate',own.read_text())
+        self.assertIn('Own candidate',own.read_text(encoding="utf-8"))
 
     def test_interrupted_index_install_preserves_published_commit_and_old_index(self):
         self.seed();tree=delivery.git(self.root,'write-tree');old=delivery.git(self.root,'rev-parse','HEAD')
-        own=self.root/'company/README.md';own.write_text(own.read_text()+'\nOwn candidate\n')
+        own=self.root/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
         with patch.object(delivery,'install_commit_index',side_effect=OSError('Observed interrupted install')):
             with self.assertRaisesRegex(OSError,'interrupted install'):
                 delivery.commit(self.root,['company/README.md'],'Preserve interruption')
         self.assertNotEqual(delivery.git(self.root,'rev-parse','HEAD'),old)
         self.assertEqual(delivery.git(self.root,'write-tree'),tree)
         self.assertTrue(delivery.git(self.root,'diff','--cached','--name-only'))
-        self.assertIn('Own candidate',own.read_text())
+        self.assertIn('Own candidate',own.read_text(encoding="utf-8"))
         with self.assertRaisesRegex(Rejected,'foreign staged'):
             delivery.commit(self.root,['company/README.md'],'No automatic recovery rewrite')
 
@@ -330,14 +334,14 @@ class GuardedDelivery(fixtures.Fixture):
         self.assertEqual(delivery.git(self.root,'write-tree'),delivery.git(self.root,'rev-parse',initial+'^{tree}'))
         self.assertEqual(delivery.git(self.root,'for-each-ref','--format=%(refname)','refs/worktree'),'')
         linked=self.base/'linked';delivery.git(self.root,'worktree','add','-b','codex/linked',str(linked),initial)
-        own=linked/'company/README.md';own.write_text(own.read_text()+'\nLinked candidate\n')
+        own=linked/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nLinked candidate\n', encoding="utf-8")
         committed=delivery.commit(linked,['company/README.md'],'Linked checked commit')
         self.assertEqual(delivery.git(self.root,'rev-parse','HEAD'),initial)
         self.assertEqual(delivery.git(linked,'write-tree'),delivery.git(linked,'rev-parse',committed+'^{tree}'))
 
     def test_split_sparse_and_relative_hooks_fail_closed(self):
         self.seed();old=delivery.git(self.root,'rev-parse','HEAD')
-        own=self.root/'company/README.md';own.write_text(own.read_text()+'\nOwn candidate\n')
+        own=self.root/'company/README.md';own.write_text(own.read_text(encoding="utf-8")+'\nOwn candidate\n', encoding="utf-8")
         for key,value,reason in [('core.splitIndex','true','split/sparse'),('index.sparse','true','split/sparse'),('core.hooksPath','untracked-hooks','relative native')]:
             with self.subTest(key=key):
                 # Local fixture config is never used for a native commit in this negative.

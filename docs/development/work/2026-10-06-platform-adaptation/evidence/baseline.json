@@ -1,0 +1,14 @@
+{
+  "baseline": "7b38b92",
+  "placeholder_explicit_read": "codex:company-intake: projection missing/changed",
+  "windows_relative_serialization": "template\\standards\\runtime.md",
+  "template_prefix_recognized": false,
+  "native_windows_python": "WindowsApps alias only; not invoked",
+  "local_macOS": "unavailable",
+  "source_only_blockers": [
+    "fcntl lock",
+    "Unix directory fsync",
+    "selector over stdout pipe",
+    "SIGALRM hook main"
+  ]
+}

@@ -7,12 +7,12 @@ def build(root):
     nodes, edges = [], []
     for file in sorted(Path(root, "company/sources").glob("*/source.yaml")):
         meta = load(file)
-        relative = str(file.relative_to(root))
+        relative = file.relative_to(root).as_posix()
         node = {"id": meta["id"], "aliases": meta.get("aliases", []), "path": relative, "sha256": digest(file), "origin": meta["origin"], "status": meta["status"], "text": meta.get("summary", "")}
         if meta.get("material"):
             material = path(root, meta["material"])
             require(material.is_file(), "knowledge material missing")
-            node.update(material=meta["material"], material_sha256=digest(material), text=material.read_text())
+            node.update(material=meta["material"], material_sha256=digest(material), text=material.read_text(encoding="utf-8"))
         nodes.append(node)
         for edge in meta.get("links", []):
             require(edge.get("type") in {"uses", "supports", "supersedes", "related"} and edge.get("level") in {"observation", "hypothesis"}, "unproven/unknown relation")

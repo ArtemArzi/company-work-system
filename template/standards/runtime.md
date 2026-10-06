@@ -1,6 +1,6 @@
 ---
 id: runtime
-version: 4
+version: 5
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
@@ -11,7 +11,7 @@ owner: product-maintainer
 
 Наблюдения application/effect содержат evidence/actor/at/result_sha256 для точного output. Новый результат сбрасывает их в unknown; прежние подтверждения и доставка сохраняются в history. Подтверждение старой версии не переносится на новую.
 
-Одна программа: `python3 scripts/system.py [--root <company>] <operation>`. JSON stdout содержит фактический результат; exit2 и stderr — отказ, не PASS. Python3.12+, PyYAML6.0.1, Git2.43+, Linux flock и relative symlinks. Никаких shell-команд из YAML, собственного scheduler-сервиса или автоматически исполняемых migrations. Нужный метод выбирает агент; CLI выполняет точный известный шаг.
+Одна программа: `python3 scripts/system.py [--root <company>] <operation>`. JSON stdout содержит фактический результат; exit2 и stderr — отказ, не PASS. Python3.12+, PyYAML6.0.1, Git2.43+; выбор ОС/первый запуск — adapters/README.md flock и relative symlinks. Никаких shell-команд из YAML, собственного scheduler-сервиса или автоматически исполняемых migrations. Нужный метод выбирает агент; CLI выполняет точный известный шаг.
 
 | Действие | Команда / нужный вход |
 | --- | --- |
@@ -111,3 +111,11 @@ index install после CAS остаётся visibly dirty: сохранить 
 после fetch и до normal push; false/missing native hook не отменяет guard.
 Release структурно проверяет все refs с отдельным policy; company proof/data
 и development documents туда не допускаются.
+
+## Платформа и точные bytes
+
+Один низкоуровневый stdlib platform_runtime → core → существующие operations. POSIX flock и Windows msvcrt nonblocking lock освобождаются при завершении процесса; lock files не удаляются. Windows и WSL не пишут один checkout одновременно. UTF-8/LF запись заменяет файл атомарно после file fsync; POSIX также fsync parent directory. Windows power-loss durability directory не обещается. Ошибка до replace сохраняет прежние bytes; после replace нужен readback до повтора.
+
+Relative state paths всегда POSIX, unsafe Windows names и case/NFC collisions отклоняются без auto rename. Junction/reparse aliases не являются canonical источниками. Git attributes не нормализуют company/work/raw/evidence/native settings; LF объявлен только для общих методов. Локальные overrides диагностирует doctor; старые hashes/receipts не пересчитывать.
+
+`doctor` читает prerequisites без PyYAML, не пишет и не синхронизирует. Setup отдельно получает закреплённые зависимости в ignored local runtime; повтор не требует загрузки. Источники — bootstrap.lock/requirements.txt; ограничения профилей — adapters. Native hooks имеют bounded process deadline, timeout завершает только их owned процесс, не фонового работника. Основные CLI проверки остаются обязательны.

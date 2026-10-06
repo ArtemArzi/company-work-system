@@ -35,7 +35,7 @@ def git(root, *arguments, check=True, timeout=None, noninteractive=False, binary
         environment["GIT_INDEX_FILE"] = str(private_index)
     if noninteractive:
         environment.update(GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="never")
-    value = subprocess.run(command, capture_output=True, text=not binary, timeout=timeout, env=environment)
+    value = subprocess.run(command, capture_output=True, text=not binary, encoding=None if binary else "utf-8", errors=None if binary else "replace", timeout=timeout, env=environment)
     if check:
         require(value.returncode == 0, "Git operation failed: " + (value.stderr.decode(errors="replace") if binary else value.stderr).strip()[:1500])
     return (value.stdout if binary else value.stdout.strip()) if check else value
@@ -94,7 +94,7 @@ def preflight(root, remote=None, branch="main", authorize=remote_allowed):
     """Receive shared state without staging, publishing or discarding local work."""
     root = Path(root).resolve()
     ident(branch)
-    require(git(root, "rev-parse", "--show-toplevel") == str(root), "preflight requires the repository root")
+    require(Path(git(root, "rev-parse", "--show-toplevel")).resolve() == root, "preflight requires the repository root")
     with lock(scope_root(root)):
         head = git(root, "rev-parse", "HEAD")
         def blocked(reason, **extra):
@@ -149,7 +149,7 @@ def preflight(root, remote=None, branch="main", authorize=remote_allowed):
         if mode == "updated":
             actual_root = scope_root(root)
             try:
-                validated = subprocess.run([sys.executable, str(actual_root / "scripts/system.py"), "--root", str(actual_root), "validate"], capture_output=True, text=True, timeout=30)
+                validated = subprocess.run([sys.executable, str(actual_root / "scripts/system.py"), "--root", str(actual_root), "validate"], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=30)
             except subprocess.TimeoutExpired:
                 return blocked("Received version validator timed out; dependent work is blocked", local_head=git(root, "rev-parse", "HEAD"), remote_head=actual)
             if validated.returncode:
@@ -252,10 +252,10 @@ def commit(root, relative_paths, message):
         scratch = Path(temporary) / "work"
         admin = Path(temporary) / "admin"
         scratch.mkdir(); admin.mkdir()
-        (scratch / ".git").write_text("gitdir: " + str(admin) + "\n")
-        (admin / "commondir").write_text(location["common"] + "\n")
-        (admin / "gitdir").write_text(str(scratch / ".git") + "\n")
-        (admin / "HEAD").write_text((old_head or "ref: refs/worktree/company-guarded") + "\n")
+        (scratch / ".git").write_text("gitdir: " + str(admin) + "\n", encoding="utf-8")
+        (admin / "commondir").write_text(location["common"] + "\n", encoding="utf-8")
+        (admin / "gitdir").write_text(str(scratch / ".git") + "\n", encoding="utf-8")
+        (admin / "HEAD").write_text((old_head or "ref: refs/worktree/company-guarded") + "\n", encoding="utf-8")
         worktree_config = gitdir / "config.worktree"
         if worktree_config.exists():
             (admin / "config.worktree").write_bytes(worktree_config.read_bytes())
@@ -340,13 +340,13 @@ def acknowledge(root, remote, branch, task_id, receipt):
         file = task_file(root, task_id)
         t = load(file)
         require(t["status"] == "verified", "only verified result can be acknowledged")
-        require(git(root, "show", f"{receipt['sha256']}:{t['output']['path']}") == Path(root, t["output"]["path"]).read_text().strip(), "delivered commit lacks exact result")
+        require(git(root, "show", f"{receipt['sha256']}:{t['output']['path']}") == Path(root, t["output"]["path"]).read_text(encoding="utf-8").strip(), "delivered commit lacks exact result")
         if t["delivery"]["status"] == "delivered" and t["delivery"].get("result_sha256") == t["output"]["sha256"]:
             return receipt
         t["delivery"] = {"status": "delivered", "commit": receipt["sha256"], "readback": True, "result_sha256": t["output"]["sha256"]}
         event(t, "delivery", t["delivery"])
         write(file, t)
-        commit(root, [str(file.relative_to(root))], "Record result delivery readback")
+        commit(root, [file.relative_to(root).as_posix()], "Record result delivery readback")
     # Same delivery path for the acknowledgment; no independent sync implementation.
     acknowledged = deliver(root, remote, branch, expected_base=receipt.get("remote_head", receipt["sha256"]))
     return {**receipt, "acknowledgment_commit": acknowledged["sha256"]}

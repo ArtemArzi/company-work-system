@@ -11,10 +11,12 @@ import json
 import os
 from pathlib import Path, PurePosixPath
 import re
-import selectors
+import queue
+import threading
 import subprocess
 import time
 from core import require, ident, config, config_snapshot, object_hash, path
+import platform_runtime as platform
 
 # High-signal credential forms; source-code regexes and placeholder names are not tokens.
 SECRET = re.compile(rb'-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----|\bgh[pousr]_[A-Za-z0-9]{30,}|\bgithub_pat_[A-Za-z0-9_]{20,}|\bAKIA[0-9A-Z]{16}|\bsk-[A-Za-z0-9_-]{32,}|\bBearer[ \t]+[A-Za-z0-9._~-]{24,}|(?i:api[_-]?key|access[_-]?token|client[_-]?secret)["\x27 \t]*[:=]["\x27 \t]*[A-Za-z0-9._~-]{24,}')
@@ -25,6 +27,8 @@ def canonical(relative):
     require(isinstance(relative,str) and relative and not relative.startswith('/'), 'history path must be relative')
     require(relative == PurePosixPath(relative).as_posix() and not any(p in {'', '.', '..'} for p in relative.split('/')), 'noncanonical history path')
     require(not any(ord(c)<32 or ord(c)==127 for c in relative), 'control character in history path')
+    try: platform.portable_path(relative)
+    except ValueError as exc: require(False, str(exc))
     return relative
 
 
@@ -68,7 +72,7 @@ class Policy:
 
 
 def release_policy():
-    return Policy('release',files=('README.md','AGENTS.md','.gitignore','requirements.txt','release.yaml','docs/company-system-guide.html','.codex/hooks.json'),
+    return Policy('release',files=('README.md','AGENTS.md','.gitignore','.gitattributes','requirements.txt','release.yaml','docs/company-system-guide.html','.codex/hooks.json'),
                   roots=('company','standards','skills','workflows','scripts','adapters','.agents','.claude','checks','hooks'),
                   scan_secrets=False,projections=True)
 
@@ -102,7 +106,7 @@ class Context:
         self.gitdir=Path(metadata[0]).resolve();common=Path(metadata[1]).resolve();fmt,bare=metadata[2:]
         require(bare in {'true','false'},'unreadable repository kind')
         if bare=='false':
-            require(self.git('rev-parse','--show-toplevel').decode().strip()==str(self.root), 'history requires the exact repository root')
+            require(Path(self.git('rev-parse','--show-toplevel').decode('utf-8').strip()).resolve()==self.root, 'history requires the exact repository root')
         else:
             require(self.gitdir==self.root,'history requires the exact bare repository root')
         self.common=common
@@ -130,12 +134,25 @@ class Batch:
     def __init__(self,ctx):
         self.ctx=ctx;ctx.processes+=1
         self.proc=subprocess.Popen(['git','--git-dir',str(ctx.gitdir),'cat-file','--batch'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,env=ctx.env)
-        self.poll=selectors.DefaultSelector();self.poll.register(self.proc.stdout,selectors.EVENT_READ)
+        self.queue=queue.Queue(maxsize=2);self.stop=threading.Event()
+        def pump():
+            try:
+                while not self.stop.is_set():
+                    value=os.read(self.proc.stdout.fileno(),65536)
+                    while not self.stop.is_set():
+                        try:self.queue.put(value,timeout=.1);break
+                        except queue.Full:pass
+                    if not value:return
+            except OSError:
+                while not self.stop.is_set():
+                    try:self.queue.put(b'',timeout=.1);return
+                    except queue.Full:pass
+        self.thread=threading.Thread(target=pump,daemon=True);self.thread.start()
         self.buffer=bytearray();self.deadline=0
 
     def fill(self):
-        require(self.poll.select(max(0,self.deadline-time.monotonic())),'history object read timed out')
-        value=os.read(self.proc.stdout.fileno(),65536)
+        try:value=self.queue.get(timeout=max(0,self.deadline-time.monotonic()))
+        except queue.Empty:require(False,'history object read timed out')
         require(value,'history object stream truncated');self.buffer.extend(value)
 
     def read(self,n):
@@ -147,7 +164,8 @@ class Batch:
         self.deadline=time.monotonic()+60
         try:self.proc.stdin.write((oid+'\n').encode());self.proc.stdin.flush()
         except (BrokenPipeError,OSError):require(False,'history object process failed')
-        while b'\n' not in self.buffer:self.fill()
+        while b'\n' not in self.buffer:
+            require(len(self.buffer)<1024,'invalid history object header');self.fill()
         line,self.buffer=self.buffer.split(b'\n',1)
         fields=line.split();require(len(fields)==3 and fields[0].decode()==oid and fields[2].isdigit(),'missing/invalid history object')
         size=int(fields[2])
@@ -163,9 +181,13 @@ class Batch:
     def value(self,oid,expected):return b''.join(self.chunks(oid,expected))
 
     def close(self):
-        self.poll.close();self.proc.stdin.close()
+        self.stop.set();self.proc.stdin.close()
         try:self.proc.wait(timeout=2)
-        except subprocess.TimeoutExpired:self.proc.terminate();self.proc.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            self.proc.terminate()
+            try:self.proc.wait(timeout=2)
+            except subprocess.TimeoutExpired:self.proc.kill();self.proc.wait(timeout=2)
+        self.thread.join(timeout=2)
         self.proc.stdout.close()
 
 
@@ -211,6 +233,8 @@ def scan(root,policy,tips=('HEAD',),all_refs=False,baseline=None,trees=()):
         tree_ids=set(trees)|set(output[1::2])
         for tree in sorted(tree_ids):
             inventory=list(walk(tree));paths={p for p,_,_ in inventory}
+            try:platform.path_collisions(paths)
+            except ValueError as exc:require(False,str(exc))
             for relative,mode,oid in inventory:
                 coverage.add((relative,mode,oid));blobids.add(oid)
                 if mode=='120000':
@@ -242,7 +266,7 @@ def repository_location(root):
     common=Path(git(root,'rev-parse','--git-common-dir'))
     common=(common if common.is_absolute() else root/common).resolve()
     if gitdir!=root:
-        require(git(root,'rev-parse','--show-toplevel')==str(root),'delivery requires the exact repository root')
+        require(Path(git(root,'rev-parse','--show-toplevel')).resolve()==root,'delivery requires the exact repository root')
     return {'gitdir':str(gitdir),'common':str(common),
             'identity':[(p.stat().st_dev,p.stat().st_ino) for p in (root,gitdir,common)]}
 

@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import tempfile
 import yaml
+import platform_runtime as platform
 
 
 class Rejected(Exception):
@@ -33,17 +34,24 @@ def path(root, relative):
     root = Path(root).resolve()
     require(isinstance(relative, str) and relative and not Path(relative).is_absolute(), "relative path required")
     require(relative == Path(relative).as_posix() and not any(part in {"", ".", ".."} for part in relative.split("/")), "canonical relative path required")
+    try:
+        platform.portable_path(relative)
+    except ValueError as exc:
+        raise Rejected(str(exc)) from exc
     result = root / relative
     require(result.resolve().is_relative_to(root), "path outside company")
-    require(not any(p.is_symlink() for p in [result, *result.parents] if p != root), "symlink source is not canonical")
+    try:
+        platform.no_alias_parents(root, result)
+    except ValueError as exc:
+        raise Rejected(str(exc)) from exc
     return result
 
 
 def load(file):
     file = Path(file)
     if file.suffix == ".json":
-        return json.loads(file.read_text())
-    return yaml.safe_load(file.read_text())
+        return json.loads(file.read_text(encoding="utf-8"))
+    return yaml.safe_load(file.read_text(encoding="utf-8"))
 
 
 def digest(file):
@@ -59,38 +67,21 @@ def write(file, data):
     file = Path(file)
     file.parent.mkdir(parents=True, exist_ok=True)
     value = json.dumps(data, ensure_ascii=False, indent=2) + "\n" if file.suffix == ".json" else yaml.safe_dump(data, allow_unicode=True, sort_keys=False)
-    fd, name = tempfile.mkstemp(prefix=".write-", dir=file.parent)
-    try:
-        with os.fdopen(fd, "w") as stream:
-            stream.write(value)
-            stream.flush()
-            os.fsync(stream.fileno())
-        os.replace(name, file)
-        directory = os.open(file.parent, os.O_RDONLY)
-        try:
-            os.fsync(directory)
-        finally:
-            os.close(directory)
-    finally:
-        if os.path.exists(name):
-            os.unlink(name)
+    platform.atomic_text(file, value)
 
 
 @contextlib.contextmanager
 def lock(root):
-    # Linux profiles only. flock releases on process exit; no stale-lock deletion.
-    import fcntl
-    file = Path(root) / ".system/lock"
-    file.parent.mkdir(parents=True, exist_ok=True)
-    with file.open("a") as stream:
-        try:
-            fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except BlockingIOError as exc:
-            raise Rejected("company operation already running") from exc
-        try:
+    file = Path(root).resolve() / ".system/lock"
+    try:
+        platform.no_alias_parents(Path(root).resolve(), file)
+    except ValueError as exc:
+        raise Rejected(str(exc)) from exc
+    try:
+        with platform.process_lock(file):
             yield
-        finally:
-            fcntl.flock(stream, fcntl.LOCK_UN)
+    except BlockingIOError as exc:
+        raise Rejected("company operation already running") from exc
 
 
 def config_snapshot(root):
@@ -126,7 +117,7 @@ def event(task, action, detail):
 def method_bindings(root, inputs=()):
     relatives = ["company/config.yaml", "release.yaml"]
     for directory in ["standards", "skills", "workflows", "scripts", "adapters", "hooks", "company/standards"]:
-        relatives += [str(p.relative_to(root)) for p in sorted(Path(root, directory).rglob("*")) if p.is_file() and p.suffix in {".py", ".md", ".yaml"}]
+        relatives += [p.relative_to(root).as_posix() for p in sorted(Path(root, directory).rglob("*")) if p.is_file() and p.suffix in {".py", ".md", ".yaml"}]
     relatives += list(inputs)
     return {p: digest(path(root, p)) for p in sorted(set(relatives))}
 

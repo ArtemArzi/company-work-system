@@ -89,7 +89,12 @@ class LocalContracts(Fixture):
             profile = load(self.root / f"adapters/{harness}/profile.yaml")
             self.assertEqual(len(profile["capabilities"]), 14)
             for canonical in (self.root / "skills").glob("*/SKILL.md"):
-                self.assertEqual((self.root / directory / "skills" / canonical.parent.name / "SKILL.md").read_bytes(), canonical.read_bytes())
+                import platform_runtime
+                representation = platform_runtime.projection(self.root, directory + "/skills", canonical.parent.name)
+                if representation == "symlink":
+                    self.assertEqual((self.root / directory / "skills" / canonical.parent.name / "SKILL.md").read_bytes(), canonical.read_bytes())
+                else:
+                    self.assertEqual((self.root / directory / "skills" / canonical.parent.name).read_bytes(), ("../../skills/" + canonical.parent.name).encode())
 
     def test_wrong_arithmetic_then_original_case_repairs(self):
         original = self.task()
@@ -116,16 +121,16 @@ class LocalContracts(Fixture):
         with self.assertRaises(Rejected): operations.execute(self.root, "test-task", self.artifact(), {"PASS": True})
 
     def test_validator_itself_rejects_wrong_place_duplicate_link_cycle(self):
-        file = self.root / "work/misplaced/SKILL.md"; file.parent.mkdir(parents=True); file.write_text((self.root / "skills/company-context/SKILL.md").read_text())
+        file = self.root / "work/misplaced/SKILL.md"; file.parent.mkdir(parents=True); file.write_text((self.root / "skills/company-context/SKILL.md").read_text(encoding="utf-8"), encoding="utf-8")
         with self.assertRaisesRegex(Rejected, "outside canonical"): validation.repository(self.root)
         file.unlink()
         source = load(self.root / "company/sources/design-basis/source.yaml")
         write(self.root / "company/sources/duplicate/source.yaml", source)
         with self.assertRaisesRegex(Rejected, "duplicate entity"): validation.repository(self.root)
         (self.root / "company/sources/duplicate/source.yaml").unlink()
-        file = self.root / "company/projects/README.md"; old = file.read_text(); file.write_text(old + "\n[Broken](missing.md)\n")
+        file = self.root / "company/projects/README.md"; old = file.read_text(encoding="utf-8"); file.write_text(old + "\n[Broken](missing.md)\n", encoding="utf-8")
         with self.assertRaisesRegex(Rejected, "broken"): validation.repository(self.root)
-        file.write_text(old)
+        file.write_text(old, encoding="utf-8")
         file = self.root / "workflows/message-to-action.yaml"; value = load(file); value["steps"][0]["depends_on"] = ["share-result"]; write(file, value)
         with self.assertRaisesRegex(Rejected, "cycle"): validation.repository(self.root)
 
@@ -142,7 +147,7 @@ class LocalContracts(Fixture):
         context = self.cli("context", "--task", "test-task")
         self.assertEqual(context["native_memory"], "not-used")
         self.assertEqual(context["tasks"][0]["revision"], t["revision"])
-        method = self.root / "standards/task-validation.md"; method.write_text(method.read_text() + "\nChanged method\n")
+        method = self.root / "standards/task-validation.md"; method.write_text(method.read_text(encoding="utf-8") + "\nChanged method\n", encoding="utf-8")
         with self.assertRaisesRegex(ValueError, "Pinned"): operations.execute(self.root, "test-task", self.artifact(), self.critical())
         t = load(task_file(self.root, "test-task"))
         operations.decide(self.root, "test-task", t["revision"], "resume", "Reviewed exact method change; same acceptance", "test-owner")
@@ -207,7 +212,7 @@ class LocalContracts(Fixture):
         meta = load(self.root / "release.yaml"); meta["state_format"] = 2; write(self.root / "release.yaml", meta)
         with self.assertRaisesRegex(Rejected, "unsupported release"): validation.repository(self.root)
         meta["state_format"] = 1; write(self.root / "release.yaml", meta)
-        unknown = self.root / "standards/unknown-method.md"; unknown.write_text('---\nid: unknown-method\nversion: 1\nowner: test-owner\n---\nUnindexed standalone method\n')
+        unknown = self.root / "standards/unknown-method.md"; unknown.write_text('---\nid: unknown-method\nversion: 1\nowner: test-owner\n---\nUnindexed standalone method\n', encoding="utf-8")
         with self.assertRaisesRegex(Rejected, "missing from map"): validation.repository(self.root)
 
     def test_marketing_and_research_contracts_preserve_unknowns(self):
@@ -257,7 +262,7 @@ class SourcesAndBackground(Fixture):
     def test_stdio_mcp_negotiation_read_tool_and_error(self):
         data = self.source()
         program = self.base / "read-server.py"
-        program.write_text('import json,sys\nenvelope='+repr(data)+'\nfor line in sys.stdin:\n m=json.loads(line)\n if "id" not in m: continue\n method=m["method"]\n if method=="initialize": result={"protocolVersion":"2025-06-18","capabilities":{"tools":{}},"serverInfo":{"name":"fixture","version":"1"}}\n elif method=="tools/list": result={"tools":[{"name":"read_records","inputSchema":{"type":"object"}}]}\n elif method=="tools/call": result={"structuredContent":envelope}\n else: result={}\n print(json.dumps({"jsonrpc":"2.0","id":m["id"],"result":result}),flush=True)\n')
+        program.write_text('import json,sys\nenvelope='+repr(data)+'\nfor line in sys.stdin:\n m=json.loads(line)\n if "id" not in m: continue\n method=m["method"]\n if method=="initialize": result={"protocolVersion":"2025-06-18","capabilities":{"tools":{}},"serverInfo":{"name":"fixture","version":"1"}}\n elif method=="tools/list": result={"tools":[{"name":"read_records","inputSchema":{"type":"object"}}]}\n elif method=="tools/call": result={"structuredContent":envelope}\n else: result={}\n print(json.dumps({"jsonrpc":"2.0","id":m["id"],"result":result}),flush=True)\n', encoding="utf-8")
         self.export_config("mcp", command=[sys.executable, str(program)], read_tool="read_records", allowed_read_tools=["read_records"])
         self.assertEqual(len(connectors.read(self.root, "test-data")["records"]), 2)
         cfg = config(self.root); cfg["sources"]["test-data"]["read_tool"] = "write_records"; write(self.root / "company/config.yaml", cfg)
@@ -298,7 +303,7 @@ class GitAcceptance(Fixture):
         source = self.base / "release-source"; source.mkdir()
         delivery.git(source, "init", "-b", "main"); delivery.identity(source)
         (source / "docs").mkdir()
-        (source / "docs/company-system-guide.html").write_text("Synthetic portable guide")
+        (source / "docs/company-system-guide.html").write_text("Synthetic portable guide", encoding="utf-8")
         delivery.git(source, "add", "."); delivery.git(source, "commit", "-m", "Allowed guide")
         release = self.base / "release.git"
         delivery.git(source, "clone", "--bare", str(source), str(release))
@@ -306,7 +311,7 @@ class GitAcceptance(Fixture):
         for number, forbidden in enumerate(("docs/development/PLAN.md", "docs/private.html")):
             with self.subTest(path=forbidden):
                 delivery.git(source, "checkout", "-b", f"forbidden-{number}", "main")
-                file = source / forbidden; file.parent.mkdir(parents=True, exist_ok=True); file.write_text("Private development")
+                file = source / forbidden; file.parent.mkdir(parents=True, exist_ok=True); file.write_text("Private development", encoding="utf-8")
                 delivery.git(source, "add", "--", forbidden); delivery.git(source, "commit", "-m", "Forbidden guide sibling")
                 invalid = self.base / f"invalid-{number}.git"
                 delivery.git(source, "clone", "--bare", str(source), str(invalid))
@@ -316,7 +321,7 @@ class GitAcceptance(Fixture):
     def product_release(self):
         p = self.base / "product"; p.mkdir()
         shutil.copytree(TEMPLATE, p / "template", symlinks=True, ignore=shutil.ignore_patterns("__pycache__"))
-        (p / "PRIVATE-DEVELOPMENT.md").write_text("Do not send product development to companies\n")
+        (p / "PRIVATE-DEVELOPMENT.md").write_text("Do not send product development to companies\n", encoding="utf-8")
         self.seed(p)
         release = self.base / "release.git"
         product.release(p, release)
@@ -327,7 +332,7 @@ class GitAcceptance(Fixture):
         company = self.base / "client"
         lifecycle.create(release, company, "client-company", "client-owner")
         (company / "work").mkdir(exist_ok=True)
-        (company / "work/kept.txt").write_text("Client-owned work\n")
+        (company / "work/kept.txt").write_text("Client-owned work\n", encoding="utf-8")
         delivery.commit(company, ["work/kept.txt"], "Retain client data")
         original_config = config(company)
         company_base = delivery.git(company, "rev-parse", "HEAD")
@@ -339,16 +344,16 @@ class GitAcceptance(Fixture):
         feature = template / "skills" / feature_id
         shutil.copytree(template / "skills/company-context", feature)
         skill_file = feature / "SKILL.md"
-        skill_file.write_text(skill_file.read_text().replace("name: company-context", "name: " + feature_id))
+        skill_file.write_text(skill_file.read_text(encoding="utf-8").replace("name: company-context", "name: " + feature_id), encoding="utf-8")
         recipe = load(feature / "workflow.yaml")
         recipe["id"] = feature_id
         write(feature / "workflow.yaml", recipe)
         skill_map = template / "skills/README.md"
-        skill_map.write_text(skill_map.read_text() + f"\n[Synthetic new feature]({feature_id}/SKILL.md).\n")
+        skill_map.write_text(skill_map.read_text(encoding="utf-8") + f"\n[Synthetic new feature]({feature_id}/SKILL.md).\n", encoding="utf-8")
         for directory in (".agents/skills", ".claude/skills"):
-            (template / directory / feature_id).symlink_to("../../skills/" + feature_id)
+            (template / directory / feature_id).symlink_to("../../skills/" + feature_id, target_is_directory=True)
         new_script = template / "scripts/synthetic-feature.py"
-        new_script.write_text("print('New synthetic feature available')\n")
+        new_script.write_text("print('New synthetic feature available')\n", encoding="utf-8")
         meta = load(template / "release.yaml")
         parts = meta["version"].split(".")
         meta["version"] = ".".join([*parts[:2], str(int(parts[2]) + 1)])
@@ -369,7 +374,7 @@ class GitAcceptance(Fixture):
         self.assertEqual(updated["status"], "verified-candidate", updated)
         candidate = Path(updated["candidate"])
         self.assertEqual(config(candidate), original_config)
-        self.assertEqual((candidate / "work/kept.txt").read_text(), "Client-owned work\n")
+        self.assertEqual((candidate / "work/kept.txt").read_text(encoding="utf-8"), "Client-owned work\n")
         self.assertTrue((candidate / "skills" / feature_id / "SKILL.md").exists())
         self.assertEqual(subprocess.check_output([sys.executable, str(candidate / "scripts/synthetic-feature.py")], text=True).strip(), "New synthetic feature available")
         delivered = delivery.deliver(candidate, str(remote), expected_base=company_base)
@@ -394,19 +399,19 @@ class GitAcceptance(Fixture):
         lifecycle.create(release, b, "beta-company", "test-owner")
         local = "company/standards/local-rule.md"
         (a / local).parent.mkdir(parents=True)
-        (a / local).write_text('---\nid: local-rule\nversion: 1\nowner: test-owner\n---\n# Alternative output arrangement\nAccepted; same criterion, explicit reason and tested examples.\n')
+        (a / local).write_text('---\nid: local-rule\nversion: 1\nowner: test-owner\n---\n# Alternative output arrangement\nAccepted; same criterion, explicit reason and tested examples.\n', encoding="utf-8")
         cfg = config(a); cfg["bindings"]["execute"] = {"base": "standards/task-validation.md", "base_sha256": digest(a / "standards/task-validation.md"), "local": local, "approved_by": "test-owner", "reason": "Different format; guarantees retained", "checks": "same good/bad examples"}; write(a / "company/config.yaml", cfg)
         delivery.commit(a, [local, "company/config.yaml"], "Accept local alternative")
         for company in [a,b]:
-            (company / "work").mkdir(exist_ok=True); (company / "work/retained.txt").write_text("Synthetic company work retained\n"); delivery.commit(company, ["work/retained.txt"], "Retain work")
+            (company / "work").mkdir(exist_ok=True); (company / "work/retained.txt").write_text("Synthetic company work retained\n", encoding="utf-8"); delivery.commit(company, ["work/retained.txt"], "Retain work")
         release_meta = load(p / "template/release.yaml"); release_meta["version"] = ".".join([*release_meta["version"].split(".")[:2], str(int(release_meta["version"].split(".")[2]) + 1)]); write(p / "template/release.yaml", release_meta)
-        method = p / "template/standards/runtime.md"; method.write_text(method.read_text() + "\nTechnical documentation improvement\n")
+        method = p / "template/standards/runtime.md"; method.write_text(method.read_text(encoding="utf-8") + "\nTechnical documentation improvement\n", encoding="utf-8")
         delivery.git(p, "add", "template"); delivery.git(p, "commit", "-m", "New clean release"); product.release(p, release)
         for company in [a,b]:
             updated = lifecycle.update(company, release, self.base / (company.name + "-updated"))
             self.assertEqual(updated["status"], "verified-candidate", updated)
             candidate = Path(updated["candidate"])
-            self.assertEqual((candidate / "work/retained.txt").read_text(), "Synthetic company work retained\n")
+            self.assertEqual((candidate / "work/retained.txt").read_text(encoding="utf-8"), "Synthetic company work retained\n")
             self.assertEqual(config(candidate), config(company))
             self.assertEqual(lifecycle.update(candidate, release, self.base / (company.name + "-repeat"))["status"], "already-installed")
             objects = delivery.git(candidate, "rev-list", "--objects", "--all")
@@ -416,9 +421,9 @@ class GitAcceptance(Fixture):
 
     def test_semantic_binding_change_stops_even_text_merge_clean(self):
         p, release = self.product_release(); a = self.base / "alpha"; lifecycle.create(release,a,"alpha-company","test-owner")
-        local = a / "company/standards/local-rule.md"; local.parent.mkdir(); local.write_text('---\nid: local-rule\nversion: 1\nowner: test-owner\n---\nAccepted alternative\n')
+        local = a / "company/standards/local-rule.md"; local.parent.mkdir(); local.write_text('---\nid: local-rule\nversion: 1\nowner: test-owner\n---\nAccepted alternative\n', encoding="utf-8")
         cfg = config(a); cfg["bindings"]["execute"] = {"base": "standards/task-validation.md", "base_sha256": digest(a / "standards/task-validation.md"), "local": "company/standards/local-rule.md", "approved_by": "test-owner", "reason": "Accepted method", "checks": "examples"}; write(a / "company/config.yaml",cfg); delivery.commit(a,["company/config.yaml","company/standards/local-rule.md"],"Local rule")
-        method = p / "template/standards/task-validation.md"; method.write_text(method.read_text()+"\nNew semantic requirement\n");delivery.git(p,"add","template");delivery.git(p,"commit","-m","Change method");product.release(p,release)
+        method = p / "template/standards/task-validation.md"; method.write_text(method.read_text(encoding="utf-8")+"\nNew semantic requirement\n", encoding="utf-8");delivery.git(p,"add","template");delivery.git(p,"commit","-m","Change method");product.release(p,release)
         result = lifecycle.update(a,release,self.base/"semantic-candidate")
         self.assertEqual(result["status"],"needs-reconciliation")
         self.assertIn("semantic reconciliation", " ".join(result["issues"]))
@@ -428,28 +433,28 @@ class GitAcceptance(Fixture):
         a,b,c = [self.base/x for x in ["session-a","session-b","session-c"]]
         for dest in [a,b]: delivery.prepare(self.root,str(remote),"main",dest)
         base = delivery.git(a,"rev-parse","HEAD")
-        (a/"work").mkdir(exist_ok=True); (a/"work/a.txt").write_text("A");delivery.commit(a,["work/a.txt"],"A result")
+        (a/"work").mkdir(exist_ok=True); (a/"work/a.txt").write_text("A", encoding="utf-8");delivery.commit(a,["work/a.txt"],"A result")
         delivery.deliver(a,str(remote),expected_base=base)
-        (b/"work").mkdir(exist_ok=True); (b/"work/b.txt").write_text("B");delivery.commit(b,["work/b.txt"],"B result")
+        (b/"work").mkdir(exist_ok=True); (b/"work/b.txt").write_text("B", encoding="utf-8");delivery.commit(b,["work/b.txt"],"B result")
         with self.assertRaisesRegex(Rejected,"stale"):delivery.deliver(b,str(remote),expected_base=base)
         delivery.git(b,"fetch","origin");delivery.git(b,"merge","--no-edit","origin/main");delivery.deliver(b,str(remote))
         self.assertTrue(delivery.deliver(b,str(remote))["repeated"])
         delivery.prepare(self.root,str(remote),"main",c)
-        self.assertEqual((c/"work/a.txt").read_text(),"A");self.assertEqual((c/"work/b.txt").read_text(),"B")
+        self.assertEqual((c/"work/a.txt").read_text(encoding="utf-8"),"A");self.assertEqual((c/"work/b.txt").read_text(encoding="utf-8"),"B")
         delivery.git(a,"fetch","origin");delivery.git(a,"merge","--no-edit","origin/main")
         for company,word in [(a,"one"),(b,"two")]:
-            file=company/"company/projects/README.md";file.write_text(word);delivery.commit(company,["company/projects/README.md"],word)
+            file=company/"company/projects/README.md";file.write_text(word, encoding="utf-8");delivery.commit(company,["company/projects/README.md"],word)
         delivery.deliver(a,str(remote))
         delivery.git(b,"fetch","origin");merged=delivery.git(b,"merge","--no-edit","origin/main",check=False)
         self.assertNotEqual(merged.returncode,0)
-        self.assertIn("one",(b/"company/projects/README.md").read_text());self.assertIn("two",(b/"company/projects/README.md").read_text())
+        self.assertIn("one",(b/"company/projects/README.md").read_text(encoding="utf-8"));self.assertIn("two",(b/"company/projects/README.md").read_text(encoding="utf-8"))
 
     def test_result_delivery_ack_and_lost_push_response_readback(self):
         self.task(); operations.execute(self.root,"test-task",self.artifact(),self.critical());self.seed()
         remote=self.base/"common.git";delivery.git(self.root,"clone","--bare",str(self.root),str(remote))
         receipt=delivery.deliver(self.root,str(remote),task_id="test-task")
         t=load(task_file(self.root,"test-task"));self.assertEqual(t["delivery"]["status"],"delivered");self.assertTrue(t["delivery"]["readback"])
-        (self.root/"work/extra.txt").write_text("Next permitted result");delivery.commit(self.root,["work/extra.txt"],"Next")
+        (self.root/"work/extra.txt").write_text("Next permitted result", encoding="utf-8");delivery.commit(self.root,["work/extra.txt"],"Next")
         original=delivery.git
         def lost(root,*args,**kwargs):
             r=original(root,*args,**kwargs)
@@ -463,21 +468,21 @@ class GitAcceptance(Fixture):
         self.assertEqual(load(task_file(restored,"test-task")),load(task_file(self.root,"test-task")))
         with (backup/"history.bundle").open("ab") as f:f.write(b'corrupt')
         with self.assertRaisesRegex(Rejected,"corrupted"):lifecycle.restore(backup,self.base/"corrupt-restore")
-        (self.root/"work/dirty.txt").write_text("Preserve unsaved work")
+        (self.root/"work/dirty.txt").write_text("Preserve unsaved work", encoding="utf-8")
         with self.assertRaisesRegex(Rejected,"dirty"):lifecycle.backup(self.root,self.base/"dirty-backup")
-        self.assertEqual((self.root/"work/dirty.txt").read_text(),"Preserve unsaved work")
+        self.assertEqual((self.root/"work/dirty.txt").read_text(encoding="utf-8"),"Preserve unsaved work")
 
     def test_sanitized_proposal_exact_permission_no_company_history(self):
-        package=self.base/"package";file=package/"standards/general-method.md";file.parent.mkdir(parents=True);file.write_text("An independently authored general procedure with a clean example\n")
+        package=self.base/"package";file=package/"standards/general-method.md";file.parent.mkdir(parents=True);file.write_text("An independently authored general procedure with a clean example\n", encoding="utf-8")
         approval={"approved_by":"test-owner","permission":"share-sanitized-method","purpose":"General reusable method","files":{"standards/general-method.md":digest(file)}};write(package/"approval.json",approval)
         target=self.base/"proposal";self.assertEqual(lifecycle.proposal(self.root,package,target)["status"],"sanitized-candidate");self.assertFalse((target/".git").exists())
-        file.write_text("test-company private data")
+        file.write_text("test-company private data", encoding="utf-8")
         with self.assertRaises(Rejected):lifecycle.proposal(self.root,package,self.base/"rejected-proposal")
 
     def test_proposal_rejects_noncanonical_paths_before_copy_or_candidate(self):
         package = self.base / "malicious-package"
         (package / "standards").mkdir(parents=True)
-        file = package / "company/private-note.txt"; file.parent.mkdir(); file.write_text("Generic-looking contents")
+        file = package / "company/private-note.txt"; file.parent.mkdir(); file.write_text("Generic-looking contents", encoding="utf-8")
         for index, relative in enumerate(["standards/../company/private-note.txt", "standards/./method.md", "standards//method.md", "standards/../../outside.md"]):
             write(package / "approval.json", {"approved_by": "test-owner", "permission": "share-sanitized-method", "purpose": "Boundary test", "files": {relative: digest(file)}})
             dest = self.base / f"bad-proposal-{index}"
@@ -523,7 +528,7 @@ class GitAcceptance(Fixture):
         delivery.commit(a, ["work/first-process/task.json", result["output"]["path"]], "Validated first internal process")
         remote = self.base / "alpha-common.git"; delivery.git(a, "clone", "--bare", str(a), str(remote))
         delivery.deliver(a, str(remote), task_id="first-process")
-        note = p / "template/standards/runtime.md"; note.write_text(note.read_text() + "\nNew method documentation; same result criteria.\n")
+        note = p / "template/standards/runtime.md"; note.write_text(note.read_text(encoding="utf-8") + "\nNew method documentation; same result criteria.\n", encoding="utf-8")
         meta = load(p / "template/release.yaml"); meta["version"] = ".".join([*meta["version"].split(".")[:2], str(int(meta["version"].split(".")[2]) + 1)]); write(p / "template/release.yaml", meta)
         delivery.git(p, "add", "template"); delivery.git(p, "commit", "-m", "Method release"); product.release(p, release)
         updated = lifecycle.update(a, release, self.base / "update-candidate")
@@ -531,7 +536,7 @@ class GitAcceptance(Fixture):
         candidate = Path(updated["candidate"])
         delivery.deliver(candidate, str(remote))
         self.assertEqual(self.cli("context", "--task", "first-process", root=candidate)["tasks"][0]["status"], "verified")
-        (candidate / "work/new-result.txt").write_text("Created after update; rollback must preserve it\n")
+        (candidate / "work/new-result.txt").write_text("Created after update; rollback must preserve it\n", encoding="utf-8")
         delivery.commit(candidate, ["work/new-result.txt"], "New company work after upgrade")
         rolled = lifecycle.rollback(candidate, self.base / "rollback-candidate")
         self.assertEqual(rolled["status"], "verified-candidate", rolled)
@@ -548,7 +553,7 @@ class GitAcceptance(Fixture):
         remote = self.base / "product-common.git"; delivery.git(p, "clone", "--bare", str(p), str(remote))
         package = self.base / "sanitized-package"
         file = package / "standards/general-procedure.md"; file.parent.mkdir(parents=True)
-        file.write_text('---\nid: general-procedure\nversion: 1\nowner: product-maintainer\nstatus: proposal\n---\n# Generic procedure\nOwn deliberately anonymized method with independent clean sample; applicability pending.\n')
+        file.write_text('---\nid: general-procedure\nversion: 1\nowner: product-maintainer\nstatus: proposal\n---\n# Generic procedure\nOwn deliberately anonymized method with independent clean sample; applicability pending.\n', encoding="utf-8")
         write(package / "approval.json", {"approved_by": "test-owner", "permission": "share-sanitized-method", "purpose": "Share a generic proposal only", "files": {"standards/general-procedure.md": digest(file)}})
         candidate = lifecycle.proposal_candidate(self.root, package, p, str(remote), self.base / "general-candidate")
         delivery.commit(Path(candidate["path"]), candidate["paths"], "Share sanitized proposal; method acceptance pending")
@@ -556,7 +561,7 @@ class GitAcceptance(Fixture):
         self.assertEqual(receipt["status"], "readback-confirmed")
         copied = self.base / "product-reader"; delivery.prepare(p, str(remote), "main", copied)
         self.assertTrue((copied / "template/standards/general-procedure.md").exists())
-        self.assertNotIn("test-company", (copied / "template/standards/general-procedure.md").read_text())
+        self.assertNotIn("test-company", (copied / "template/standards/general-procedure.md").read_text(encoding="utf-8"))
         self.assertFalse((copied / "work").exists())
 
 

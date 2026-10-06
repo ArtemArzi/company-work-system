@@ -15,3 +15,5 @@
 [Хуки](hooks/README.md) и [их стандарт](standards/hook-authoring.md) используют
 общие проверки. Native выключен без решения компании; hooks не заменяют
 validate/export guard и не инициируют лишний синк или ревью.
+
+Если Python/библиотеки отсутствуют, сначала [подготовить рабочую среду](adapters/README.md): setup получает локальные зависимости, doctor только проверяет. Для Windows использовать run.ps1; POSIX — run.sh. После setup общий цикл/preflight прежний; не писать одновременно из Windows и WSL в один checkout.
