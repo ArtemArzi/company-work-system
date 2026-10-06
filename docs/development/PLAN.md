@@ -101,6 +101,14 @@ Patch1.1.3: bounded исправление6design-hook замечаний HTML, 
 | H1 | Канонический стандарт/manifest, fixed dispatcher; company-author и карты | Стандарт/manifest/карты и positive proposal path проверены |
 | H2 | Шесть сценариев, оба тонких native adapters, preview/merge и CLI fallback | Принято37/37 Python/protocol; native trust/events unverified |
 | V | Before/after, known-bad, оба профиля, copy/adapt/delivery/resume/update/recovery и независимая приёмка всего | 132/132 PASS; source_unchanged; whole-result r2 PASS |
-| R | Номер функционального выпуска, README/release запись, product commit/push и изолированный пакет; кандидат компаний | 1.2.0 принят; scoped commit/push/isolated bundle в работе, Work отдельно |
+| R | Номер функционального выпуска, README/release запись, product commit/push и изолированный пакет; кандидат компаний | 1.2.0 сохранён; actual isolated bundle/copy/adapt PASS; origin/main доставка по AGENTS, Work отдельно |
 
 Существенные новые policy/state решения из A1 проверять существующим plan reviewer до зависимого кода, не запускать новую цепочку приёмки для каждой мелкой правки. Полный suite требуется после runtime изменений перед функциональным выпуском; сейчас проверяются документы/ссылки/воспроизведение. Не повышать версию по документационному плану. Native trust/OAuth/live отсутствие доступа остаются явными блокировками своих частей, а не причиной устанавливать весь комплект или объявлять локальные fixtures native успехом.
+
+### Результат 1.2.0
+
+Реализация завершена в разрешённом локальном объёме:132/132tests PASS,80source hashes неизменны, независимая whole-result приёмка company-work-system-result-pass-20261006-6ffe7f6-r2. Функциональный product commit beb014f2f282333d3c27ca9215c593942eb304b9 сохранён общим guarded commit с действующими native Git hooks. Из него создан реальный isolated release и138067-byte bundle; copy/adapt/validate в новой учебной компании PASS, development/ownership proof исключены. [Artifact evidence](work/2026-10-06-performance/evidence/release-artifact.json).
+
+Номер основы1.2.0; bundle `.local/company-work-system-1.2.0.bundle`, releaseSHA8996271615b2814250fe4906ffc2d2e58029030c, SHA25641a1b35cb7821181238d9ba89deff282d352d0f676306a45344a3280f50f4bdc. Публикация product выполняется ordinary push origin HEAD:main + readback. Источник текущего внешнего состояния — сам origin/main; технический текущий итог команды в ignored .local/performance-hooks-delivery.json, его не дублировать отдельным receipt commit. Если remote не включает функциональный commit, сохранить local state и продолжить только штатную доставку; если включает, следующий шаг — новая задача продукта или отдельная разрешённая адаптация компании.
+
+Work/host/реальные компании не обновлялись. Codex/Claude provider-native events/trust и Claude OAuth/live остаются unverified; common CLI/protocol fallback проверен, hooks default off. Small benchmark укладывается в +10ms; medium synthetic traversal4.421/4.668×, не время сети или живого Work. Split/sparse Git index/relative custom hooksPath требуют отдельной поддерживаемой адаптации, текущий путь явно blocks.

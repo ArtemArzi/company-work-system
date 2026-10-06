@@ -1,6 +1,6 @@
 # Скорость проверки Git и точность зависимостей задач
 
-Статус: реализация1.2.0 проверена и принята независимо; product commit/push/bundle в работе. Native provider events/trust не подтверждены, host/Work не включены.
+Статус: реализация1.2.0 завершена, сохранена и принята независимо; actual bundle проверен. Git-доставка и её подтверждение — origin/main + ignored technical receipt. Native provider events/trust не подтверждены, host/Work не включены.
 Владелец общего прогресса: [PLAN](../../PLAN.md#следующий-этап-скорость-и-хуки).
 Основание: поручение 06.10.2026; главный продукт, исходный HEAD ca6552ec0ca3730fe9d0ac4841245685e19380ec, версия 1.1.5.
 
@@ -135,3 +135,9 @@ Independent native Git evidence: reviewer observed original local fixture hook u
 Full exact source suite joined: 132/132 PASS939.529s; harness939.616s exit0/source_unchanged=true,80source files. Evidence full-suite-final.txt/json binds before/after hashes. Shared product/template sources stable; no new global/native/Work configuration. Native global Git positive/rejection independently verified; Codex/Claude provider-native events/trust/OAuth and live companies remain unverified. Same whole-result reviewer receives joined evidence for final verdict.
 
 Итоговая независимая приёмка PASS: company-work-system-result-pass-20261006-6ffe7f6-r2, все80recorded sourcehashes совпали, repair_list пуст. Доставка продукта и реальный isolated artifact — следующий разрешённый шаг; настоящий Work/companies/native activation отдельно. Receipt: evidence/result-review-r2.json.
+
+### Сохранение результата и продолжение
+
+Функциональные81owned paths сохранены общим guarded commit beb014f2f282333d3c27ca9215c593942eb304b9, без изменения identity/config/native hooks. Реальный committed release8996271615b2814250fe4906ffc2d2e58029030c; bundle SHA25641a1b35cb7821181238d9ba89deff282d352d0f676306a45344a3280f50f4bdc,138067bytes. Actual bundle→mirror→new synthetic company→adapt→validate PASS22entities/12skills/0tasks; development иcompany ownership proof отсутствуют. Artifact evidence у performance/evidence/release-artifact.json. Пакет остаётся local artifact; компаниям и GitHub Releases автоматически не отправлен.
+
+Remaining code failures: отсутствуют. Product publication выполняется штатным ordinary push/readback; current state origin/main и ignored .local/performance-hooks-delivery.json, не новый журнал/повторный receipt sync. Next agent: product AGENTS вход/preflight → PLAN; если origin/main включает функциональный commit, продолжить новую работу, не запускать прежнее исследование/приёмку заново. Если Git readback не подтверждён, сохранить local candidate и завершить только доступную доставку. Native/provider/live access gaps сохраняются для отдельной разрешённой компании/сессии, не как выдуманное PASS.

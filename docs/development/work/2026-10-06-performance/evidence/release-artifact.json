@@ -1,0 +1,16 @@
+{
+  "status": "pass",
+  "product_commit": "beb014f2f282333d3c27ca9215c593942eb304b9",
+  "release_sha": "8996271615b2814250fe4906ffc2d2e58029030c",
+  "bundle_sha256": "41a1b35cb7821181238d9ba89deff282d352d0f676306a45344a3280f50f4bdc",
+  "bundle_bytes": 138067,
+  "copy_adapt_validate": {
+    "checked": true,
+    "entities": 22,
+    "skills": 12,
+    "tasks": 0
+  },
+  "company_base_matches_release": true,
+  "development_and_ownership_proof_excluded": true,
+  "boundary": "actual committed bundle; temporary synthetic company only, not native/live company installation"
+}
