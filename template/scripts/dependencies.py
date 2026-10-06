@@ -5,7 +5,7 @@ from core import Rejected, config_snapshot, digest, ident, load, method_bindings
 
 KINDS = {'metrics': 'company-source-read', 'marketing': 'company-marketing',
          'research': 'company-research', 'action-summary': 'company-summary'}
-KERNEL = {'scripts/platform_runtime.py', 'scripts/core.py', 'scripts/dependencies.py', 'scripts/operations.py',
+KERNEL = {'.gitattributes', 'requirements.txt', 'scripts/bootstrap.py', 'scripts/bootstrap.lock', 'scripts/run.sh', 'scripts/run.ps1', 'scripts/platform_runtime.py', 'scripts/core.py', 'scripts/dependencies.py', 'scripts/operations.py',
           'scripts/validation.py', 'scripts/system.py', 'scripts/hooks.py',
           'hooks/manifest.yaml', 'standards/task-validation.md', 'standards/runtime.md'}
 ADMISSION_FIELDS = ('type', 'approved_by', 'account', 'scope', 'period', 'unit',

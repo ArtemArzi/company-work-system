@@ -8,6 +8,13 @@ function NoAlias([string]$Path) {
         if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) { Blocked "path alias forbidden: $Path" }
     }
 }
+# SHA256 is built into .NET; setup must work without PowerShell module discovery.
+function FileHash([string]$Path) {
+    $stream = [IO.File]::OpenRead($Path)
+    $algorithm = [Security.Cryptography.SHA256]::Create()
+    try { return ([BitConverter]::ToString($algorithm.ComputeHash($stream))).Replace('-', '').ToLowerInvariant() }
+    finally { $algorithm.Dispose(); $stream.Dispose() }
+}
 # Win32 argv quoting works with PowerShell 5.1 ProcessStartInfo (no ArgumentList).
 function QuoteArg([string]$Value) {
     if ($Value -notmatch '[\s"]' -and $Value.Length -gt 0) { return $Value }
@@ -95,10 +102,10 @@ try {
                 }
             } finally { $outputStream.Dispose(); $inputStream.Dispose() }
         } finally { $response.Dispose() }
-        if ((Get-FileHash -LiteralPath "$temp\archive" -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { Blocked 'uv archive SHA256 mismatch; downloaded bytes were not executed' }
+        if ((FileHash "$temp\archive") -ne $expected) { Blocked 'uv archive SHA256 mismatch; downloaded bytes were not executed' }
         [IO.File]::Move("$temp\archive", $archivePath)
     }
-    if ((Get-Item -LiteralPath $archivePath).Length -gt [int]$lock['MAX_ARCHIVE_BYTES'][0] -or (Get-FileHash -LiteralPath $archivePath -Algorithm SHA256).Hash.ToLowerInvariant() -ne $expected) { Blocked 'cached uv archive size/SHA256 mismatch; preserve it and inspect before retry' }
+    if ((Get-Item -LiteralPath $archivePath).Length -gt [int]$lock['MAX_ARCHIVE_BYTES'][0] -or (FileHash $archivePath) -ne $expected) { Blocked 'cached uv archive size/SHA256 mismatch; preserve it and inspect before retry' }
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $zip = [IO.Compression.ZipFile]::OpenRead($archivePath)
     try {
@@ -108,7 +115,7 @@ try {
         try { $source.CopyTo($destination) } finally { $destination.Dispose(); $source.Dispose() }
     } finally { $zip.Dispose() }
     if (Test-Path -LiteralPath "$runtime\uv.exe") {
-        if ((Get-FileHash -LiteralPath "$runtime\uv.exe").Hash -ne (Get-FileHash -LiteralPath "$temp\uv.exe").Hash) { Blocked 'uv executable differs from pinned archive' }
+        if ((FileHash "$runtime\uv.exe") -ne (FileHash "$temp\uv.exe")) { Blocked 'uv executable differs from pinned archive' }
     } elseif ($setup) { [IO.File]::Move("$temp\uv.exe", "$runtime\uv.exe") }
     else { Blocked 'uv executable missing; run explicit setup' }
     if ($setup) {

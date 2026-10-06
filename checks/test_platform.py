@@ -1,6 +1,7 @@
 """Portability contracts and failures, independent of real provider accounts."""
 import base64
 import hashlib
+import io
 import json
 import os
 from pathlib import Path
@@ -92,8 +93,8 @@ class Platforms(Fixture):
 
     def test_doctor_is_readonly_and_installed_runtime_is_not_business_memory(self):
         before = {p.relative_to(self.root).as_posix(): digest(p) for p in (self.root / 'company').rglob('*') if p.is_file()}
-        bad = self.root / '.local/runtime/package/SKILL.md'; bad.parent.mkdir(parents=True); bad.write_text('not a business skill', encoding='utf-8')
-        bad = self.root / '.venv/foreign.md'; bad.parent.mkdir(); bad.write_text('[bad](missing)', encoding='utf-8')
+        bad = self.root / '.local/runtime/package/SKILL.md'; bad.parent.mkdir(parents=True); bad.write_text('not a business skill', encoding='utf-8', newline="\n")
+        bad = self.root / '.venv/foreign.md'; bad.parent.mkdir(); bad.write_text('[bad](missing)', encoding='utf-8', newline="\n")
         validation.repository(self.root)
         self.assertEqual(doctor.diagnose(self.root)['status'], 'ready')
         self.assertEqual(before, {p.relative_to(self.root).as_posix(): digest(p) for p in (self.root / 'company').rglob('*') if p.is_file()})
@@ -135,6 +136,23 @@ class Platforms(Fixture):
                 file.write_bytes(target)
         delivery.git(self.root, 'config', 'core.symlinks', 'false')
         backup = self.base / 'backup'; lifecycle.backup(self.root, backup)
+        # Actual schema1 Windows backups stored mode120000 projections as
+        # regular placeholder bytes. Preserve this old reader contract.
+        manifest = load(backup / 'manifest.json')
+        relative = '.agents/skills/company-context'
+        placeholder = b'../../skills/company-context'
+        rebuilt = backup / 'legacy-files.tar'
+        with tarfile.open(backup / 'files.tar', 'r') as source, tarfile.open(rebuilt, 'w') as target:
+            for member in source:
+                if member.name == relative:
+                    member = tarfile.TarInfo(relative); member.size = len(placeholder)
+                    target.addfile(member, io.BytesIO(placeholder))
+                else:
+                    target.addfile(member, source.extractfile(member) if member.isfile() else None)
+        rebuilt.replace(backup / 'files.tar')
+        manifest['files'][relative] = {'sha256': hashlib.sha256(placeholder).hexdigest()}
+        manifest['tar_sha256'] = digest(backup / 'files.tar')
+        write(backup / 'manifest.json', manifest)
         restored = self.base / 'restored'; lifecycle.restore(backup, restored)
         self.assertIn(platform.projection(restored, '.agents/skills', 'company-context'), ['symlink', 'git-placeholder'])
         self.assertEqual(delivery.git(restored, 'rev-parse', 'HEAD'), delivery.git(self.root, 'rev-parse', 'HEAD'))

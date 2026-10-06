@@ -23,7 +23,7 @@ class Preflight(Fixture):
     def change(self, root, relative, text):
         file = root / relative
         file.parent.mkdir(parents=True, exist_ok=True)
-        file.write_text(text, encoding="utf-8")
+        file.write_text(text, encoding="utf-8", newline="\n")
         delivery.commit(root, [relative], 'Synthetic authorized change')
 
     def test_receive_latest_and_deliver_other_employee_without_manual_sync(self):
@@ -47,8 +47,8 @@ class Preflight(Fixture):
         remote, a, b = self.common()
         self.change(a, 'work/shared.txt', 'New remote work'); delivery.deliver(a,str(remote))
         head = delivery.git(b,'rev-parse','HEAD')
-        (b/'company/projects/README.md').write_text('Unfinished local work', encoding="utf-8")
-        (b/'work').mkdir(exist_ok=True); (b/'work/untracked.txt').write_text('Never auto-commit this', encoding="utf-8")
+        (b/'company/projects/README.md').write_text('Unfinished local work', encoding="utf-8", newline="\n")
+        (b/'work').mkdir(exist_ok=True); (b/'work/untracked.txt').write_text('Never auto-commit this', encoding="utf-8", newline="\n")
         delivery.git(b,'add','company/projects/README.md')
         before = delivery.git(b,'status','--porcelain','--untracked-files=all')
         blocked = self.cli('preflight',root=b,success=False)
@@ -132,7 +132,7 @@ class Preflight(Fixture):
         head=delivery.git(self.root,'rev-parse','HEAD')
         self.assertIn('not configured',self.cli('preflight',success=False)['reason'])
         remote,a,b=self.common_after_seed()
-        marker=b/'.git/MERGE_HEAD';marker.write_text(head+'\n', encoding="utf-8")
+        marker=b/'.git/MERGE_HEAD';marker.write_text(head+'\n', encoding="utf-8", newline="\n")
         blocked=self.cli('preflight',root=b,success=False)
         self.assertEqual(blocked['operation'],'MERGE_HEAD')
         self.assertEqual(marker.read_text(encoding="utf-8"),head+'\n')
@@ -149,8 +149,8 @@ class Preflight(Fixture):
 
     def test_ignored_local_file_cannot_be_overwritten_by_fast_forward(self):
         remote,a,b=self.common()
-        (b/'.local').mkdir();(b/'.local/preserved.txt').write_text('Untracked ignored personal work', encoding="utf-8")
-        (a/'.local').mkdir();(a/'.local/preserved.txt').write_text('Tracked collision', encoding="utf-8")
+        (b/'.local').mkdir();(b/'.local/preserved.txt').write_text('Untracked ignored personal work', encoding="utf-8", newline="\n")
+        (a/'.local').mkdir();(a/'.local/preserved.txt').write_text('Tracked collision', encoding="utf-8", newline="\n")
         delivery.git(a,'add','-f','.local/preserved.txt')
         delivery.git(a,'commit','-m','Synthetic ignored-path collision')
         delivery.deliver(a,str(remote))

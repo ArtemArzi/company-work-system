@@ -35,11 +35,11 @@ class Evolution(fixtures.Fixture):
         remote=self.base/'common.git';delivery.git(a,'clone','--bare',str(a),str(remote))
         delivery.deliver(a,str(remote),task_id=task['id'])
         cfgb=config(b);cfgb['hooks']={'enabled':False,'disabled':['publication-check']};write(b/'company/config.yaml',cfgb)
-        (b/'work').mkdir(exist_ok=True);(b/'work/kept.txt').write_text('Company B local work', encoding="utf-8")
+        (b/'work').mkdir(exist_ok=True);(b/'work/kept.txt').write_text('Company B local work', encoding="utf-8", newline="\n")
         delivery.commit(b,['company/config.yaml','work/kept.txt'],'Save disabled company settings')
         before_a=copy.deepcopy(config(a));before_b=copy.deepcopy(config(b))
         # A canonical method update changes the native fingerprint, not local ownership.
-        rule=product/'template/standards/hook-authoring.md';rule.write_text(rule.read_text(encoding="utf-8")+'\nSynthetic release clarification.\n', encoding="utf-8")
+        rule=product/'template/standards/hook-authoring.md';rule.write_text(rule.read_text(encoding="utf-8")+'\nSynthetic release clarification.\n', encoding="utf-8", newline="\n")
         version=load(product/'template/release.yaml');parts=version['version'].split('.');version['version']='.'.join([*parts[:2],str(int(parts[2])+1)]);write(product/'template/release.yaml',version)
         delivery.git(product,'add','template');delivery.git(product,'commit','-m','Fixture hook method release')
         fixtures.product.release(product,release)
@@ -94,7 +94,7 @@ class Evolution(fixtures.Fixture):
         declaration['hooks'][2]['purpose']='Check new method map links after the write'
         write(company/'hooks/manifest.yaml',declaration)
         code=(company/'scripts/hooks.py').read_text(encoding="utf-8")+'\n# General method improvement: retain shared validator ownership.\n'
-        (company/'scripts/hooks.py').write_text(code, encoding="utf-8")
+        (company/'scripts/hooks.py').write_text(code, encoding="utf-8", newline="\n")
         self.assertEqual(hooks.manifest(company)['hooks'][2]['purpose'],declaration['hooks'][2]['purpose'])
         package=self.base/'authored-sanitized-hook';package.mkdir()
         authored={'hooks/manifest.yaml':(company/'hooks/manifest.yaml').read_bytes(),'scripts/hooks.py':code.encode(),
@@ -117,7 +117,7 @@ class Evolution(fixtures.Fixture):
         self.assertNotIn(company.name,delivery.git(candidate,'log','--format=%s'))
         self.assertFalse((candidate/'template/.system/hooks-project-codex.json').exists())
         # The structural preparer must never import unreviewed donated code.
-        poison=package/'scripts/hooks.py';poison.write_text('raise RuntimeError("Unreviewed donated code executed")\n'+code, encoding="utf-8")
+        poison=package/'scripts/hooks.py';poison.write_text('raise RuntimeError("Unreviewed donated code executed")\n'+code, encoding="utf-8", newline="\n")
         approval=load(package/'approval.json');approval['files']['scripts/hooks.py']=digest(poison);write(package/'approval.json',approval)
         inert=lifecycle.proposal_candidate(company,package,product,str(remote),self.base/'inert-product-candidate')
         self.assertEqual(inert['status'],'reviewable-product-candidate')
@@ -127,9 +127,9 @@ class Evolution(fixtures.Fixture):
         package=self.base/'hook-negative';package.mkdir()
         examples=['scripts/arbitrary.py','.claude/settings.json','.codex/hooks.json','.system/hooks-project-codex.json','company/README.md']
         for n,relative in enumerate(examples):
-            file=package/relative;file.parent.mkdir(parents=True,exist_ok=True);file.write_text('Synthetic candidate', encoding="utf-8")
+            file=package/relative;file.parent.mkdir(parents=True,exist_ok=True);file.write_text('Synthetic candidate', encoding="utf-8", newline="\n")
             write(package/'approval.json',{'approved_by':'test-owner','permission':'share-sanitized-method','purpose':'Negative path', 'files':{relative:digest(file)}})
             with self.assertRaisesRegex(Rejected,'allowlist'):lifecycle.proposal(self.root,package,self.base/f'negative-{n}')
-        file=package/'scripts/hooks.py';file.write_text('print("test-company")\n', encoding="utf-8")
+        file=package/'scripts/hooks.py';file.write_text('print("test-company")\n', encoding="utf-8", newline="\n")
         write(package/'approval.json',{'approved_by':'test-owner','permission':'share-sanitized-method','purpose':'Negative identity', 'files':{'scripts/hooks.py':digest(file)}})
         with self.assertRaisesRegex(Rejected,'private identifiers'):lifecycle.proposal(self.root,package,self.base/'negative-identity')

@@ -1,0 +1,7 @@
+test_legacy_placeholder_backup_rehydrates_safe_projection (checks.test_platform.Platforms.test_legacy_placeholder_backup_rehydrates_safe_projection) ... ok
+test_byte_policy_and_bootstrap_drift_block_selected_and_full_tasks (checks.test_dependencies.Dependencies.test_byte_policy_and_bootstrap_drift_block_selected_and_full_tasks) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 21.898s
+
+OK

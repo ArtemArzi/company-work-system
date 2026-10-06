@@ -8,6 +8,9 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import time
+import io
+import tarfile
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -23,7 +26,7 @@ spec.loader.exec_module(bootstrap)
 class BootstrapTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='cws-bootstrap-')
-        self.root = Path(self.temp.name) / 'company with spaces'
+        self.root = Path(self.temp.name).resolve() / 'company with spaces'
         (self.root / 'scripts').mkdir(parents=True)
         for name in ('bootstrap.py', 'bootstrap.lock', 'run.sh', 'run.ps1', 'platform_runtime.py'):
             shutil.copy2(SCRIPTS / name, self.root / 'scripts' / name)
@@ -150,6 +153,68 @@ class BootstrapTests(unittest.TestCase):
         self.assertFalse((runtime / 'uv').exists())
         self.assertFalse((self.root / '.venv').exists())
         self.assertEqual(list(runtime.glob('.fetch-*')), [])
+
+    @unittest.skipIf(os.name == 'nt', 'POSIX ancestor aliases and signals')
+    def test_system_ancestor_alias_allowed_but_internal_alias_rejected(self):
+        ancestor = self.root.parent / 'os-ancestor-alias'
+        ancestor.symlink_to(self.root.parent, target_is_directory=True)
+        logical_root = ancestor / self.root.name
+        bootstrap.guard(logical_root / 'scripts/bootstrap.lock', logical_root)
+        external = self.root.parent / 'external'
+        external.mkdir()
+        (self.root / '.venv').symlink_to(external, target_is_directory=True)
+        with self.assertRaisesRegex(bootstrap.BootstrapError, 'alias'):
+            bootstrap.guard(logical_root / '.venv', logical_root)
+        result = self.wrapper(['bootstrap-status'])
+        self.assertEqual(result.returncode, 2)
+        self.assertIn(b'alias', result.stderr)
+        self.assertEqual(list(external.iterdir()), [])
+
+    @unittest.skipIf(os.name == 'nt', 'POSIX watchdog regression')
+    def test_watchdog_kills_and_reaps_owned_child_ignoring_sigterm(self):
+        # Execute the complete launcher with a synthetic pinned uv artifact.
+        # The one-second deadline is data in this isolated fixture's manifest.
+        runtime = self.root / '.local/runtime'
+        runtime.mkdir(parents=True)
+        (runtime / 'owner').write_text(str(self.root) + '\n')
+        data = bootstrap.manifest(self.root)
+        system = 'macos' if sys.platform == 'darwin' else 'linux'
+        arch = 'aarch64' if os.uname().machine in ('arm64', 'aarch64') else 'x86_64'
+        name, _, entry = data[f'{system}-{arch}']
+        pid_file = runtime / 'child.pid'
+        late_file = runtime / 'late-write'
+        executable = ('#!' + sys.executable + '\nimport os,signal,time\n'
+                      'signal.signal(signal.SIGTERM,signal.SIG_IGN)\n'
+                      f'open({str(pid_file)!r},"w").write(str(os.getpid()))\n'
+                      'time.sleep(3)\n'
+                      f'open({str(late_file)!r},"w").write("must never happen")\n'
+                      'time.sleep(30)\n').encode()
+        archive = runtime / name
+        with tarfile.open(archive, 'w:gz') as package:
+            item = tarfile.TarInfo(entry); item.mode = 0o700; item.size = len(executable)
+            package.addfile(item, io.BytesIO(executable))
+        lock = self.root / 'scripts/bootstrap.lock'
+        lines = lock.read_text().splitlines()
+        for index, line in enumerate(lines):
+            if line.startswith('TIMEOUT_SECONDS\t'): lines[index] = 'TIMEOUT_SECONDS\t1'
+            if line.startswith(f'{system}-{arch}\t'):
+                lines[index] = '\t'.join([f'{system}-{arch}', name, hashlib.sha256(archive.read_bytes()).hexdigest(), entry])
+        lock.write_text('\n'.join(lines) + '\n')
+        sibling = subprocess.Popen([sys.executable, '-c', 'import time;time.sleep(30)'])
+        try:
+            started = time.monotonic()
+            result = self.wrapper(['setup'])
+            elapsed = time.monotonic() - started
+            self.assertEqual(result.returncode, 2, result.stderr)
+            self.assertIn(b'timed out', result.stderr)
+            self.assertLess(elapsed, 3.5)
+            self.assertIsNone(sibling.poll(), 'unrelated child must remain running')
+            pid = int(pid_file.read_text())
+            with self.assertRaises(ProcessLookupError): os.kill(pid, 0)
+            self.assertFalse(late_file.exists())
+            self.assertFalse((runtime / 'environment.json').exists())
+        finally:
+            sibling.kill(); sibling.wait()
 
     def test_pyvenv_config_spaces_and_foreign_base(self):
         runtime = self.reserve()

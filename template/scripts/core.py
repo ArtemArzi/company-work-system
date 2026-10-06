@@ -116,6 +116,8 @@ def event(task, action, detail):
 
 def method_bindings(root, inputs=()):
     relatives = ["company/config.yaml", "release.yaml"]
+    if tuple(map(int, load(Path(root) / 'release.yaml')['version'].split('.'))) >= (1, 3, 0):
+        relatives += ['.gitattributes', 'requirements.txt', 'scripts/bootstrap.lock', 'scripts/run.sh', 'scripts/run.ps1']
     for directory in ["standards", "skills", "workflows", "scripts", "adapters", "hooks", "company/standards"]:
         relatives += [p.relative_to(root).as_posix() for p in sorted(Path(root, directory).rglob("*")) if p.is_file() and p.suffix in {".py", ".md", ".yaml"}]
     relatives += list(inputs)

@@ -5,6 +5,7 @@ import os
 from pathlib import Path, PurePosixPath
 import re
 import shlex
+import stat
 import tempfile
 import unicodedata
 
@@ -38,10 +39,11 @@ def path_collisions(relatives):
 
 def alias(file):
     file = Path(file)
-    if not file.exists() and not file.is_symlink():
+    try:
+        metadata = file.lstat()  # Do not follow a Windows file-typed directory link.
+    except FileNotFoundError:
         return False
-    return (file.is_symlink() or (hasattr(file, "is_junction") and file.is_junction()) or
-            bool(getattr(file.lstat(), "st_file_attributes", 0) & 0x400))
+    return stat.S_ISLNK(metadata.st_mode) or bool(getattr(metadata, "st_file_attributes", 0) & 0x400)
 
 
 def no_alias_parents(root, file, include_leaf=True):

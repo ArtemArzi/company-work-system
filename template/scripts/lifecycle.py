@@ -120,18 +120,33 @@ def backup(root, destination):
     require(not destination.exists() and not destination.resolve().is_relative_to(Path(root).resolve()), "backup destination must be new/outside company")
     destination.mkdir(parents=True)
     git(root, "bundle", "create", str(destination / "history.bundle"), "--all")
-    files = git(root, "ls-files", "-z").split("\x00")
+    inventory = {}
+    for row in git(root, 'ls-files', '--stage', '-z').split('\x00'):
+        if row:
+            header, relative = row.split('\t', 1)
+            mode, oid, stage = header.split()
+            require(stage == '0', 'backup has unresolved index')
+            inventory[relative] = (mode, oid)
     manifest = {}
     with tarfile.open(destination / "files.tar", "w") as archive:
-        for relative in files:
-            if not relative:
-                continue
+        for relative, (mode, oid) in inventory.items():
             file = Path(root, relative)
-            if file.is_symlink():
-                manifest[relative] = {"symlink": str(file.readlink())}
+            if mode == '120000':
+                import re
+                import platform_runtime as platform
+                match = re.fullmatch(r'\.(?:agents|claude)/skills/([a-z][a-z0-9-]{1,63})', relative)
+                require(match is not None, 'backup noncanonical projection')
+                platform.projection(root, relative.rsplit('/', 1)[0], match[1], allow_absent=False)
+                expected = '../../skills/' + match[1]
+                require(git(root, 'cat-file', 'blob', oid, binary=True) == expected.encode(), 'backup projection blob changed')
+                manifest[relative] = {"symlink": expected}
+                member = tarfile.TarInfo(relative)
+                member.type = tarfile.SYMTYPE; member.linkname = expected; member.mode = 0o777
+                archive.addfile(member)
             else:
+                require(mode in {'100644', '100755'} and not file.is_symlink(), 'backup unsupported mode')
                 manifest[relative] = {"sha256": digest(file)}
-            archive.add(file, arcname=relative, recursive=False)
+                archive.add(file, arcname=relative, recursive=False)
     write(destination / "manifest.json", {"schema_version": 1, "head": git(root, "rev-parse", "HEAD"), "files": manifest, "bundle_sha256": digest(destination / "history.bundle"), "tar_sha256": digest(destination / "files.tar")})
     return {"path": str(destination), "tracked_files": len(manifest), "boundary": "tracked authorized files only; ignored secrets/external data need separate owner backup"}
 
@@ -310,7 +325,8 @@ def proposal_candidate(root, package, product_root, product_remote, destination)
             text = index.read_text(encoding="utf-8") if index.exists() else "# Карта стандартов\n\n"
             for relative in standards:
                 text += f"- [{Path(relative).stem}]({Path(relative).name}) — proposal, maintainer acceptance pending\n"
-            index.write_text(text, encoding="utf-8")
+            from platform_runtime import atomic_text
+            atomic_text(index, text)
             changed.append("template/standards/README.md")
         # This process uses its trusted validator/handler allowlist, not donated
         # scripts. New executable contracts still require maintainer review.

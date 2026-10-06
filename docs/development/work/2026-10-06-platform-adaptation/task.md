@@ -42,3 +42,25 @@ CI bootstrap-only commit9f365c8a63f1a72a7be59fc06b9bd91a8201fab9 доставл�
 Следующий шаг: закончить bootstrap, portability tests и OS matrix; проверить restore negative/old projection/no late hook writes; затем полный результат отдельному reviewer.
 
 Проверки первого прохода: platform11PASS (legacy placeholders/raw CRLF/native settings/lock death/atomic errors/paths); system30PASS+1sandbox error HTTP listen запрещён — повторять полный suite с разрешённым local network. History30PASS+1failure старого diagnostic message (процесс импортировал код до исправления); порядок guards восстановлен, targeted rerun и fullsuite обязательны. Windows-invalid filename negative теперь строится как Git index object, чтобы проверять тот же плохой пример без невозможного файла ОС. Test text fixtures читаются UTF-8 явно.
+
+## Кандидат и реальная матрица
+
+Кандидат5db7c0d47135e4bc508034888573b6ac328c7975 сохранён в codex/platform-adaptation; общий выпуск ещё не принят и не доставлен main. Workflow networkbootstrap-only commit1c060e90685a5572ec5f0bbb4776c8af6743f18d main; targetedCIreviewPASS ...a78513c2. [Actionsrun37513945580](https://github.com/ArtemArzi/company-work-system/actions/runs/37513945580) запускает exact candidateSHA на Ubuntu24.04, Windows2022, macOS14; statuspending, native claimsнерасширять. LocalfullsuiteсразрешённымHTTPfixtures идёт; bootstrapworker actual15/15PASS36.638s включаяnoPythonPATH, повтор и unchangedfakehome.
+
+Свежий отдельный whole-resultreviewer platform_result_acceptance читает полный кандидат параллельно проверкам; его итог обязателен после evidence join и исправлений. Следующийагент: дождаться/сохранить exactCI/logs, закрыть конкретные failures без weakening, targetedrevalidationreviewer, затем release1.3.0main+bundle; компании исключены.
+
+## Реальные ошибки и repair-forward, 07.10
+
+Первый exact candidate CI37513945580: Ubuntu158PASS; macOS158tests8failures12errors; Windows158tests10failures19errors3skips. Полные наблюдения — evidence/macos-first.log, windows-first.log, ci-first.json. Linux local158tests1204.113s:1failure proactive versions changed во время параллельных правок bindings; это discovery evidence, не приёмка замороженного кандидата.
+
+Причины: lexical temporary roots /var vs/private/var и Windows8.3alias; Win copytree потерял directory type symlink; стандартный text writer fixtures создал CRLF; backup readlink Windows separators; Get-FileHash недоступен в очищенном окружении. Исправлены canonical root comparisons, строгий lstat alias guard, test-only canonical directory projection reconstruction, explicitLFfixtures, sharedatomic writer, exact Gitmode120000 projection serialization и SHA через builtin.NET. Небезопасные Git filenames теперь создаются Gitobjects plumbing, тот же negative case сохранён.
+
+Независимый reviewer обнаружил отсутствие .gitattributes/bootstrap в task dependency closures и TERM-only watchdog. Исправлены sharedkernel/общий binding, regression selected/full tasksPASS; ownership-aware TERM→grace→KILL→reap. Две промежуточные watchdog попытки ~33s: subshell потерял jobs table, dash безjobcontrol не имел processgroup для kill%job. Точная проверка теперь PASS2.053s, поздней записи нет, sibling жив; независимый повтор2.062sPASS. Worker frozen, full actual bootstrap17/17PASS37.075s включая noPythonPATH и неизменный fakehome.
+
+Применён development-recovery: implementation/verification divergence, repair-forward; accepted contracts и baseline/candidate5db сохранены, требования не ослаблены. Windows archive projection representation нормализуется только после доказательства exact canonical mode120000 Gitblob; остальные bytes и hashes неизменны, старый schema1SHA placeholder читается строго.
+
+Actual baseline1.2 код материализован из7b38b92, им создан historical task + native settings/proof + backup. Current/actual old1.2 Linux reader в обоих направлениях PASS (evidence/legacy-transfer-linux.log). Producer первая попытка rejected source freshness; отдельный strict fresh reproPASS. Вторая rejected source hash: повторно сгенерированный observed_at отличался от boundartifact. Исправление: копировать exact исходные bytes, третья produce/verifyPASS. Failed candidates сохранены ignored.local/transfer-proof/source{,2}; никаких hashes/проверок не переписано.
+
+Осталось: проверенный workflow transfer delta отдельно main, frozen candidate + exact native3OS suite/actual crossOS transfer, независимая whole-result приёмка и isolatedrelease. Клиенты/Work/host не менялись. Native Codex/Claude trust/events и Cloud providers остаются unverified.
+
+CI transferdelta REVISE полнота: любые manifests раньше давали success. Исправлено exact3current+Ubuntulegacy inventory; отсутствие каждого/лишнийartifact negativePASS; producerrequiresprojected/settings/proof/task/rawCRLF; restoredraw bytes/конкретнаяtask/4proofsOS и8Ubuntu. Sameplanreviewer PASS company-work-system-platform-ci-transfer-pass-20261007-42d697e8. Workflow-only142d4ac main; candidatefreeze и exactmatrix далее.

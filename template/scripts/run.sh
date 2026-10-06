@@ -41,18 +41,38 @@ hash() {
     elif command -v shasum >/dev/null 2>&1; then shasum -a 256 "$1" | awk '{print $1}'
     else blocked 'SHA256 utility missing (sha256sum or shasum)'; fi
 }
-# The watchdog only owns this uv process. Downloads have their own HTTP deadline too.
+# Check the parent's current job table before every signal. A completed job's
+# numeric PID may have been reused, so kill -0 alone does not establish ownership.
+owned_job() {
+    LC_ALL=C jobs -l > "$temp/jobs.$1"
+    owned_job_value=$(awk -v pid="$1" 'index($1,"[")==1 && /Running|Stopped/ {for(i=2;i<=NF;i++) if($i==pid){gsub(/[^0-9]/,"",$1); print "%" $1; exit}}' "$temp/jobs.$1")
+}
+signal_owned() {
+    owned_job "$2"
+    [ -z "$owned_job_value" ] || kill -"$1" "$2" 2>/dev/null || :
+}
 bounded() {
     "$@" & child=$!
-    (trap 'kill "$sleeper" 2>/dev/null || :; exit 0' TERM HUP INT
+    timed_out=false
+    trap 'timed_out=true
+          signal_owned TERM "$child"
+          sleep 1
+          signal_owned KILL "$child"' USR1
+    (trap 'signal_owned TERM "$sleeper"; wait "$sleeper" 2>/dev/null || :; exit 0' TERM HUP INT
      sleep "$(value TIMEOUT_SECONDS)" & sleeper=$!
      wait "$sleeper" || exit 0
-     kill -TERM "$child" 2>/dev/null || :) & timer=$!
+     kill -USR1 "$$" 2>/dev/null || :) & timer=$!
     code=0; wait "$child" || code=$?
-    kill "$timer" 2>/dev/null || :
+    if "$timed_out"; then
+        wait "$child" 2>/dev/null || :
+    fi
+    signal_owned TERM "$timer"
     wait "$timer" 2>/dev/null || :
-    [ "$code" -eq 0 ] || blocked "runtime command failed or timed out (exit $code)"
+    trap - USR1
+    if "$timed_out"; then blocked "runtime command timed out; owned child was terminated and reaped"; fi
+    [ "$code" -eq 0 ] || blocked "runtime command failed (exit $code)"
 }
+
 if [ ! -f "$runtime/$archive" ]; then
     "$setup" || blocked 'pinned uv archive missing; run explicit setup'
     command -v curl >/dev/null 2>&1 || blocked 'curl is required for the first setup'

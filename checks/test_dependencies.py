@@ -10,6 +10,19 @@ import validation
 
 
 class Dependencies(fixtures.Fixture):
+    def test_byte_policy_and_bootstrap_drift_block_selected_and_full_tasks(self):
+        selected = self.task()
+        full = method_bindings(self.root)
+        for relative in ['.gitattributes', 'scripts/bootstrap.lock', 'scripts/run.sh', 'scripts/run.ps1', 'requirements.txt']:
+            self.assertIn(relative, selected['bindings'])
+            self.assertIn(relative, full)
+        file = self.root / '.gitattributes'
+        file.write_bytes(file.read_bytes() + b'\n/company/** text eol=crlf\n')
+        self.assertIn('.gitattributes', changed_bindings(self.root, selected['bindings'], selected['binding_scope']))
+        self.assertIn('.gitattributes', changed_bindings(self.root, full))
+        with self.assertRaisesRegex(ValueError, 'Pinned'):
+            operations.execute(self.root, selected['id'], self.artifact(), self.critical())
+
     def test_selected_sources_harness_and_unrelated_methods(self):
         task = self.task()
         self.assertIn('binding_scope', task)
@@ -17,8 +30,8 @@ class Dependencies(fixtures.Fixture):
         cfg['sources']['unrelated-source'] = {'type': 'export', 'path': 'elsewhere', 'account': 'other'}
         cfg['profiles']['claude'] = 'other-profile'
         write(self.root/'company/config.yaml', cfg)
-        file = self.root/'adapters/claude/README.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated change\n', encoding="utf-8")
-        file = self.root/'skills/company-marketing/SKILL.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated method\n', encoding="utf-8")
+        file = self.root/'adapters/claude/README.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated change\n', encoding="utf-8", newline="\n")
+        file = self.root/'skills/company-marketing/SKILL.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated method\n', encoding="utf-8", newline="\n")
         self.assertEqual(changed_bindings(self.root, task['bindings'], task['binding_scope']), [])
         verified = operations.execute(self.root, task['id'], self.artifact(), self.critical())
         self.assertEqual(verified['status'], 'verified')
@@ -97,7 +110,7 @@ class Dependencies(fixtures.Fixture):
 
     def test_legacy_read_and_resume_preserve_scope_history(self):
         task = self.task(); previous = copy.deepcopy(task)
-        file=self.root/'standards/data-access.md';file.write_text(file.read_text(encoding="utf-8")+'\nChanged selected rule\n', encoding="utf-8")
+        file=self.root/'standards/data-access.md';file.write_text(file.read_text(encoding="utf-8")+'\nChanged selected rule\n', encoding="utf-8", newline="\n")
         current=operations.decide(self.root,task['id'],task['revision'],'resume','Accept changed rule','test-owner')
         self.assertEqual(current['history'][-1]['detail']['previous_dependencies']['binding_scope'],previous['binding_scope'])
         self.assertNotEqual(current['bindings']['standards/data-access.md'],previous['bindings']['standards/data-access.md'])

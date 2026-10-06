@@ -1,0 +1,735 @@
+﻿2026-10-06T18:47:13.1235556Z Current runner version: '2.337.0'
+2026-10-06T18:47:13.1264388Z ##[group]Runner Image Provisioner
+2026-10-06T18:47:13.1265269Z Hosted Compute Agent
+2026-10-06T18:47:13.1265890Z Version: 20260901.588
+2026-10-06T18:47:13.1266566Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-06T18:47:13.1267360Z Build Date: 2026-09-01T19:56:44Z
+2026-10-06T18:47:13.1268413Z Worker ID: {81330c6c-1553-4ce6-8bd9-ab93d21921d6}
+2026-10-06T18:47:13.1269248Z Azure Region: eastus
+2026-10-06T18:47:13.1269808Z ##[endgroup]
+2026-10-06T18:47:13.1271347Z ##[group]Operating System
+2026-10-06T18:47:13.1272078Z Microsoft Windows Server 2022
+2026-10-06T18:47:13.1272811Z 10.0.20348
+2026-10-06T18:47:13.1273335Z Datacenter
+2026-10-06T18:47:13.1273851Z ##[endgroup]
+2026-10-06T18:47:13.1274441Z ##[group]Runner Image
+2026-10-06T18:47:13.1275026Z Image: windows-2022
+2026-10-06T18:47:13.1275600Z Version: 20260927.320.1
+2026-10-06T18:47:13.1277248Z Included Software: https://github.com/actions/runner-images/blob/win22/20260927.320/images/windows/Windows2022-Readme.md
+2026-10-06T18:47:13.1279176Z Image Release: https://github.com/actions/runner-images/releases/tag/win22%2F20260927.320
+2026-10-06T18:47:13.1280278Z ##[endgroup]
+2026-10-06T18:47:13.1281491Z ##[group]GITHUB_TOKEN Permissions
+2026-10-06T18:47:13.1283746Z Contents: read
+2026-10-06T18:47:13.1284404Z Metadata: read
+2026-10-06T18:47:13.1284989Z ##[endgroup]
+2026-10-06T18:47:13.1287197Z Secret source: Actions
+2026-10-06T18:47:13.1288144Z Cache mode: write
+2026-10-06T18:47:13.1288857Z Prepare workflow directory
+2026-10-06T18:47:13.1583121Z Prepare all required actions
+2026-10-06T18:47:13.1621393Z Getting action download info
+2026-10-06T18:47:13.3519002Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-06T18:47:13.4400648Z Download action repository 'actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-06T18:47:13.6968796Z Complete job name: check (windows-2022)
+2026-10-06T18:47:13.8425097Z ##[group]Run if ($env:CANDIDATE_SHA -notmatch '^[0-9a-f]{40}$') { throw 'Full SHA required' }
+2026-10-06T18:47:13.8426156Z [36;1mif ($env:CANDIDATE_SHA -notmatch '^[0-9a-f]{40}$') { throw 'Full SHA required' }[0m
+2026-10-06T18:47:13.9774758Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-06T18:47:13.9775619Z env:
+2026-10-06T18:47:13.9775980Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-06T18:47:13.9776465Z   CANDIDATE_SHA: 5db7c0d47135e4bc508034888573b6ac328c7975
+2026-10-06T18:47:13.9776981Z ##[endgroup]
+2026-10-06T18:47:14.3368069Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-10-06T18:47:14.3368781Z with:
+2026-10-06T18:47:14.3369172Z   ref: 5db7c0d47135e4bc508034888573b6ac328c7975
+2026-10-06T18:47:14.3369655Z   persist-credentials: false
+2026-10-06T18:47:14.3370092Z   repository: ArtemArzi/company-work-system
+2026-10-06T18:47:14.3373562Z   token: ***
+2026-10-06T18:47:14.3373926Z   ssh-strict: true
+2026-10-06T18:47:14.3374263Z   ssh-user: git
+2026-10-06T18:47:14.3374588Z   clean: true
+2026-10-06T18:47:14.3374929Z   sparse-checkout-cone-mode: true
+2026-10-06T18:47:14.3375357Z   fetch-depth: 1
+2026-10-06T18:47:14.3375685Z   fetch-tags: false
+2026-10-06T18:47:14.3376023Z   show-progress: true
+2026-10-06T18:47:14.3376358Z   lfs: false
+2026-10-06T18:47:14.3376673Z   submodules: false
+2026-10-06T18:47:14.3377017Z   set-safe-directory: true
+2026-10-06T18:47:14.3377408Z   allow-unsafe-pr-checkout: false
+2026-10-06T18:47:14.3377800Z env:
+2026-10-06T18:47:14.3378132Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-06T18:47:14.3378503Z ##[endgroup]
+2026-10-06T18:47:14.4506056Z Syncing repository: ArtemArzi/company-work-system
+2026-10-06T18:47:14.4507540Z ##[group]Getting Git version info
+2026-10-06T18:47:14.4508163Z Working directory is 'D:\a\company-work-system\company-work-system'
+2026-10-06T18:47:14.6158058Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-06T18:47:15.4431910Z git version 2.55.0.windows.5
+2026-10-06T18:47:15.4459421Z ##[endgroup]
+2026-10-06T18:47:15.4473360Z Temporarily overriding HOME='D:\a\_temp\68f66fa9-5a76-41da-b60d-89931c9608e4' before making global git config changes
+2026-10-06T18:47:15.4474197Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-06T18:47:15.4482094Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\company-work-system\company-work-system
+2026-10-06T18:47:15.5553278Z Deleting the contents of 'D:\a\company-work-system\company-work-system'
+2026-10-06T18:47:15.5557302Z ##[group]Initializing the repository
+2026-10-06T18:47:15.5564624Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\company-work-system\company-work-system
+2026-10-06T18:47:15.8573475Z Initialized empty Git repository in D:/a/company-work-system/company-work-system/.git/
+2026-10-06T18:47:15.8605676Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/ArtemArzi/company-work-system
+2026-10-06T18:47:15.9157071Z ##[endgroup]
+2026-10-06T18:47:15.9157593Z ##[group]Disabling automatic garbage collection
+2026-10-06T18:47:15.9164709Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-06T18:47:15.9343429Z ##[endgroup]
+2026-10-06T18:47:15.9343762Z ##[group]Setting up auth
+2026-10-06T18:47:15.9353443Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-06T18:47:15.9531691Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-06T18:47:17.8727365Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-06T18:47:17.8909650Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-06T18:47:18.2302420Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-06T18:47:18.2483651Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-06T18:47:18.5910675Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-06T18:47:18.6098809Z ##[endgroup]
+2026-10-06T18:47:18.6107599Z ##[group]Fetching the repository
+2026-10-06T18:47:18.6108663Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin 5db7c0d47135e4bc508034888573b6ac328c7975
+2026-10-06T18:47:19.4848675Z From https://github.com/ArtemArzi/company-work-system
+2026-10-06T18:47:19.4849218Z  * branch            5db7c0d47135e4bc508034888573b6ac328c7975 -> FETCH_HEAD
+2026-10-06T18:47:19.4870274Z ##[endgroup]
+2026-10-06T18:47:19.4870620Z ##[group]Determining the checkout info
+2026-10-06T18:47:19.4872632Z ##[endgroup]
+2026-10-06T18:47:19.4883293Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-06T18:47:19.5222131Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-06T18:47:19.5395604Z ##[group]Checking out the ref
+2026-10-06T18:47:19.5402356Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force 5db7c0d47135e4bc508034888573b6ac328c7975
+2026-10-06T18:47:19.6240001Z Note: switching to '5db7c0d47135e4bc508034888573b6ac328c7975'.
+2026-10-06T18:47:19.6240747Z 
+2026-10-06T18:47:19.6241017Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-06T18:47:19.6241683Z changes and commit them, and you can discard any commits you make in this
+2026-10-06T18:47:19.6242372Z state without impacting any branches by switching back to a branch.
+2026-10-06T18:47:19.6243926Z 
+2026-10-06T18:47:19.6244108Z If you want to create a new branch to retain commits you create, you may
+2026-10-06T18:47:19.6244481Z do so (now or later) by using -c with the switch command. Example:
+2026-10-06T18:47:19.6244683Z 
+2026-10-06T18:47:19.6244810Z   git switch -c <new-branch-name>
+2026-10-06T18:47:19.6244951Z 
+2026-10-06T18:47:19.6245027Z Or undo this operation with:
+2026-10-06T18:47:19.6245152Z 
+2026-10-06T18:47:19.6245221Z   git switch -
+2026-10-06T18:47:19.6245311Z 
+2026-10-06T18:47:19.6245493Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-06T18:47:19.6245720Z 
+2026-10-06T18:47:19.6245934Z HEAD is now at 5db7c0d Prepare portable company runtime and local dependency setup candidate
+2026-10-06T18:47:19.6331686Z ##[endgroup]
+2026-10-06T18:47:19.6594067Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-06T18:47:19.6752060Z 5db7c0d47135e4bc508034888573b6ac328c7975
+2026-10-06T18:47:19.6774909Z ##[group]Removing auth
+2026-10-06T18:47:19.6783996Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-06T18:47:19.6964293Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-06T18:47:20.0513439Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-06T18:47:20.0669294Z http.https://github.com/.extraheader
+2026-10-06T18:47:20.0692875Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-10-06T18:47:20.0869103Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-06T18:47:20.4309571Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-06T18:47:20.4507708Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-06T18:47:20.8156977Z ##[endgroup]
+2026-10-06T18:47:20.8358974Z ##[group]Run if ((git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { throw 'Candidate changed' }
+2026-10-06T18:47:20.8359551Z [36;1mif ((git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { throw 'Candidate changed' }[0m
+2026-10-06T18:47:20.8392095Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-06T18:47:20.8392364Z env:
+2026-10-06T18:47:20.8392506Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-06T18:47:20.8392719Z   CANDIDATE_SHA: 5db7c0d47135e4bc508034888573b6ac328c7975
+2026-10-06T18:47:20.8392949Z ##[endgroup]
+2026-10-06T18:47:21.1606502Z ##[group]Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+2026-10-06T18:47:21.1606852Z with:
+2026-10-06T18:47:21.1607003Z   python-version: 3.12
+2026-10-06T18:47:21.1607169Z   check-latest: false
+2026-10-06T18:47:21.1609323Z   token: ***
+2026-10-06T18:47:21.1609480Z   update-environment: true
+2026-10-06T18:47:21.1609672Z   allow-prereleases: false
+2026-10-06T18:47:21.1609839Z   freethreaded: false
+2026-10-06T18:47:21.1609986Z env:
+2026-10-06T18:47:21.1610116Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-06T18:47:21.1610269Z ##[endgroup]
+2026-10-06T18:47:21.2796369Z ##[group]Installed versions
+2026-10-06T18:47:21.2912356Z (node:4520) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-06T18:47:21.2912895Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-06T18:47:21.2913773Z Successfully set up CPython (3.12.10)
+2026-10-06T18:47:21.2914244Z ##[endgroup]
+2026-10-06T18:47:21.3098203Z ##[group]Run python -m pip install -r template/requirements.txt
+2026-10-06T18:47:21.3098637Z [36;1mpython -m pip install -r template/requirements.txt[0m
+2026-10-06T18:47:21.3128818Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-06T18:47:21.3129087Z env:
+2026-10-06T18:47:21.3129245Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-06T18:47:21.3129483Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:21.3129851Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+2026-10-06T18:47:21.3130188Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:21.3130485Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:21.3130786Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:21.3131029Z ##[endgroup]
+2026-10-06T18:47:26.4703251Z Collecting PyYAML==6.0.1 (from -r template/requirements.txt (line 1))
+2026-10-06T18:47:26.6150276Z   Downloading PyYAML-6.0.1-cp312-cp312-win_amd64.whl.metadata (2.1 kB)
+2026-10-06T18:47:26.6452837Z Downloading PyYAML-6.0.1-cp312-cp312-win_amd64.whl (138 kB)
+2026-10-06T18:47:26.9414970Z Installing collected packages: PyYAML
+2026-10-06T18:47:27.0220274Z Successfully installed PyYAML-6.0.1
+2026-10-06T18:47:27.1438220Z ##[group]Run python -m unittest discover -s checks -v
+2026-10-06T18:47:27.1438576Z [36;1mpython -m unittest discover -s checks -v[0m
+2026-10-06T18:47:27.1467090Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-06T18:47:27.1467350Z env:
+2026-10-06T18:47:27.1467493Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-06T18:47:27.1467732Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:27.1468076Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+2026-10-06T18:47:27.1468408Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:27.1468701Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:27.1469012Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-06T18:47:27.1469249Z ##[endgroup]
+2026-10-06T18:47:34.6610663Z test_cached_archive_corruption_rejected_without_execution (test_bootstrap.BootstrapTests.test_cached_archive_corruption_rejected_without_execution) ... FAIL
+2026-10-06T18:47:34.6627605Z test_download_failure_and_corruption_leave_no_success_marker (test_bootstrap.BootstrapTests.test_download_failure_and_corruption_leave_no_success_marker) ... skipped 'POSIX downloader fixture'
+2026-10-06T18:47:34.6700278Z test_foreign_interpreter_is_never_given_to_installer (test_bootstrap.BootstrapTests.test_foreign_interpreter_is_never_given_to_installer) ... ERROR
+2026-10-06T18:47:34.6805892Z test_foreign_venv_preserved (test_bootstrap.BootstrapTests.test_foreign_venv_preserved) ... FAIL
+2026-10-06T18:47:34.6887156Z test_install_failure_keeps_preparing_state (test_bootstrap.BootstrapTests.test_install_failure_keeps_preparing_state) ... ERROR
+2026-10-06T18:47:34.6967023Z test_interrupted_partial_setup_resumes_only_owned_environment (test_bootstrap.BootstrapTests.test_interrupted_partial_setup_resumes_only_owned_environment) ... ERROR
+2026-10-06T18:47:34.7046117Z test_manifest_pinned_single_source (test_bootstrap.BootstrapTests.test_manifest_pinned_single_source) ... ok
+2026-10-06T18:47:34.7122043Z test_missing_git_actionable_blocker (test_bootstrap.BootstrapTests.test_missing_git_actionable_blocker) ... ok
+2026-10-06T18:47:34.9392752Z test_offline_no_python_ordinary_command_never_downloads (test_bootstrap.BootstrapTests.test_offline_no_python_ordinary_command_never_downloads) ... ok
+2026-10-06T18:47:34.9503009Z test_pyvenv_config_spaces_and_foreign_base (test_bootstrap.BootstrapTests.test_pyvenv_config_spaces_and_foreign_base) ... ERROR
+2026-10-06T18:47:34.9590986Z test_ready_repeat_does_not_reinstall (test_bootstrap.BootstrapTests.test_ready_repeat_does_not_reinstall) ... ERROR
+2026-10-06T18:47:36.2686102Z test_real_setup_without_path_python_host_preserved (test_bootstrap.BootstrapTests.test_real_setup_without_path_python_host_preserved) ... FAIL
+2026-10-06T18:47:36.2796352Z test_redirect_environment_cleaned_without_changing_parent (test_bootstrap.BootstrapTests.test_redirect_environment_cleaned_without_changing_parent) ... ok
+2026-10-06T18:47:36.2859913Z test_relocated_and_manifest_changed_venv_rejected (test_bootstrap.BootstrapTests.test_relocated_and_manifest_changed_venv_rejected) ... ERROR
+2026-10-06T18:47:36.2873610Z test_symlink_venv_and_runtime_rejected (test_bootstrap.BootstrapTests.test_symlink_venv_and_runtime_rejected) ... skipped 'Windows symlink permission is not required'
+2026-10-06T18:47:36.9652053Z test_cancelled_incident_preserves_terminal_state_and_bytes (test_consistency.Consistency.test_cancelled_incident_preserves_terminal_state_and_bytes) ... ok
+2026-10-06T18:47:37.4108387Z test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) ... ok
+2026-10-06T18:47:37.7476629Z test_metrics_require_unambiguous_independent_source_admission (test_consistency.Consistency.test_metrics_require_unambiguous_independent_source_admission) ... ok
+2026-10-06T18:47:43.4452553Z test_foreign_index_is_not_used_or_modified_by_delivery (test_consistency.Consistency.test_foreign_index_is_not_used_or_modified_by_delivery) ... FAIL
+2026-10-06T18:47:47.0763014Z test_relative_prepare_is_relative_to_caller_not_source_checkout (test_consistency.Consistency.test_relative_prepare_is_relative_to_caller_not_source_checkout) ... FAIL
+2026-10-06T18:47:47.3557136Z test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) ... ok
+2026-10-06T18:47:47.5192451Z test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) ... ok
+2026-10-06T18:47:48.6826236Z test_resume_and_supersede_keep_original_verification_in_task_history (test_consistency.Consistency.test_resume_and_supersede_keep_original_verification_in_task_history) ... ok
+2026-10-06T18:47:57.8997975Z test_interrupted_finish_update_preserves_original_rollback_base (test_consistency.EvolutionConsistency.test_interrupted_finish_update_preserves_original_rollback_base) ... FAIL
+2026-10-06T18:48:05.0890217Z test_relative_company_update_backup_restore_and_rollback (test_consistency.EvolutionConsistency.test_relative_company_update_backup_restore_and_rollback) ... ERROR
+2026-10-06T18:48:07.9235330Z test_delivered_metrics_keep_historical_admission_after_age_and_config_change (test_consistency.EvolutionConsistency.test_delivered_metrics_keep_historical_admission_after_age_and_config_change) ... ERROR
+2026-10-06T18:48:19.2214380Z test_blocked_update_cannot_finish_without_owner_binding_reconciliation (test_consistency.EvolutionConsistency.test_blocked_update_cannot_finish_without_owner_binding_reconciliation) ... ok
+2026-10-06T18:48:19.5814061Z test_ambiguous_custom_and_undeclared_fallback (test_dependencies.Dependencies.test_ambiguous_custom_and_undeclared_fallback) ... ok
+2026-10-06T18:48:20.0181127Z test_config_race_before_evidence_never_verified (test_dependencies.Dependencies.test_config_race_before_evidence_never_verified) ... ok
+2026-10-06T18:48:20.7017419Z test_declared_dependency_add_remove_and_kernel_change (test_dependencies.Dependencies.test_declared_dependency_add_remove_and_kernel_change) ... ok
+2026-10-06T18:48:21.1833473Z test_delivered_admission_uses_historical_specification (test_dependencies.Dependencies.test_delivered_admission_uses_historical_specification) ... ok
+2026-10-06T18:48:21.4116681Z test_explicit_harness_and_transitive_skill_selection (test_dependencies.Dependencies.test_explicit_harness_and_transitive_skill_selection) ... ok
+2026-10-06T18:48:21.7924026Z test_legacy_read_and_resume_preserve_scope_history (test_dependencies.Dependencies.test_legacy_read_and_resume_preserve_scope_history) ... ok
+2026-10-06T18:48:21.9559273Z test_scope_tampering_and_export_primary_path_rejected (test_dependencies.Dependencies.test_scope_tampering_and_export_primary_path_rejected) ... ok
+2026-10-06T18:48:22.2157677Z test_selected_source_same_id_change_and_rights_block (test_dependencies.Dependencies.test_selected_source_same_id_change_and_rights_block) ... ok
+2026-10-06T18:48:22.9822957Z test_selected_sources_harness_and_unrelated_methods (test_dependencies.Dependencies.test_selected_sources_harness_and_unrelated_methods) ... ok
+2026-10-06T18:48:34.9436299Z test_company_proofs_survive_delivery_update_rollback_restore (test_evolution_hooks.Evolution.test_company_proofs_survive_delivery_update_rollback_restore) ... ERROR
+2026-10-06T18:48:35.2473187Z test_hook_proposal_rejects_bad_approval_data_and_nonfixed_script (test_evolution_hooks.Evolution.test_hook_proposal_rejects_bad_approval_data_and_nonfixed_script) ... ok
+2026-10-06T18:48:42.7522204Z test_local_hook_proposal_has_exact_approval_and_reviewable_replacement (test_evolution_hooks.Evolution.test_local_hook_proposal_has_exact_approval_and_reviewable_replacement) ... ok
+2026-10-06T18:48:47.0369849Z test_author_new_skill_pair_and_safe_projections_use_common_commit (test_history.GuardedDelivery.test_author_new_skill_pair_and_safe_projections_use_common_commit) ... ok
+2026-10-06T18:48:47.1763145Z test_commit_lock_cleanup_preserves_consumed_or_replaced_foreign_locks (test_history.GuardedDelivery.test_commit_lock_cleanup_preserves_consumed_or_replaced_foreign_locks) ... ok
+2026-10-06T18:48:51.1496892Z test_compare_and_swap_preserves_external_new_head (test_history.GuardedDelivery.test_compare_and_swap_preserves_external_new_head) ... ok
+2026-10-06T18:48:54.7013738Z test_concurrent_policy_change_before_index_blocks (test_history.GuardedDelivery.test_concurrent_policy_change_before_index_blocks) ... ok
+2026-10-06T18:48:57.5893998Z test_config_drift_after_scratch_commit_blocks_publication (test_history.GuardedDelivery.test_config_drift_after_scratch_commit_blocks_publication) ... ok
+2026-10-06T18:48:59.9147609Z test_external_delivery_requires_explicit_policy_before_network (test_history.GuardedDelivery.test_external_delivery_requires_explicit_policy_before_network) ... ok
+2026-10-06T18:49:03.1379483Z test_foreign_staged_work_is_preserved (test_history.GuardedDelivery.test_foreign_staged_work_is_preserved) ... ok
+2026-10-06T18:49:05.4559402Z test_head_race_does_not_attach_own_result_to_new_parent (test_history.GuardedDelivery.test_head_race_does_not_attach_own_result_to_new_parent) ... ok
+2026-10-06T18:49:07.4185026Z test_index_race_before_actual_staging_preserves_foreign_bytes (test_history.GuardedDelivery.test_index_race_before_actual_staging_preserves_foreign_bytes) ... ok
+2026-10-06T18:49:07.6041084Z test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup (test_history.GuardedDelivery.test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup) ... ERROR
+2026-10-06T18:49:11.1802949Z test_interrupted_index_install_preserves_published_commit_and_old_index (test_history.GuardedDelivery.test_interrupted_index_install_preserves_published_commit_and_old_index) ... ok
+2026-10-06T18:49:15.7155948Z test_late_foreign_staging_cannot_enter_checked_commit (test_history.GuardedDelivery.test_late_foreign_staging_cannot_enter_checked_commit) ... ok
+2026-10-06T18:49:20.1186583Z test_native_commit_rejection_preserves_original_branch_and_index (test_history.GuardedDelivery.test_native_commit_rejection_preserves_original_branch_and_index) ... ok
+2026-10-06T18:49:23.2214052Z test_native_hook_tree_change_rejects_before_publication (test_history.GuardedDelivery.test_native_hook_tree_change_rejects_before_publication) ... ok
+2026-10-06T18:49:27.7266322Z test_preview_tree_uses_owned_index_and_safe_commit_passes (test_history.GuardedDelivery.test_preview_tree_uses_owned_index_and_safe_commit_passes) ... ok
+2026-10-06T18:49:29.5581000Z test_rejection_preserves_working_file_and_index (test_history.GuardedDelivery.test_rejection_preserves_working_file_and_index) ... ok
+2026-10-06T18:49:32.3905379Z test_split_sparse_and_relative_hooks_fail_closed (test_history.GuardedDelivery.test_split_sparse_and_relative_hooks_fail_closed) ... ok
+2026-10-06T18:49:32.4576754Z test_additional_high_signal_forms_are_rejected_without_logging_values (test_history.History.test_additional_high_signal_forms_are_rejected_without_logging_values) ... ok
+2026-10-06T18:49:32.9404987Z test_all_refs_release_alias_tags_and_direct_blob (test_history.History.test_all_refs_release_alias_tags_and_direct_blob) ... ok
+2026-10-06T18:49:33.8510581Z test_baseline_exact_content_and_foreign_merge (test_history.History.test_baseline_exact_content_and_foreign_merge) ... ok
+2026-10-06T18:49:34.5772101Z test_binary_permission_does_not_skip_secret_or_text_alias (test_history.History.test_binary_permission_does_not_skip_secret_or_text_alias) ... ok
+2026-10-06T18:49:35.4500217Z test_bundle_rechecks_actual_exported_refs_after_source_race (test_history.History.test_bundle_rechecks_actual_exported_refs_after_source_race) ... ok
+2026-10-06T18:49:35.7926018Z test_git_selectors_cleared_and_rewrites_rejected (test_history.History.test_git_selectors_cleared_and_rewrites_rejected) ... ok
+2026-10-06T18:49:36.8456088Z test_large_blob_is_streamed_and_cross_chunk_marker_rejected (test_history.History.test_large_blob_is_streamed_and_cross_chunk_marker_rejected) ... ok
+2026-10-06T18:49:36.9567716Z test_noncanonical_names_modes_and_symlinks (test_history.History.test_noncanonical_names_modes_and_symlinks) ... ERROR
+2026-10-06T18:49:37.4096090Z test_release_forbidden_historical_alias_even_if_head_removed (test_history.History.test_release_forbidden_historical_alias_even_if_head_removed) ... ok
+2026-10-06T18:49:37.8054409Z test_secret_removed_from_head_is_still_rejected (test_history.History.test_secret_removed_from_head_is_still_rejected) ... ok
+2026-10-06T18:49:38.0461511Z test_shallow_and_alternate_store_rejected (test_history.History.test_shallow_and_alternate_store_rejected) ... ok
+2026-10-06T18:49:38.7214627Z test_shared_positive_and_same_blob_all_paths_checked (test_history.History.test_shared_positive_and_same_blob_all_paths_checked) ... ok
+2026-10-06T18:49:38.9710183Z test_truncated_reader_detects_eof (test_history.History.test_truncated_reader_detects_eof) ... ok
+2026-10-06T18:49:39.4752189Z test_wrong_baseline_and_missing_object (test_history.History.test_wrong_baseline_and_missing_object) ... ok
+2026-10-06T18:49:39.8374446Z test_add_patch_and_edit_use_shared_validator (test_hooks.Hooks.test_add_patch_and_edit_use_shared_validator) ... ok
+2026-10-06T18:49:40.1948273Z test_bad_payload_event_root_and_paths_rejected (test_hooks.Hooks.test_bad_payload_event_root_and_paths_rejected) ... ok
+2026-10-06T18:49:40.7508873Z test_code_dependency_change_invalidates_command_and_old_dispatch (test_hooks.Hooks.test_code_dependency_change_invalidates_command_and_old_dispatch) ... ok
+2026-10-06T18:49:40.9882267Z test_concurrent_cache_lock_failure_and_handler_crash_not_pass (test_hooks.Hooks.test_concurrent_cache_lock_failure_and_handler_crash_not_pass) ... ok
+2026-10-06T18:49:41.2027381Z test_concurrent_foreign_settings_edit_not_overwritten (test_hooks.Hooks.test_concurrent_foreign_settings_edit_not_overwritten) ... ok
+2026-10-06T18:49:41.4404399Z test_config_changed_after_settings_write_never_forges_proof (test_hooks.Hooks.test_config_changed_after_settings_write_never_forges_proof) ... FAIL
+2026-10-06T18:49:41.9036999Z test_copied_company_proof_regenerates_absolute_paths_without_trust (test_hooks.Hooks.test_copied_company_proof_regenerates_absolute_paths_without_trust) ... FAIL
+2026-10-06T18:49:42.1378657Z test_default_project_is_preview_without_activation_or_files (test_hooks.Hooks.test_default_project_is_preview_without_activation_or_files) ... ok
+2026-10-06T18:49:42.5825300Z test_disabled_native_and_working_common_fallback (test_hooks.Hooks.test_disabled_native_and_working_common_fallback) ... ok
+2026-10-06T18:49:43.0625997Z test_disabling_removes_exact_owned_groups_only (test_hooks.Hooks.test_disabling_removes_exact_owned_groups_only) ... ok
+2026-10-06T18:49:43.5821709Z test_interrupt_subagent_recursive_stop_never_continues (test_hooks.Hooks.test_interrupt_subagent_recursive_stop_never_continues) ... ok
+2026-10-06T18:49:43.8497424Z test_interruption_between_settings_and_proof_detectable_on_retry (test_hooks.Hooks.test_interruption_between_settings_and_proof_detectable_on_retry) ... FAIL
+2026-10-06T18:49:44.3617398Z test_legacy_proof_migration_exact_and_new_proof_precedence (test_hooks.Hooks.test_legacy_proof_migration_exact_and_new_proof_precedence) ... ok
+2026-10-06T18:49:44.8702492Z test_legacy_proof_mismatch_and_malformed_preserve_all_bytes (test_hooks.Hooks.test_legacy_proof_mismatch_and_malformed_preserve_all_bytes) ... ok
+2026-10-06T18:49:45.2839418Z test_malformed_native_settings_preserved_as_conflict (test_hooks.Hooks.test_malformed_native_settings_preserved_as_conflict) ... ok
+2026-10-06T18:49:45.4251945Z test_manifest_exact_six_schema_and_no_yaml_commands (test_hooks.Hooks.test_manifest_exact_six_schema_and_no_yaml_commands) ... ok
+2026-10-06T18:49:45.6070012Z test_manifest_invalid_event_and_timeout (test_hooks.Hooks.test_manifest_invalid_event_and_timeout) ... ok
+2026-10-06T18:49:46.0859391Z test_method_impact_explicit_batch_uses_declared_closure (test_hooks.Hooks.test_method_impact_explicit_batch_uses_declared_closure) ... ok
+2026-10-06T18:49:46.6052578Z test_method_impact_only_explicit_dependencies_and_publication_hint (test_hooks.Hooks.test_method_impact_only_explicit_dependencies_and_publication_hint) ... ok
+2026-10-06T18:49:47.1840815Z test_missing_receipt_unknown_namespace_and_mixed_group_conflict (test_hooks.Hooks.test_missing_receipt_unknown_namespace_and_mixed_group_conflict) ... ok
+2026-10-06T18:49:47.5582391Z test_native_invalid_json_oversize_missing_dependency_failure_not_pass (test_hooks.Hooks.test_native_invalid_json_oversize_missing_dependency_failure_not_pass) ... ok
+2026-10-06T18:49:47.7393558Z test_native_projection_apply_requires_company_permissions (test_hooks.Hooks.test_native_projection_apply_requires_company_permissions) ... ok
+2026-10-06T18:49:48.7175711Z test_native_protocol_versions_json_denial_and_advisory_both (test_hooks.Hooks.test_native_protocol_versions_json_denial_and_advisory_both) ... ok
+2026-10-06T18:49:51.9565545Z test_native_timeout_explicit_failure_without_stop_block (test_hooks.Hooks.test_native_timeout_explicit_failure_without_stop_block) ... ok
+2026-10-06T18:49:52.7717931Z test_other_settings_preserved_idempotent_and_owned_collision (test_hooks.Hooks.test_other_settings_preserved_idempotent_and_owned_collision) ... ok
+2026-10-06T18:49:52.8892831Z test_payload_normalization_independent_of_method_dependencies (test_hooks.Hooks.test_payload_normalization_independent_of_method_dependencies) ... ERROR
+2026-10-06T18:49:53.2759447Z test_permission_revoked_by_final_fingerprint_preserves_settings_and_proof (test_hooks.Hooks.test_permission_revoked_by_final_fingerprint_preserves_settings_and_proof) ... ok
+2026-10-06T18:49:53.5269042Z test_post_write_missing_map_advisory_and_linked_positive (test_hooks.Hooks.test_post_write_missing_map_advisory_and_linked_positive) ... ok
+2026-10-06T18:49:53.6935450Z test_post_write_reads_actual_bytes_instead_of_proposed_payload (test_hooks.Hooks.test_post_write_reads_actual_bytes_instead_of_proposed_payload) ... ok
+2026-10-06T18:49:53.9972573Z test_product_root_routes_development_and_template_paths (test_hooks.Hooks.test_product_root_routes_development_and_template_paths) ... ok
+2026-10-06T18:49:54.0771191Z test_publication_hint_recognizes_fixed_cli_without_execution (test_hooks.Hooks.test_publication_hint_recognizes_fixed_cli_without_execution) ... FAIL
+2026-10-06T18:49:54.4817821Z test_stop_compact_dedup_revision_no_business_writes (test_hooks.Hooks.test_stop_compact_dedup_revision_no_business_writes) ... ok
+2026-10-06T18:49:54.9138302Z test_subdirectory_absolute_quoted_projection_executes (test_hooks.Hooks.test_subdirectory_absolute_quoted_projection_executes) ... ok
+2026-10-06T18:49:55.1402457Z test_unknown_task_navigation_only_disabled_scenario (test_hooks.Hooks.test_unknown_task_navigation_only_disabled_scenario) ... ok
+2026-10-06T18:49:55.4216144Z test_untrusted_or_missing_expected_definition_never_passes (test_hooks.Hooks.test_untrusted_or_missing_expected_definition_never_passes) ... ok
+2026-10-06T18:49:55.6508237Z test_update_patch_partial_metadata_is_advisory_not_denial (test_hooks.Hooks.test_update_patch_partial_metadata_is_advisory_not_denial) ... ok
+2026-10-06T18:49:56.0757604Z test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed (test_hooks.Hooks.test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed) ... ok
+2026-10-06T18:49:58.4016215Z test_archive_link_or_duplicate_rejected_before_destination (test_platform.Platforms.test_archive_link_or_duplicate_rejected_before_destination) ... ok
+2026-10-06T18:50:00.4233138Z test_backup_preserves_raw_crlf_utf8_and_settings_without_filter (test_platform.Platforms.test_backup_preserves_raw_crlf_utf8_and_settings_without_filter) ... ERROR
+2026-10-06T18:50:00.9086569Z test_doctor_is_readonly_and_installed_runtime_is_not_business_memory (test_platform.Platforms.test_doctor_is_readonly_and_installed_runtime_is_not_business_memory) ... ok
+2026-10-06T18:50:01.5219654Z test_exact_placeholders_and_absence_use_canonical_explicit_read (test_platform.Platforms.test_exact_placeholders_and_absence_use_canonical_explicit_read) ... ok
+2026-10-06T18:50:01.5220737Z test_failure_after_replace_is_explicit_readback (test_platform.Platforms.test_failure_after_replace_is_explicit_readback) ... skipped 'POSIX directory fsync contract; Windows contract has its own test'
+2026-10-06T18:50:04.6877376Z test_legacy_placeholder_backup_rehydrates_safe_projection (test_platform.Platforms.test_legacy_placeholder_backup_rehydrates_safe_projection) ... ok
+2026-10-06T18:50:04.8321349Z test_portable_paths_and_case_unicode_directory_collisions (test_platform.Platforms.test_portable_paths_and_case_unicode_directory_collisions) ... ok
+2026-10-06T18:50:05.0294770Z test_process_death_releases_lock_without_deleting_it (test_platform.Platforms.test_process_death_releases_lock_without_deleting_it) ... ok
+2026-10-06T18:50:05.2444007Z test_projection_windows_has_explicit_shell_and_fingerprint (test_platform.Platforms.test_projection_windows_has_explicit_shell_and_fingerprint) ... ok
+2026-10-06T18:50:05.3715025Z test_utf8_lf_and_failure_before_replace_preserves_bytes (test_platform.Platforms.test_utf8_lf_and_failure_before_replace_preserves_bytes) ... ok
+2026-10-06T18:50:05.5117277Z test_windows_atomic_contract_does_not_open_directory (test_platform.Platforms.test_windows_atomic_contract_does_not_open_directory) ... ok
+2026-10-06T18:50:11.1529883Z test_dirty_staged_and_untracked_preserved_even_with_new_remote (test_preflight.Preflight.test_dirty_staged_and_untracked_preserved_even_with_new_remote) ... ok
+2026-10-06T18:50:17.7969866Z test_diverged_keeps_both_committed_histories (test_preflight.Preflight.test_diverged_keeps_both_committed_histories) ... ok
+2026-10-06T18:50:22.4034843Z test_fast_forward_uses_received_validator_and_blocks_invalid_version (test_preflight.Preflight.test_fast_forward_uses_received_validator_and_blocks_invalid_version) ... ERROR
+2026-10-06T18:50:25.2452013Z test_fetch_timeout_is_bounded_and_preserves_snapshot (test_preflight.Preflight.test_fetch_timeout_is_bounded_and_preserves_snapshot) ... ok
+2026-10-06T18:50:28.9831302Z test_ignored_local_file_cannot_be_overwritten_by_fast_forward (test_preflight.Preflight.test_ignored_local_file_cannot_be_overwritten_by_fast_forward) ... ok
+2026-10-06T18:50:32.0491299Z test_offline_reports_local_snapshot_without_freshness (test_preflight.Preflight.test_offline_reports_local_snapshot_without_freshness) ... ok
+2026-10-06T18:50:42.9786259Z test_receive_latest_and_deliver_other_employee_without_manual_sync (test_preflight.Preflight.test_receive_latest_and_deliver_other_employee_without_manual_sync) ... ok
+2026-10-06T18:50:46.1665500Z test_unfinished_git_and_detached_and_no_remote_do_not_change_head (test_preflight.Preflight.test_unfinished_git_and_detached_and_no_remote_do_not_change_head) ... ok
+2026-10-06T18:50:52.4700193Z test_wrong_company_and_unapproved_external_are_rejected (test_preflight.Preflight.test_wrong_company_and_unapproved_external_are_rejected) ... ok
+2026-10-06T18:50:54.9592894Z test_backup_restore_and_corruption_dirty_tree (test_system.GitAcceptance.test_backup_restore_and_corruption_dirty_tree) ... ERROR
+2026-10-06T18:51:08.0882253Z test_common_delivery_concurrent_results_stale_and_conflict (test_system.GitAcceptance.test_common_delivery_concurrent_results_stale_and_conflict) ... ok
+2026-10-06T18:51:13.5083394Z test_company_method_proposal_uses_same_product_delivery_without_data (test_system.GitAcceptance.test_company_method_proposal_uses_same_product_delivery_without_data) ... ERROR
+2026-10-06T18:51:31.3677112Z test_copy_update_two_companies_history_and_local_rule (test_system.GitAcceptance.test_copy_update_two_companies_history_and_local_rule) ... ok
+2026-10-06T18:51:40.7451325Z test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session (test_system.GitAcceptance.test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session) ... ERROR
+2026-10-06T18:51:45.3535992Z test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes (test_system.GitAcceptance.test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes) ... ERROR
+2026-10-06T18:51:57.4481823Z test_portable_feature_release_updates_client_without_development_or_data_loss (test_system.GitAcceptance.test_portable_feature_release_updates_client_without_development_or_data_loss) ... ok
+2026-10-06T18:52:00.8812137Z test_proposal_rejects_noncanonical_paths_before_copy_or_candidate (test_system.GitAcceptance.test_proposal_rejects_noncanonical_paths_before_copy_or_candidate) ... ok
+2026-10-06T18:52:02.3868285Z test_release_guide_allowed_but_development_history_rejected (test_system.GitAcceptance.test_release_guide_allowed_but_development_history_rejected) ... ok
+2026-10-06T18:52:05.0529186Z test_result_delivery_ack_and_lost_push_response_readback (test_system.GitAcceptance.test_result_delivery_ack_and_lost_push_response_readback) ... ERROR
+2026-10-06T18:52:05.2694881Z test_sanitized_proposal_exact_permission_no_company_history (test_system.GitAcceptance.test_sanitized_proposal_exact_permission_no_company_history) ... ok
+2026-10-06T18:52:14.0463580Z test_semantic_binding_change_stops_even_text_merge_clean (test_system.GitAcceptance.test_semantic_binding_change_stops_even_text_merge_clean) ... ok
+2026-10-06T18:52:14.3561187Z test_clean_template_and_all_pairs (test_system.LocalContracts.test_clean_template_and_all_pairs) ... ok
+2026-10-06T18:52:14.5283063Z test_decimal_sum_is_exact_without_business_rounding_rule (test_system.LocalContracts.test_decimal_sum_is_exact_without_business_rounding_rule) ... ok
+2026-10-06T18:52:14.6199557Z test_episode_denominator_and_cross_source_outcome (test_system.LocalContracts.test_episode_denominator_and_cross_source_outcome) ... ok
+2026-10-06T18:52:15.4627842Z test_independence_and_observation_are_separate (test_system.LocalContracts.test_independence_and_observation_are_separate) ... ok
+2026-10-06T18:52:15.7308033Z test_lock_prevents_parallel_mutation_without_stale_lock_repair (test_system.LocalContracts.test_lock_prevents_parallel_mutation_without_stale_lock_repair) ... ok
+2026-10-06T18:52:15.8431271Z test_marketing_and_research_contracts_preserve_unknowns (test_system.LocalContracts.test_marketing_and_research_contracts_preserve_unknowns) ... ok
+2026-10-06T18:52:16.7101284Z test_new_process_reads_file_memory_and_blocks_changed_method (test_system.LocalContracts.test_new_process_reads_file_memory_and_blocks_changed_method) ... ok
+2026-10-06T18:52:18.1298384Z test_observations_bound_to_result_and_reset_with_history (test_system.LocalContracts.test_observations_bound_to_result_and_reset_with_history) ... ok
+2026-10-06T18:52:18.5718469Z test_result_rejects_known_bad_provenance_count_null_and_pass (test_system.LocalContracts.test_result_rejects_known_bad_provenance_count_null_and_pass) ... ok
+2026-10-06T18:52:18.8056996Z test_task_id_semantic_conflict_preserves_original (test_system.LocalContracts.test_task_id_semantic_conflict_preserves_original) ... ok
+2026-10-06T18:52:18.9888000Z test_unconfirmed_stale_revision_cancel_and_unknowns (test_system.LocalContracts.test_unconfirmed_stale_revision_cancel_and_unknowns) ... ok
+2026-10-06T18:52:19.8001462Z test_validator_itself_rejects_wrong_place_duplicate_link_cycle (test_system.LocalContracts.test_validator_itself_rejects_wrong_place_duplicate_link_cycle) ... ok
+2026-10-06T18:52:20.2888662Z test_workflow_disabled_missing_capability_unknown_version_and_index (test_system.LocalContracts.test_workflow_disabled_missing_capability_unknown_version_and_index) ... ok
+2026-10-06T18:52:21.2299352Z test_wrong_arithmetic_then_original_case_repairs (test_system.LocalContracts.test_wrong_arithmetic_then_original_case_repairs) ... ok
+2026-10-06T18:52:21.3870522Z test_graph_current_source_aliases_and_disabled_fallback (test_system.SourcesAndBackground.test_graph_current_source_aliases_and_disabled_fallback) ... ok
+2026-10-06T18:52:22.5917705Z test_http_pagination_429_redirect_and_limit (test_system.SourcesAndBackground.test_http_pagination_429_redirect_and_limit) ... ok
+2026-10-06T18:52:23.3354300Z test_one_shot_ticks_change_only_limits_off_and_recovery (test_system.SourcesAndBackground.test_one_shot_ticks_change_only_limits_off_and_recovery) ... ok
+2026-10-06T18:52:23.5095780Z test_real_file_export_and_wrong_company_partial_stale (test_system.SourcesAndBackground.test_real_file_export_and_wrong_company_partial_stale) ... ok
+2026-10-06T18:52:23.6737753Z test_stdio_mcp_negotiation_read_tool_and_error (test_system.SourcesAndBackground.test_stdio_mcp_negotiation_read_tool_and_error) ... ok
+2026-10-06T18:52:23.6738479Z 
+2026-10-06T18:52:23.6738825Z ======================================================================
+2026-10-06T18:52:23.6739641Z ERROR: test_foreign_interpreter_is_never_given_to_installer (test_bootstrap.BootstrapTests.test_foreign_interpreter_is_never_given_to_installer)
+2026-10-06T18:52:23.6740427Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6740776Z Traceback (most recent call last):
+2026-10-06T18:52:23.6746868Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 172, in test_foreign_interpreter_is_never_given_to_installer
+2026-10-06T18:52:23.6747505Z     bootstrap.check_owner(self.root, create=True)
+2026-10-06T18:52:23.6748038Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 107, in check_owner
+2026-10-06T18:52:23.6748491Z     guard(path, root)
+2026-10-06T18:52:23.6748896Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 65, in guard
+2026-10-06T18:52:23.6749365Z     raise BootstrapError(f'Path alias is forbidden: {item}')
+2026-10-06T18:52:23.6749909Z cws_bootstrap.BootstrapError: Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-78rl42hg\company with spaces
+2026-10-06T18:52:23.6750330Z 
+2026-10-06T18:52:23.6750458Z ======================================================================
+2026-10-06T18:52:23.6750964Z ERROR: test_install_failure_keeps_preparing_state (test_bootstrap.BootstrapTests.test_install_failure_keeps_preparing_state)
+2026-10-06T18:52:23.6751479Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6751785Z Traceback (most recent call last):
+2026-10-06T18:52:23.6752301Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 232, in test_install_failure_keeps_preparing_state
+2026-10-06T18:52:23.6752815Z     bootstrap.check_owner(self.root, create=True)
+2026-10-06T18:52:23.6753292Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 107, in check_owner
+2026-10-06T18:52:23.6753705Z     guard(path, root)
+2026-10-06T18:52:23.6754075Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 65, in guard
+2026-10-06T18:52:23.6754749Z     raise BootstrapError(f'Path alias is forbidden: {item}')
+2026-10-06T18:52:23.6755287Z cws_bootstrap.BootstrapError: Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-zpjjgjid\company with spaces
+2026-10-06T18:52:23.6755692Z 
+2026-10-06T18:52:23.6755813Z ======================================================================
+2026-10-06T18:52:23.6756392Z ERROR: test_interrupted_partial_setup_resumes_only_owned_environment (test_bootstrap.BootstrapTests.test_interrupted_partial_setup_resumes_only_owned_environment)
+2026-10-06T18:52:23.6756996Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6757291Z Traceback (most recent call last):
+2026-10-06T18:52:23.6757913Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 193, in test_interrupted_partial_setup_resumes_only_owned_environment
+2026-10-06T18:52:23.6758456Z     bootstrap.check_owner(self.root, create=True)
+2026-10-06T18:52:23.6758993Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 107, in check_owner
+2026-10-06T18:52:23.6759406Z     guard(path, root)
+2026-10-06T18:52:23.6759954Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 65, in guard
+2026-10-06T18:52:23.6760496Z     raise BootstrapError(f'Path alias is forbidden: {item}')
+2026-10-06T18:52:23.6761020Z cws_bootstrap.BootstrapError: Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-10zho55z\company with spaces
+2026-10-06T18:52:23.6761407Z 
+2026-10-06T18:52:23.6761530Z ======================================================================
+2026-10-06T18:52:23.6762014Z ERROR: test_pyvenv_config_spaces_and_foreign_base (test_bootstrap.BootstrapTests.test_pyvenv_config_spaces_and_foreign_base)
+2026-10-06T18:52:23.6762505Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6762778Z Traceback (most recent call last):
+2026-10-06T18:52:23.6763299Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 165, in test_pyvenv_config_spaces_and_foreign_base
+2026-10-06T18:52:23.6763848Z     self.assertEqual(bootstrap.owned_interpreter(self.root), python)
+2026-10-06T18:52:23.6764169Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6764642Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 133, in owned_interpreter
+2026-10-06T18:52:23.6765073Z     guard(managed, root)
+2026-10-06T18:52:23.6765449Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 65, in guard
+2026-10-06T18:52:23.6765936Z     raise BootstrapError(f'Path alias is forbidden: {item}')
+2026-10-06T18:52:23.6766450Z cws_bootstrap.BootstrapError: Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-_61jhwx1\company with spaces
+2026-10-06T18:52:23.6766824Z 
+2026-10-06T18:52:23.6766947Z ======================================================================
+2026-10-06T18:52:23.6767394Z ERROR: test_ready_repeat_does_not_reinstall (test_bootstrap.BootstrapTests.test_ready_repeat_does_not_reinstall)
+2026-10-06T18:52:23.6767863Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6768154Z Traceback (most recent call last):
+2026-10-06T18:52:23.6768642Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 217, in test_ready_repeat_does_not_reinstall
+2026-10-06T18:52:23.6769139Z     state = bootstrap.check_owner(self.root, create=True)
+2026-10-06T18:52:23.6769419Z             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6769833Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 107, in check_owner
+2026-10-06T18:52:23.6770197Z     guard(path, root)
+2026-10-06T18:52:23.6770518Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 65, in guard
+2026-10-06T18:52:23.6771090Z     raise BootstrapError(f'Path alias is forbidden: {item}')
+2026-10-06T18:52:23.6771631Z cws_bootstrap.BootstrapError: Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-1m39ahvd\company with spaces
+2026-10-06T18:52:23.6772015Z 
+2026-10-06T18:52:23.6772139Z ======================================================================
+2026-10-06T18:52:23.6772663Z ERROR: test_relocated_and_manifest_changed_venv_rejected (test_bootstrap.BootstrapTests.test_relocated_and_manifest_changed_venv_rejected)
+2026-10-06T18:52:23.6773200Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6773499Z Traceback (most recent call last):
+2026-10-06T18:52:23.6774034Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 86, in test_relocated_and_manifest_changed_venv_rejected
+2026-10-06T18:52:23.6774560Z     state = bootstrap.check_owner(self.root, create=True)
+2026-10-06T18:52:23.6774857Z             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6775287Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 107, in check_owner
+2026-10-06T18:52:23.6775700Z     guard(path, root)
+2026-10-06T18:52:23.6776709Z   File "D:\a\company-work-system\company-work-system\template\scripts\bootstrap.py", line 65, in guard
+2026-10-06T18:52:23.6777245Z     raise BootstrapError(f'Path alias is forbidden: {item}')
+2026-10-06T18:52:23.6777751Z cws_bootstrap.BootstrapError: Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-bbbsw2os\company with spaces
+2026-10-06T18:52:23.6778119Z 
+2026-10-06T18:52:23.6778208Z ======================================================================
+2026-10-06T18:52:23.6778769Z ERROR: test_relative_company_update_backup_restore_and_rollback (test_consistency.EvolutionConsistency.test_relative_company_update_backup_restore_and_rollback)
+2026-10-06T18:52:23.6779373Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6779672Z Traceback (most recent call last):
+2026-10-06T18:52:23.6780223Z   File "D:\a\company-work-system\company-work-system\checks\test_consistency.py", line 133, in test_relative_company_update_backup_restore_and_rollback
+2026-10-06T18:52:23.6780766Z     lifecycle.restore('relative-backup', 'relative-restored')
+2026-10-06T18:52:23.6781213Z   File "D:\a\company-work-system\company-work-system\template\scripts\lifecycle.py", line 184, in restore
+2026-10-06T18:52:23.6781787Z     require(item == {'symlink': expected} or item == {'sha256': hashlib.sha256(raw).hexdigest()}, "backup placeholder changed")
+2026-10-06T18:52:23.6782368Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 21, in require
+2026-10-06T18:52:23.6782788Z     raise Rejected(message)
+2026-10-06T18:52:23.6783030Z core.Rejected: backup placeholder changed
+2026-10-06T18:52:23.6783188Z 
+2026-10-06T18:52:23.6783307Z ======================================================================
+2026-10-06T18:52:23.6783982Z ERROR: test_delivered_metrics_keep_historical_admission_after_age_and_config_change (test_consistency.EvolutionConsistency.test_delivered_metrics_keep_historical_admission_after_age_and_config_change)
+2026-10-06T18:52:23.6784637Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6784908Z Traceback (most recent call last):
+2026-10-06T18:52:23.6785493Z   File "D:\a\company-work-system\company-work-system\checks\test_consistency.py", line 151, in test_delivered_metrics_keep_historical_admission_after_age_and_config_change
+2026-10-06T18:52:23.6786104Z     delivery.deliver(self.root, str(remote), task_id='test-task')
+2026-10-06T18:52:23.6786574Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 315, in deliver
+2026-10-06T18:52:23.6787097Z     return acknowledge(root, remote, branch, task_id, receipt) if task_id else receipt
+2026-10-06T18:52:23.6787569Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6788009Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 349, in acknowledge
+2026-10-06T18:52:23.6788528Z     commit(root, [file.relative_to(root).as_posix()], "Record result delivery readback")
+2026-10-06T18:52:23.6788880Z                   ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6789258Z   File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\pathlib.py", line 682, in relative_to
+2026-10-06T18:52:23.6789751Z     raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+2026-10-06T18:52:23.6790551Z ValueError: 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\company-acceptance-ubw_0yb_\\company\\work\\test-task\\task.json' is not in the subpath of 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\company-acceptance-ubw_0yb_\\company'
+2026-10-06T18:52:23.6791196Z 
+2026-10-06T18:52:23.6791296Z ======================================================================
+2026-10-06T18:52:23.6791900Z ERROR: test_company_proofs_survive_delivery_update_rollback_restore (test_evolution_hooks.Evolution.test_company_proofs_survive_delivery_update_rollback_restore)
+2026-10-06T18:52:23.6792574Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6792877Z Traceback (most recent call last):
+2026-10-06T18:52:23.6793423Z   File "D:\a\company-work-system\company-work-system\checks\test_evolution_hooks.py", line 36, in test_company_proofs_survive_delivery_update_rollback_restore
+2026-10-06T18:52:23.6793972Z     delivery.deliver(a,str(remote),task_id=task['id'])
+2026-10-06T18:52:23.6794403Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 315, in deliver
+2026-10-06T18:52:23.6794923Z     return acknowledge(root, remote, branch, task_id, receipt) if task_id else receipt
+2026-10-06T18:52:23.6795282Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6795709Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 349, in acknowledge
+2026-10-06T18:52:23.6796221Z     commit(root, [file.relative_to(root).as_posix()], "Record result delivery readback")
+2026-10-06T18:52:23.6796554Z                   ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6796931Z   File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\pathlib.py", line 682, in relative_to
+2026-10-06T18:52:23.6797428Z     raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+2026-10-06T18:52:23.6798210Z ValueError: 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\company-acceptance-c5q_l7v7\\alpha\\work\\scoped-process\\task.json' is not in the subpath of 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\company-acceptance-c5q_l7v7\\alpha'
+2026-10-06T18:52:23.6798798Z 
+2026-10-06T18:52:23.6798919Z ======================================================================
+2026-10-06T18:52:23.6799531Z ERROR: test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup (test_history.GuardedDelivery.test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup)
+2026-10-06T18:52:23.6800158Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6800532Z Traceback (most recent call last):
+2026-10-06T18:52:23.6801095Z   File "D:\a\company-work-system\company-work-system\checks\test_history.py", line 333, in test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup
+2026-10-06T18:52:23.6801697Z     initial=delivery.commit(self.root,paths,'Initial checked company')
+2026-10-06T18:52:23.6802019Z             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6802429Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 214, in commit
+2026-10-06T18:52:23.6802809Z     file = commit_path(root, relative)
+2026-10-06T18:52:23.6803056Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6803452Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 57, in commit_path
+2026-10-06T18:52:23.6803928Z     return path(root, relative)
+2026-10-06T18:52:23.6804155Z            ^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6804523Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 44, in path
+2026-10-06T18:52:23.6804908Z     platform.no_alias_parents(root, result)
+2026-10-06T18:52:23.6805373Z   File "D:\a\company-work-system\company-work-system\template\scripts\platform_runtime.py", line 53, in no_alias_parents
+2026-10-06T18:52:23.6805784Z     if alias(candidate):
+2026-10-06T18:52:23.6805987Z        ^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6806370Z   File "D:\a\company-work-system\company-work-system\template\scripts\platform_runtime.py", line 41, in alias
+2026-10-06T18:52:23.6806807Z     if not file.exists() and not file.is_symlink():
+2026-10-06T18:52:23.6807065Z            ^^^^^^^^^^^^^
+2026-10-06T18:52:23.6807400Z   File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\pathlib.py", line 860, in exists
+2026-10-06T18:52:23.6807810Z     self.stat(follow_symlinks=follow_symlinks)
+2026-10-06T18:52:23.6808183Z   File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\pathlib.py", line 840, in stat
+2026-10-06T18:52:23.6808641Z     return os.stat(self, follow_symlinks=follow_symlinks)
+2026-10-06T18:52:23.6808919Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6809484Z PermissionError: [WinError 5] Access is denied: 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\company-acceptance-sfl63p_s\\company\\.agents\\skills\\company-author'
+2026-10-06T18:52:23.6809952Z 
+2026-10-06T18:52:23.6810052Z ======================================================================
+2026-10-06T18:52:23.6810532Z ERROR: test_noncanonical_names_modes_and_symlinks (test_history.History.test_noncanonical_names_modes_and_symlinks)
+2026-10-06T18:52:23.6811002Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6811293Z Traceback (most recent call last):
+2026-10-06T18:52:23.6811777Z   File "D:\a\company-work-system\company-work-system\checks\test_history.py", line 98, in test_noncanonical_names_modes_and_symlinks
+2026-10-06T18:52:23.6812382Z     delivery.git(self.root, 'update-index', '--add', '--cacheinfo', '100644', blob, 'public/new\nline.md')
+2026-10-06T18:52:23.6812920Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 40, in git
+2026-10-06T18:52:23.6813521Z     require(value.returncode == 0, "Git operation failed: " + (value.stderr.decode(errors="replace") if binary else value.stderr).strip()[:1500])
+2026-10-06T18:52:23.6814125Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 21, in require
+2026-10-06T18:52:23.6814515Z     raise Rejected(message)
+2026-10-06T18:52:23.6814809Z core.Rejected: Git operation failed: error: Invalid path 'public/new
+2026-10-06T18:52:23.6815110Z line.md'
+2026-10-06T18:52:23.6815348Z fatal: git update-index: --cacheinfo cannot add public/new
+2026-10-06T18:52:23.6815627Z line.md
+2026-10-06T18:52:23.6815732Z 
+2026-10-06T18:52:23.6815851Z ======================================================================
+2026-10-06T18:52:23.6816396Z ERROR: test_payload_normalization_independent_of_method_dependencies (test_hooks.Hooks.test_payload_normalization_independent_of_method_dependencies)
+2026-10-06T18:52:23.6816956Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6817239Z Traceback (most recent call last):
+2026-10-06T18:52:23.6817747Z   File "D:\a\company-work-system\company-work-system\checks\test_hooks.py", line 60, in test_payload_normalization_independent_of_method_dependencies
+2026-10-06T18:52:23.6818455Z     self.assertEqual(hooks._changes(self.root, payload), [{"path": "company/projects/test.md", "content": "literal $(do-not-run)"}])
+2026-10-06T18:52:23.6818940Z                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6819344Z   File "D:\a\company-work-system\company-work-system\template\scripts\hooks.py", line 100, in _changes
+2026-10-06T18:52:23.6819906Z     require(cwd.is_relative_to(root) and cwd.is_dir(), "hook cwd outside explicit root")
+2026-10-06T18:52:23.6820410Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 21, in require
+2026-10-06T18:52:23.6820807Z     raise Rejected(message)
+2026-10-06T18:52:23.6821054Z core.Rejected: hook cwd outside explicit root
+2026-10-06T18:52:23.6821240Z 
+2026-10-06T18:52:23.6821360Z ======================================================================
+2026-10-06T18:52:23.6821932Z ERROR: test_backup_preserves_raw_crlf_utf8_and_settings_without_filter (test_platform.Platforms.test_backup_preserves_raw_crlf_utf8_and_settings_without_filter)
+2026-10-06T18:52:23.6822510Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6822803Z Traceback (most recent call last):
+2026-10-06T18:52:23.6823320Z   File "D:\a\company-work-system\company-work-system\checks\test_platform.py", line 123, in test_backup_preserves_raw_crlf_utf8_and_settings_without_filter
+2026-10-06T18:52:23.6823850Z     lifecycle.restore(backup, restored)
+2026-10-06T18:52:23.6824289Z   File "D:\a\company-work-system\company-work-system\template\scripts\lifecycle.py", line 184, in restore
+2026-10-06T18:52:23.6824945Z     require(item == {'symlink': expected} or item == {'sha256': hashlib.sha256(raw).hexdigest()}, "backup placeholder changed")
+2026-10-06T18:52:23.6825532Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 21, in require
+2026-10-06T18:52:23.6825926Z     raise Rejected(message)
+2026-10-06T18:52:23.6826166Z core.Rejected: backup placeholder changed
+2026-10-06T18:52:23.6826344Z 
+2026-10-06T18:52:23.6826438Z ======================================================================
+2026-10-06T18:52:23.6827056Z ERROR: test_fast_forward_uses_received_validator_and_blocks_invalid_version (test_preflight.Preflight.test_fast_forward_uses_received_validator_and_blocks_invalid_version)
+2026-10-06T18:52:23.6827679Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6827972Z Traceback (most recent call last):
+2026-10-06T18:52:23.6828524Z   File "D:\a\company-work-system\company-work-system\checks\test_preflight.py", line 122, in test_fast_forward_uses_received_validator_and_blocks_invalid_version
+2026-10-06T18:52:23.6829050Z     delivery.deliver(a,str(remote))
+2026-10-06T18:52:23.6829444Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 294, in deliver
+2026-10-06T18:52:23.6829857Z     clean(root)
+2026-10-06T18:52:23.6830196Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 51, in clean
+2026-10-06T18:52:23.6830780Z     require(not git(root, "status", "--porcelain", "--untracked-files=all"), "dirty candidate; preserve local work and prepare separately")
+2026-10-06T18:52:23.6831339Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 21, in require
+2026-10-06T18:52:23.6831704Z     raise Rejected(message)
+2026-10-06T18:52:23.6832006Z core.Rejected: dirty candidate; preserve local work and prepare separately
+2026-10-06T18:52:23.6832264Z 
+2026-10-06T18:52:23.6832381Z ======================================================================
+2026-10-06T18:52:23.6832862Z ERROR: test_backup_restore_and_corruption_dirty_tree (test_system.GitAcceptance.test_backup_restore_and_corruption_dirty_tree)
+2026-10-06T18:52:23.6833356Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6833646Z Traceback (most recent call last):
+2026-10-06T18:52:23.6834118Z   File "D:\a\company-work-system\company-work-system\checks\test_system.py", line 467, in test_backup_restore_and_corruption_dirty_tree
+2026-10-06T18:52:23.6834934Z     backup=self.base/"backup";lifecycle.backup(self.root,backup);restored=self.base/"restored";self.assertEqual(lifecycle.restore(backup,restored)["status"],"restored-and-verified")
+2026-10-06T18:52:23.6835702Z                                                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6836204Z   File "D:\a\company-work-system\company-work-system\template\scripts\lifecycle.py", line 184, in restore
+2026-10-06T18:52:23.6836787Z     require(item == {'symlink': expected} or item == {'sha256': hashlib.sha256(raw).hexdigest()}, "backup placeholder changed")
+2026-10-06T18:52:23.6837353Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 21, in require
+2026-10-06T18:52:23.6837742Z     raise Rejected(message)
+2026-10-06T18:52:23.6837996Z core.Rejected: backup placeholder changed
+2026-10-06T18:52:23.6838145Z 
+2026-10-06T18:52:23.6838230Z ======================================================================
+2026-10-06T18:52:23.6838783Z ERROR: test_company_method_proposal_uses_same_product_delivery_without_data (test_system.GitAcceptance.test_company_method_proposal_uses_same_product_delivery_without_data)
+2026-10-06T18:52:23.6839381Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6839669Z Traceback (most recent call last):
+2026-10-06T18:52:23.6840265Z   File "D:\a\company-work-system\company-work-system\checks\test_system.py", line 560, in test_company_method_proposal_uses_same_product_delivery_without_data
+2026-10-06T18:52:23.6840958Z     receipt = delivery.deliver(Path(candidate["path"]), str(remote), expected_base=candidate["base"])
+2026-10-06T18:52:23.6841386Z               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6841838Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 294, in deliver
+2026-10-06T18:52:23.6842221Z     clean(root)
+2026-10-06T18:52:23.6842570Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 51, in clean
+2026-10-06T18:52:23.6843190Z     require(not git(root, "status", "--porcelain", "--untracked-files=all"), "dirty candidate; preserve local work and prepare separately")
+2026-10-06T18:52:23.6844353Z   File "D:\a\company-work-system\company-work-system\template\scripts\core.py", line 21, in require
+2026-10-06T18:52:23.6844760Z     raise Rejected(message)
+2026-10-06T18:52:23.6845059Z core.Rejected: dirty candidate; preserve local work and prepare separately
+2026-10-06T18:52:23.6845314Z 
+2026-10-06T18:52:23.6845411Z ======================================================================
+2026-10-06T18:52:23.6846473Z ERROR: test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session (test_system.GitAcceptance.test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session)
+2026-10-06T18:52:23.6847200Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6847529Z Traceback (most recent call last):
+2026-10-06T18:52:23.6848166Z   File "D:\a\company-work-system\company-work-system\checks\test_system.py", line 530, in test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session
+2026-10-06T18:52:23.6848784Z     delivery.deliver(a, str(remote), task_id="first-process")
+2026-10-06T18:52:23.6849251Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 315, in deliver
+2026-10-06T18:52:23.6849763Z     return acknowledge(root, remote, branch, task_id, receipt) if task_id else receipt
+2026-10-06T18:52:23.6850156Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6850606Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 349, in acknowledge
+2026-10-06T18:52:23.6851113Z     commit(root, [file.relative_to(root).as_posix()], "Record result delivery readback")
+2026-10-06T18:52:23.6851468Z                   ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6851842Z   File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\pathlib.py", line 682, in relative_to
+2026-10-06T18:52:23.6852941Z     raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+2026-10-06T18:52:23.6853790Z ValueError: 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\company-acceptance-lnj_98q5\\company-alpha\\work\\first-process\\task.json' is not in the subpath of 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\company-acceptance-lnj_98q5\\company-alpha'
+2026-10-06T18:52:23.6854473Z 
+2026-10-06T18:52:23.6854558Z ======================================================================
+2026-10-06T18:52:23.6855232Z ERROR: test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes (test_system.GitAcceptance.test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes)
+2026-10-06T18:52:23.6855882Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6856153Z Traceback (most recent call last):
+2026-10-06T18:52:23.6856744Z   File "D:\a\company-work-system\company-work-system\checks\test_system.py", line 509, in test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes
+2026-10-06T18:52:23.6857362Z     delivery.deliver(self.root, str(remote), task_id="summary-task")
+2026-10-06T18:52:23.6857955Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 315, in deliver
+2026-10-06T18:52:23.6858454Z     return acknowledge(root, remote, branch, task_id, receipt) if task_id else receipt
+2026-10-06T18:52:23.6858836Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6859284Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 349, in acknowledge
+2026-10-06T18:52:23.6859797Z     commit(root, [file.relative_to(root).as_posix()], "Record result delivery readback")
+2026-10-06T18:52:23.6860151Z                   ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6860526Z   File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\pathlib.py", line 682, in relative_to
+2026-10-06T18:52:23.6861002Z     raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+2026-10-06T18:52:23.6861834Z ValueError: 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\company-acceptance-om1q3xnx\\company\\work\\summary-task\\task.json' is not in the subpath of 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\company-acceptance-om1q3xnx\\company'
+2026-10-06T18:52:23.6862420Z 
+2026-10-06T18:52:23.6862529Z ======================================================================
+2026-10-06T18:52:23.6863052Z ERROR: test_result_delivery_ack_and_lost_push_response_readback (test_system.GitAcceptance.test_result_delivery_ack_and_lost_push_response_readback)
+2026-10-06T18:52:23.6863587Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6863880Z Traceback (most recent call last):
+2026-10-06T18:52:23.6864420Z   File "D:\a\company-work-system\company-work-system\checks\test_system.py", line 455, in test_result_delivery_ack_and_lost_push_response_readback
+2026-10-06T18:52:23.6864985Z     receipt=delivery.deliver(self.root,str(remote),task_id="test-task")
+2026-10-06T18:52:23.6865303Z             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6865718Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 315, in deliver
+2026-10-06T18:52:23.6866205Z     return acknowledge(root, remote, branch, task_id, receipt) if task_id else receipt
+2026-10-06T18:52:23.6866567Z            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6867001Z   File "D:\a\company-work-system\company-work-system\template\scripts\delivery.py", line 349, in acknowledge
+2026-10-06T18:52:23.6867506Z     commit(root, [file.relative_to(root).as_posix()], "Record result delivery readback")
+2026-10-06T18:52:23.6867851Z                   ^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6868224Z   File "C:\hostedtoolcache\windows\Python\3.12.10\x64\Lib\pathlib.py", line 682, in relative_to
+2026-10-06T18:52:23.6868690Z     raise ValueError(f"{str(self)!r} is not in the subpath of {str(other)!r}")
+2026-10-06T18:52:23.6869838Z ValueError: 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\company-acceptance-06ul365o\\company\\work\\test-task\\task.json' is not in the subpath of 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\company-acceptance-06ul365o\\company'
+2026-10-06T18:52:23.6870425Z 
+2026-10-06T18:52:23.6870545Z ======================================================================
+2026-10-06T18:52:23.6871115Z FAIL: test_cached_archive_corruption_rejected_without_execution (test_bootstrap.BootstrapTests.test_cached_archive_corruption_rejected_without_execution)
+2026-10-06T18:52:23.6871696Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6871990Z Traceback (most recent call last):
+2026-10-06T18:52:23.6872526Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 128, in test_cached_archive_corruption_rejected_without_execution
+2026-10-06T18:52:23.6873064Z     self.assertIn(b'SHA256 mismatch', result.stderr)
+2026-10-06T18:52:23.6873610Z AssertionError: b'SHA256 mismatch' not found in b'bootstrap blocked: foreign or relocated runtime; preserve it and use a fresh checkout\r\n'
+2026-10-06T18:52:23.6874005Z 
+2026-10-06T18:52:23.6874178Z ======================================================================
+2026-10-06T18:52:23.6874576Z FAIL: test_foreign_venv_preserved (test_bootstrap.BootstrapTests.test_foreign_venv_preserved)
+2026-10-06T18:52:23.6874975Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6875490Z cws_bootstrap.BootstrapError: Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-us4tjov5\company with spaces
+2026-10-06T18:52:23.6875888Z 
+2026-10-06T18:52:23.6876037Z During handling of the above exception, another exception occurred:
+2026-10-06T18:52:23.6876271Z 
+2026-10-06T18:52:23.6876380Z Traceback (most recent call last):
+2026-10-06T18:52:23.6876823Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 79, in test_foreign_venv_preserved
+2026-10-06T18:52:23.6877354Z     with self.assertRaisesRegex(bootstrap.BootstrapError, 'Foreign .venv'):
+2026-10-06T18:52:23.6877705Z          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6878226Z AssertionError: "Foreign .venv" does not match "Path alias is forbidden: C:\Users\RUNNER~1\AppData\Local\Temp\cws-bootstrap-us4tjov5\company with spaces"
+2026-10-06T18:52:23.6878648Z 
+2026-10-06T18:52:23.6878741Z ======================================================================
+2026-10-06T18:52:23.6879260Z FAIL: test_real_setup_without_path_python_host_preserved (test_bootstrap.BootstrapTests.test_real_setup_without_path_python_host_preserved)
+2026-10-06T18:52:23.6879785Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6880071Z Traceback (most recent call last):
+2026-10-06T18:52:23.6880568Z   File "D:\a\company-work-system\company-work-system\checks\test_bootstrap.py", line 276, in test_real_setup_without_path_python_host_preserved
+2026-10-06T18:52:23.6881182Z     self.assertEqual(result.returncode, 0, result.stderr.decode('utf-8', errors='replace'))
+2026-10-06T18:52:23.6882019Z AssertionError: 2 != 0 : The term 'Get-FileHash' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+2026-10-06T18:52:23.6882638Z 
+2026-10-06T18:52:23.6882641Z 
+2026-10-06T18:52:23.6882645Z 
+2026-10-06T18:52:23.6882760Z ======================================================================
+2026-10-06T18:52:23.6883283Z FAIL: test_foreign_index_is_not_used_or_modified_by_delivery (test_consistency.Consistency.test_foreign_index_is_not_used_or_modified_by_delivery)
+2026-10-06T18:52:23.6883805Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6884051Z Traceback (most recent call last):
+2026-10-06T18:52:23.6885066Z   File "D:\a\company-work-system\company-work-system\checks\test_consistency.py", line 56, in test_foreign_index_is_not_used_or_modified_by_delivery
+2026-10-06T18:52:23.6885663Z     self.assertEqual(delivery.git(self.root, 'status', '--porcelain'), '')
+2026-10-06T18:52:23.6885989Z AssertionError: 'M README.md' != ''
+2026-10-06T18:52:23.6886209Z - M README.md
+2026-10-06T18:52:23.6886331Z 
+2026-10-06T18:52:23.6886334Z 
+2026-10-06T18:52:23.6886428Z ======================================================================
+2026-10-06T18:52:23.6887032Z FAIL: test_relative_prepare_is_relative_to_caller_not_source_checkout (test_consistency.Consistency.test_relative_prepare_is_relative_to_caller_not_source_checkout)
+2026-10-06T18:52:23.6887625Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6887910Z Traceback (most recent call last):
+2026-10-06T18:52:23.6888462Z   File "D:\a\company-work-system\company-work-system\checks\test_consistency.py", line 66, in test_relative_prepare_is_relative_to_caller_not_source_checkout
+2026-10-06T18:52:23.6889097Z     self.assertEqual(Path(prepared['path']), self.base / 'relative-candidate')
+2026-10-06T18:52:23.6889841Z AssertionError: WindowsPath('C:/Users/runneradmin/AppData/Local/Temp/company-ac[33 chars]ate') != WindowsPath('C:/Users/RUNNER~1/AppData/Local/Temp/company-accep[30 chars]ate')
+2026-10-06T18:52:23.6890354Z 
+2026-10-06T18:52:23.6890474Z ======================================================================
+2026-10-06T18:52:23.6891098Z FAIL: test_interrupted_finish_update_preserves_original_rollback_base (test_consistency.EvolutionConsistency.test_interrupted_finish_update_preserves_original_rollback_base)
+2026-10-06T18:52:23.6891737Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6892024Z Traceback (most recent call last):
+2026-10-06T18:52:23.6892581Z   File "D:\a\company-work-system\company-work-system\checks\test_consistency.py", line 124, in test_interrupted_finish_update_preserves_original_rollback_base
+2026-10-06T18:52:23.6893279Z     self.assertEqual(lifecycle.rollback(candidate, self.base / 'rolled-back')['status'], 'verified-candidate')
+2026-10-06T18:52:23.6893746Z AssertionError: 'conflict' != 'verified-candidate'
+2026-10-06T18:52:23.6894022Z - conflict
+2026-10-06T18:52:23.6894215Z + verified-candidate
+2026-10-06T18:52:23.6894327Z 
+2026-10-06T18:52:23.6894330Z 
+2026-10-06T18:52:23.6894452Z ======================================================================
+2026-10-06T18:52:23.6894950Z FAIL: test_config_changed_after_settings_write_never_forges_proof (test_hooks.Hooks.test_config_changed_after_settings_write_never_forges_proof)
+2026-10-06T18:52:23.6895480Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6895772Z Traceback (most recent call last):
+2026-10-06T18:52:23.6896307Z   File "D:\a\company-work-system\company-work-system\checks\test_hooks.py", line 424, in test_config_changed_after_settings_write_never_forges_proof
+2026-10-06T18:52:23.6896835Z     self.assertEqual(result["status"], "conflict")
+2026-10-06T18:52:23.6897118Z AssertionError: 'projected' != 'conflict'
+2026-10-06T18:52:23.6897365Z - projected
+2026-10-06T18:52:23.6897550Z + conflict
+2026-10-06T18:52:23.6897660Z 
+2026-10-06T18:52:23.6897666Z 
+2026-10-06T18:52:23.6897751Z ======================================================================
+2026-10-06T18:52:23.6898291Z FAIL: test_copied_company_proof_regenerates_absolute_paths_without_trust (test_hooks.Hooks.test_copied_company_proof_regenerates_absolute_paths_without_trust)
+2026-10-06T18:52:23.6898887Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6899176Z Traceback (most recent call last):
+2026-10-06T18:52:23.6899692Z   File "D:\a\company-work-system\company-work-system\checks\test_hooks.py", line 225, in test_copied_company_proof_regenerates_absolute_paths_without_trust
+2026-10-06T18:52:23.6900258Z     self.assertEqual(args[args.index("--root") + 1], str(relocated))
+2026-10-06T18:52:23.6900886Z AssertionError: 'C:\\Users\\runneradmin\\AppData\\Local\\Temp\\compan[31 chars]pany' != 'C:\\Users\\RUNNER~1\\AppData\\Local\\Temp\\company-h[28 chars]pany'
+2026-10-06T18:52:23.6901484Z - C:\Users\runneradmin\AppData\Local\Temp\company-hooks-33iluysi\relocated company
+2026-10-06T18:52:23.6901841Z ?          ^^^^^^^^^^^
+2026-10-06T18:52:23.6902131Z + C:\Users\RUNNER~1\AppData\Local\Temp\company-hooks-33iluysi\relocated company
+2026-10-06T18:52:23.6902455Z ?          ^^^^^^^^
+2026-10-06T18:52:23.6902559Z 
+2026-10-06T18:52:23.6902562Z 
+2026-10-06T18:52:23.6902674Z ======================================================================
+2026-10-06T18:52:23.6903217Z FAIL: test_interruption_between_settings_and_proof_detectable_on_retry (test_hooks.Hooks.test_interruption_between_settings_and_proof_detectable_on_retry)
+2026-10-06T18:52:23.6903781Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6904067Z Traceback (most recent call last):
+2026-10-06T18:52:23.6904612Z   File "D:\a\company-work-system\company-work-system\checks\test_hooks.py", line 251, in test_interruption_between_settings_and_proof_detectable_on_retry
+2026-10-06T18:52:23.6905560Z     with patch.object(hooks, "write", side_effect=interrupted), self.assertRaises(OSError):
+2026-10-06T18:52:23.6905983Z                                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-10-06T18:52:23.6906275Z AssertionError: OSError not raised
+2026-10-06T18:52:23.6906438Z 
+2026-10-06T18:52:23.6906533Z ======================================================================
+2026-10-06T18:52:23.6907071Z FAIL: test_publication_hint_recognizes_fixed_cli_without_execution (test_hooks.Hooks.test_publication_hint_recognizes_fixed_cli_without_execution)
+2026-10-06T18:52:23.6907644Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6907939Z Traceback (most recent call last):
+2026-10-06T18:52:23.6908465Z   File "D:\a\company-work-system\company-work-system\checks\test_hooks.py", line 76, in test_publication_hint_recognizes_fixed_cli_without_execution
+2026-10-06T18:52:23.6909029Z     self.assertTrue(hooks._publication_invocation(self.root, payload))
+2026-10-06T18:52:23.6909350Z AssertionError: False is not true
+2026-10-06T18:52:23.6909514Z 
+2026-10-06T18:52:23.6909632Z ----------------------------------------------------------------------
+2026-10-06T18:52:23.6909924Z Ran 158 tests in 295.608s
+2026-10-06T18:52:23.6910082Z 
+2026-10-06T18:52:23.6910203Z FAILED (failures=10, errors=19, skipped=3)
+2026-10-06T18:52:23.7787477Z ##[error]Process completed with exit code 1.
+2026-10-06T18:52:23.7965536Z Post job cleanup.
+2026-10-06T18:52:23.9293577Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-06T18:52:23.9458527Z git version 2.55.0.windows.5
+2026-10-06T18:52:23.9498691Z Temporarily overriding HOME='D:\a\_temp\bb732673-8f7c-486c-8b61-c4a90f5dc30a' before making global git config changes
+2026-10-06T18:52:23.9499699Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-06T18:52:23.9507627Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\company-work-system\company-work-system
+2026-10-06T18:52:23.9685424Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-06T18:52:23.9859331Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-06T18:52:24.3605684Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-06T18:52:24.3780933Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-06T18:52:24.7239655Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-06T18:52:24.7415250Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-06T18:52:25.0849595Z Cleaning up orphan processes
+2026-10-06T18:52:25.0876608Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

@@ -86,6 +86,7 @@ def definition_hash(root, harness):
 
 
 def _relative(root, cwd, value):
+    root, cwd = Path(root).resolve(), Path(cwd).resolve()
     require(isinstance(value, str) and value and "\x00" not in value, "tool path required")
     candidate = Path(value)
     # Reject lexical traversal even when resolution would land back inside root.
@@ -96,6 +97,7 @@ def _relative(root, cwd, value):
 
 
 def _changes(root, payload):
+    root = Path(root).resolve()
     cwd = Path(payload.get("cwd", str(root))).resolve()
     require(cwd.is_relative_to(root) and cwd.is_dir(), "hook cwd outside explicit root")
     tool = payload.get("tool_name")
@@ -163,6 +165,7 @@ def _navigation(kind, task):
 
 
 def _publication_invocation(root, payload):
+    root = Path(root).resolve()
     if payload.get("tool_name") != "Bash":
         return False
     data = payload.get("tool_input", {})

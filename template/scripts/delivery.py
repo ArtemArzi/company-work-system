@@ -9,6 +9,7 @@ import tempfile
 from contextlib import contextmanager
 from core import Rejected, config, digest, ident, load, lock, path, require
 import validation
+from platform_runtime import atomic_text
 
 
 def scope_root(root):
@@ -252,10 +253,10 @@ def commit(root, relative_paths, message):
         scratch = Path(temporary) / "work"
         admin = Path(temporary) / "admin"
         scratch.mkdir(); admin.mkdir()
-        (scratch / ".git").write_text("gitdir: " + str(admin) + "\n", encoding="utf-8")
-        (admin / "commondir").write_text(location["common"] + "\n", encoding="utf-8")
-        (admin / "gitdir").write_text(str(scratch / ".git") + "\n", encoding="utf-8")
-        (admin / "HEAD").write_text((old_head or "ref: refs/worktree/company-guarded") + "\n", encoding="utf-8")
+        atomic_text(scratch / ".git", "gitdir: " + str(admin) + "\n")
+        atomic_text(admin / "commondir", location["common"] + "\n")
+        atomic_text(admin / "gitdir", str(scratch / ".git") + "\n")
+        atomic_text(admin / "HEAD", (old_head or "ref: refs/worktree/company-guarded") + "\n")
         worktree_config = gitdir / "config.worktree"
         if worktree_config.exists():
             (admin / "config.worktree").write_bytes(worktree_config.read_bytes())
@@ -335,6 +336,7 @@ def deliver(root, remote, branch="main", expected_base=None, task_id=None):
 
 
 def acknowledge(root, remote, branch, task_id, receipt):
+    root = Path(root).resolve()
     from core import event, load, lock, task_file, write
     with lock(root):
         file = task_file(root, task_id)

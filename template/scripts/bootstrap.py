@@ -15,7 +15,7 @@ import tarfile
 import zipfile
 
 sys.path.insert(0, str(Path(__file__).absolute().parent))
-from platform_runtime import atomic_text, process_lock
+from platform_runtime import alias, atomic_text, process_lock
 
 
 class BootstrapError(RuntimeError):
@@ -55,14 +55,14 @@ def digest(path: Path) -> str:
 
 
 def guard(path: Path, root: Path) -> None:
-    """Reject symlink/junction ancestors before writing owned paths."""
-    path.relative_to(root)
+    """Normalize OS ancestors, then reject aliases in the company's own components."""
+    relative = path.relative_to(root)
+    root = root.resolve()
+    path = root / relative
     for item in (root, *reversed(path.parents), path):
-        if item == root or root in item.parents:
-            if item.is_symlink() or (hasattr(item, 'is_junction') and item.is_junction()):
-                raise BootstrapError(f'Path alias is forbidden: {item}')
-            if item.exists() and item.resolve() != item.absolute():
-                raise BootstrapError(f'Path alias is forbidden: {item}')
+        if (item == root or root in item.parents) and alias(item):
+            raise BootstrapError(f'Path alias is forbidden: {item}')
+
 
 
 def environment(root: Path) -> dict[str, str]:
@@ -235,7 +235,7 @@ def setup(root: Path) -> dict:
     guard(runtime, root)
     if not runtime.is_dir() or not (runtime / 'owner').is_file():
         raise BootstrapError('Use the shell launcher for the first explicit setup')
-    if (runtime / 'owner').read_text(encoding='utf-8').strip() != str(root):
+    if Path((runtime / 'owner').read_text(encoding='utf-8').strip()).resolve() != root.resolve():
         raise BootstrapError('Foreign or relocated runtime; use a fresh checkout')
     uv = verified_uv(root, data)
     guard(runtime / "setup.lock", root)
@@ -275,7 +275,7 @@ def setup(root: Path) -> dict:
 
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
-    root = Path(__file__).absolute().parent.parent
+    root = Path(__file__).resolve().parent.parent
     try:
         guard(root, root)
         if args == ['setup']:
