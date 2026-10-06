@@ -6,7 +6,7 @@ from pathlib import Path
 import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "template/scripts"))
-from core import require
+from core import digest, require
 from delivery import clean, git, preflight
 from lifecycle import release_isolated
 from validation import repository
@@ -34,6 +34,18 @@ def release(product, destination):
     return sha
 
 
+def package(release_repo, destination):
+    """Export the checked release-only history for transfer to another computer."""
+    release_repo, destination = Path(release_repo).resolve(), Path(destination).absolute()
+    release_isolated(release_repo)
+    require(not destination.exists() and not destination.is_symlink(), "bundle destination already exists; no overwrite")
+    require(not destination.resolve().is_relative_to(release_repo), "bundle must be outside release repository")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    git(release_repo, "bundle", "create", str(destination), "--all")
+    git(release_repo, "bundle", "verify", str(destination))
+    return {"release_sha": git(release_repo, "rev-parse", "refs/heads/main"), "bundle": str(destination), "bundle_sha256": digest(destination)}
+
+
 if __name__ == "__main__":
     if sys.argv[1:] == ["preflight"]:
         try:
@@ -44,5 +56,7 @@ if __name__ == "__main__":
         sys.exit(0 if result["status"] == "ready" else 2)
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("destination", type=Path)
+    parser.add_argument("--bundle", type=Path, help="New portable bundle of the checked release-only history; never overwrites")
     args = parser.parse_args()
-    print(release(ROOT, args.destination.resolve()))
+    sha = release(ROOT, args.destination.resolve())
+    print(json.dumps(package(args.destination, args.bundle), ensure_ascii=False, indent=2) if args.bundle else sha)

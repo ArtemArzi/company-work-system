@@ -310,6 +310,71 @@ class GitAcceptance(Fixture):
         product.release(p, release)
         return p, release
 
+    def test_portable_feature_release_updates_client_without_development_or_data_loss(self):
+        p, release = self.product_release()
+        company = self.base / "client"
+        lifecycle.create(release, company, "client-company", "client-owner")
+        (company / "work").mkdir(exist_ok=True)
+        (company / "work/kept.txt").write_text("Client-owned work\n")
+        delivery.commit(company, ["work/kept.txt"], "Retain client data")
+        original_config = config(company)
+        company_base = delivery.git(company, "rev-parse", "HEAD")
+        remote = self.base / "client-common.git"
+        delivery.git(company, "clone", "--bare", str(company), str(remote))
+
+        template = p / "template"
+        feature_id = "company-new-feature"
+        feature = template / "skills" / feature_id
+        shutil.copytree(template / "skills/company-context", feature)
+        skill_file = feature / "SKILL.md"
+        skill_file.write_text(skill_file.read_text().replace("name: company-context", "name: " + feature_id))
+        recipe = load(feature / "workflow.yaml")
+        recipe["id"] = feature_id
+        write(feature / "workflow.yaml", recipe)
+        skill_map = template / "skills/README.md"
+        skill_map.write_text(skill_map.read_text() + f"\n[Synthetic new feature]({feature_id}/SKILL.md).\n")
+        for directory in (".agents/skills", ".claude/skills"):
+            (template / directory / feature_id).symlink_to("../../skills/" + feature_id)
+        new_script = template / "scripts/synthetic-feature.py"
+        new_script.write_text("print('New synthetic feature available')\n")
+        meta = load(template / "release.yaml")
+        parts = meta["version"].split(".")
+        meta["version"] = ".".join([*parts[:2], str(int(parts[2]) + 1)])
+        write(template / "release.yaml", meta)
+        validation.repository(template)
+        delivery.git(p, "add", "template")
+        delivery.git(p, "commit", "-m", "Release new synthetic feature")
+        target = product.release(p, release)
+        bundle = self.base / "feature.bundle"
+        exported = product.package(release, bundle)
+        self.assertEqual(exported["release_sha"], target)
+        self.assertEqual(exported["bundle_sha256"], digest(bundle))
+        received = self.base / "received-release.git"
+        delivery.git(self.base, "clone", "--bare", str(bundle), str(received))
+        lifecycle.release_isolated(received)
+        self.assertNotIn("PRIVATE-DEVELOPMENT", delivery.git(received, "rev-list", "--objects", "--all"))
+        updated = lifecycle.update(company, received, self.base / "client-update")
+        self.assertEqual(updated["status"], "verified-candidate", updated)
+        candidate = Path(updated["candidate"])
+        self.assertEqual(config(candidate), original_config)
+        self.assertEqual((candidate / "work/kept.txt").read_text(), "Client-owned work\n")
+        self.assertTrue((candidate / "skills" / feature_id / "SKILL.md").exists())
+        self.assertEqual(subprocess.check_output([sys.executable, str(candidate / "scripts/synthetic-feature.py")], text=True).strip(), "New synthetic feature available")
+        delivered = delivery.deliver(candidate, str(remote), expected_base=company_base)
+        self.assertEqual(delivered["status"], "readback-confirmed")
+        self.assertEqual(lifecycle.update(candidate, received, self.base / "repeat-update")["status"], "already-installed")
+        saved = bundle.read_bytes()
+        with self.assertRaisesRegex(Rejected, "no overwrite"):
+            product.package(release, bundle)
+        self.assertEqual(bundle.read_bytes(), saved)
+        broken = self.base / "broken.bundle"
+        broken.symlink_to("absent-bundle-target")
+        with self.assertRaisesRegex(Rejected, "no overwrite"):
+            product.package(release, broken)
+        with self.assertRaises(Rejected):
+            product.package(p / ".git", self.base / "forbidden.bundle")
+        self.assertFalse((self.base / "forbidden.bundle").exists())
+
     def test_copy_update_two_companies_history_and_local_rule(self):
         p, release = self.product_release()
         a, b = self.base / "alpha", self.base / "beta"

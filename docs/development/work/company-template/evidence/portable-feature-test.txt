@@ -1,0 +1,6 @@
+test_portable_feature_release_updates_client_without_development_or_data_loss (checks.test_system.GitAcceptance.test_portable_feature_release_updates_client_without_development_or_data_loss) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 24.007s
+
+OK

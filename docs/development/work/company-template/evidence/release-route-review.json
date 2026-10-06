@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-06",
+  "role": "block_reviewer",
+  "agent": "/root/release_and_crm_review",
+  "read_only": true,
+  "verdict": "PASS",
+  "candidate_files_sha256": {
+    "scripts/product.py": "7641a0332e56e8901b2c0bd47def261a01dfda7704b51b1f95292e7fce0e6fad",
+    "checks/test_system.py": "f736513078a811c5d6801a3a143417ecee85ebb8a771e5fb9305caf54e2cb5b5",
+    "README.md": "b90a1a6e13d840bbd49f8fc896e0fb1a5397746d1fc1160867e4ef2c1bb131e5",
+    "docs/development/RELEASE.md": "361280ff65880e39dc0db0235f326cc4be1a9b2085a1e24b0391c6858735d0d2",
+    "template/release.yaml": "643dbeab55e58bb24b1aa0b62c6ffa5ff6bc46644c0db337644a14b6531234ad"
+  },
+  "independent_test": {
+    "name": "test_portable_feature_release_updates_client_without_development_or_data_loss",
+    "status": "PASS",
+    "seconds": 26.271
+  },
+  "source_map": {
+    "path": "studio/knowledge/business-automation/materials/krasinsky/09-crm-and-implementation-problems.md",
+    "sha256": "d7058bf43b3c430ece989dec28ae2020152f3c56955bfabea2b3a082edee7e51",
+    "rows": 28,
+    "all_rows_reviewed": true,
+    "correction": "row27 now matches K182/S0830-S0833, own interpretation separate from lecturer"
+  },
+  "preservation": "original hash matches saved lecture audit; new map only, original/cards unchanged",
+  "boundaries": [
+    "source completeness limited to preserved217card catalogue",
+    "video/ASR/case outcomes not independently proved",
+    "new feature transfer is synthetic/local; native/liveclientbusiness proof excluded",
+    "externalpush/readback and opening actualGitHub done separately by root"
+  ]
+}
