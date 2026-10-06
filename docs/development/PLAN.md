@@ -42,7 +42,7 @@ Scope Task Delivery: только этот отдельный продукт п�
 
 ## Текущее состояние
 
-06.10.2026: главный продукт1.1.5 проверен и принят независимым deep reviewer:52/52PASS550.818s, receipt company-consistency-result-pass-20261006-3bb4e11-e0648404. Разрешённая product delivery/readback завершается. Публикуется только продукт. Work проверен дополнительно как installed-copy fixture, installed1.1.1 не меняется; его local подготовка не публикуется. Исторические приёмки ниже сохраняют прежнюю область.
+06.10.2026: главный продукт1.1.5 проверен и принят независимым deep reviewer:52/52PASS550.818s, receipt company-consistency-result-pass-20261006-3bb4e11-e0648404. Доставка принадлежит product origin/main; terminal SHA readback записывается локально в .local/product-delivery-1.1.5.json без отдельного повторного синка этого receipt. Публикуется только продукт. Work проверен дополнительно как installed-copy fixture, installed1.1.1 не меняется; его local подготовка не публикуется. Исторические приёмки ниже сохраняют прежнюю область.
 
 GitHub [ArtemArzi/company-work-system](https://github.com/ArtemArzi/company-work-system) первоначально создан приватным; по явному поручению владельца 06.10.2026 стал публичным. Анонимный GitHub API подтвердил HTTP200, private=false и неизменный main. Следующие коммиты сохраняются обычным push; данные компаний и release-only граница не меняются. Проверка истории и конкретный результат/readback — в существующей задаче company-template и evidence/publication.json.
 

@@ -1,6 +1,6 @@
 {
   "date": "2026-10-06",
-  "status": "accepted-main-product-delivery-pending",
+  "status": "accepted-main-product",
   "product_baseline": "b17a3b4310a73a3ab326edc7c7c83012b3a0a1c0",
   "work_baseline": "8a70980b72e303a6ef88ad3893b059209acab7db",
   "methods_review": {
@@ -133,6 +133,8 @@
   },
   "delivery": {
     "scope": "main product origin/main only",
-    "status": "pending"
+    "route": "ordinary fast-forward push; exact remote SHA readback",
+    "receipt": ".local/product-delivery-1.1.5.json",
+    "boundary": "local terminal receipt does not trigger a separate publication of the same result; no company installation"
   }
 }
