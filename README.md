@@ -34,4 +34,4 @@ flowchart LR
 2. [Карта разработки](docs/development/README.md) → [PLAN](docs/development/PLAN.md) → соответствующая задача.
 3. [RELEASE](docs/development/RELEASE.md) — выпустить функцию, передать пакет и подготовить обновление компании.
 
-Канонический комплект компании — **template/**. Документы разработки — **docs/development/**. Репозиторий продукта: [ArtemArzi/company-work-system](https://github.com/ArtemArzi/company-work-system), private.
+Канонический комплект компании — **template/**. Документы разработки — **docs/development/**. Репозиторий продукта: [ArtemArzi/company-work-system](https://github.com/ArtemArzi/company-work-system), публичный.

@@ -1,0 +1,51 @@
+{
+  "date": "2026-10-06",
+  "authorization": "explicit owner request to make ONLY ArtemArzi/company-work-system public",
+  "transport": "Existing authorized gh CLI; GitHub MCP visibility mutation unavailable",
+  "before": {
+    "repo": "ArtemArzi/company-work-system",
+    "private": true,
+    "admin": true,
+    "wiki": false,
+    "pages": false,
+    "discussions": false,
+    "branches": {
+      "main": "14daebf8ee6a3b619a155b98dacb30161bec38bc"
+    },
+    "tags": 0,
+    "issues": 0,
+    "pulls": 0,
+    "releases": 0,
+    "runs": 0,
+    "artifacts": 0,
+    "unchanged_candidate": true
+  },
+  "candidate_review": {
+    "head": "14daebf8ee6a3b619a155b98dacb30161bec38bc",
+    "reachable_blobs": 205,
+    "commits": 14,
+    "pngs": 5,
+    "credential_findings": 0,
+    "email_findings": 8,
+    "email_disposition": "all local-system@example.invalid, generic reserved fixture identity",
+    "plan_receipt": "public-repo-plan-20261006-14daebf-pass-d392",
+    "eligibility_receipt": "public-repo-eligibility-20261006-14daebf-pass-a71e"
+  },
+  "after": {
+    "anonymous": true,
+    "http_status": 200,
+    "full_name": "ArtemArzi/company-work-system",
+    "private": false,
+    "visibility": "public",
+    "head": "14daebf8ee6a3b619a155b98dacb30161bec38bc",
+    "rulesets_count": 0
+  },
+  "rulesets_before": "HTTP403 feature not available for private/free repository; not claimed empty",
+  "limits": [
+    "bounded content scan is not proof of absolute absence",
+    "public downloaded copies are not revoked by re-privatization",
+    "no company/Work visibility, runtime/version, license, history or release-only contract changed"
+  ],
+  "result_receipt": "public-repo-result-20261006-14daebf-pass-c903",
+  "result_verdict": "pass; independent anonymous readback and four-path documentation candidate accepted"
+}
