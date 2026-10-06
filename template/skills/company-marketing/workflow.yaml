@@ -9,18 +9,20 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: Verified marketing Result for accepted audience and purpose; delivery/use/effect remain separate
+output: Verified marketing Result for accepted audience and purpose; delivery/use/effect
+  remain separate
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: prepare-marketing
   operation: marketing
-  instruction: Это подготовка агентом, а не одноимённая команда CLI. По действующим определениям/источникам
-    подготовить Result marketing с аудиторией, предложением, следующим действием и ограничениями; публикация
-    требует действительного разрешения.
+  instruction: Это подготовка агентом, а не одноимённая команда CLI. По действующим
+    определениям/источникам подготовить Result marketing с аудиторией, предложением,
+    следующим действием и ограничениями; публикация требует действительного разрешения.
   depends_on:
   - read-context
 - id: execute-marketing-result
@@ -28,5 +30,9 @@ steps:
   instruction: Один execute подготовленного Result, critical и обязательного review.
   depends_on:
   - prepare-marketing
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/operations.py

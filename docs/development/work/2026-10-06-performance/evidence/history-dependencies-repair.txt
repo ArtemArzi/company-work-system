@@ -1,0 +1,28 @@
+test_additional_high_signal_forms_are_rejected_without_logging_values (checks.test_history.History.test_additional_high_signal_forms_are_rejected_without_logging_values) ... ok
+test_all_refs_release_alias_tags_and_direct_blob (checks.test_history.History.test_all_refs_release_alias_tags_and_direct_blob) ... ok
+test_baseline_exact_content_and_foreign_merge (checks.test_history.History.test_baseline_exact_content_and_foreign_merge) ... ok
+test_binary_permission_does_not_skip_secret_or_text_alias (checks.test_history.History.test_binary_permission_does_not_skip_secret_or_text_alias) ... ok
+test_bundle_rechecks_actual_exported_refs_after_source_race (checks.test_history.History.test_bundle_rechecks_actual_exported_refs_after_source_race) ... ok
+test_git_selectors_cleared_and_rewrites_rejected (checks.test_history.History.test_git_selectors_cleared_and_rewrites_rejected) ... ok
+test_large_blob_is_streamed_and_cross_chunk_marker_rejected (checks.test_history.History.test_large_blob_is_streamed_and_cross_chunk_marker_rejected) ... ok
+test_noncanonical_names_modes_and_symlinks (checks.test_history.History.test_noncanonical_names_modes_and_symlinks) ... ok
+test_release_forbidden_historical_alias_even_if_head_removed (checks.test_history.History.test_release_forbidden_historical_alias_even_if_head_removed) ... ok
+test_secret_removed_from_head_is_still_rejected (checks.test_history.History.test_secret_removed_from_head_is_still_rejected) ... ok
+test_shallow_and_alternate_store_rejected (checks.test_history.History.test_shallow_and_alternate_store_rejected) ... ok
+test_shared_positive_and_same_blob_all_paths_checked (checks.test_history.History.test_shared_positive_and_same_blob_all_paths_checked) ... ok
+test_truncated_reader_detects_eof (checks.test_history.History.test_truncated_reader_detects_eof) ... ok
+test_wrong_baseline_and_missing_object (checks.test_history.History.test_wrong_baseline_and_missing_object) ... ok
+test_ambiguous_custom_and_undeclared_fallback (checks.test_dependencies.Dependencies.test_ambiguous_custom_and_undeclared_fallback) ... ok
+test_config_race_before_evidence_never_verified (checks.test_dependencies.Dependencies.test_config_race_before_evidence_never_verified) ... ok
+test_declared_dependency_add_remove_and_kernel_change (checks.test_dependencies.Dependencies.test_declared_dependency_add_remove_and_kernel_change) ... ok
+test_delivered_admission_uses_historical_specification (checks.test_dependencies.Dependencies.test_delivered_admission_uses_historical_specification) ... ok
+test_explicit_harness_and_transitive_skill_selection (checks.test_dependencies.Dependencies.test_explicit_harness_and_transitive_skill_selection) ... ok
+test_legacy_read_and_resume_preserve_scope_history (checks.test_dependencies.Dependencies.test_legacy_read_and_resume_preserve_scope_history) ... ok
+test_scope_tampering_and_export_primary_path_rejected (checks.test_dependencies.Dependencies.test_scope_tampering_and_export_primary_path_rejected) ... ok
+test_selected_source_same_id_change_and_rights_block (checks.test_dependencies.Dependencies.test_selected_source_same_id_change_and_rights_block) ... ok
+test_selected_sources_harness_and_unrelated_methods (checks.test_dependencies.Dependencies.test_selected_sources_harness_and_unrelated_methods) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 8.358s
+
+OK

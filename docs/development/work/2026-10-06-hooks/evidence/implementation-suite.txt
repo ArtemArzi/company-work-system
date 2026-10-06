@@ -1,0 +1,35 @@
+test_add_patch_and_edit_use_shared_validator (test_hooks.Hooks.test_add_patch_and_edit_use_shared_validator) ... ok
+test_bad_payload_event_root_and_paths_rejected (test_hooks.Hooks.test_bad_payload_event_root_and_paths_rejected) ... ok
+test_code_dependency_change_invalidates_command_and_old_dispatch (test_hooks.Hooks.test_code_dependency_change_invalidates_command_and_old_dispatch) ... ok
+test_concurrent_cache_lock_failure_and_handler_crash_not_pass (test_hooks.Hooks.test_concurrent_cache_lock_failure_and_handler_crash_not_pass) ... ok
+test_concurrent_foreign_settings_edit_not_overwritten (test_hooks.Hooks.test_concurrent_foreign_settings_edit_not_overwritten) ... ok
+test_default_project_is_preview_without_activation_or_files (test_hooks.Hooks.test_default_project_is_preview_without_activation_or_files) ... ok
+test_disabled_native_and_working_common_fallback (test_hooks.Hooks.test_disabled_native_and_working_common_fallback) ... ok
+test_disabling_removes_exact_owned_groups_only (test_hooks.Hooks.test_disabling_removes_exact_owned_groups_only) ... ok
+test_interrupt_subagent_recursive_stop_never_continues (test_hooks.Hooks.test_interrupt_subagent_recursive_stop_never_continues) ... ok
+test_malformed_native_settings_preserved_as_conflict (test_hooks.Hooks.test_malformed_native_settings_preserved_as_conflict) ... ok
+test_manifest_exact_six_schema_and_no_yaml_commands (test_hooks.Hooks.test_manifest_exact_six_schema_and_no_yaml_commands) ... ok
+test_manifest_invalid_event_and_timeout (test_hooks.Hooks.test_manifest_invalid_event_and_timeout) ... ok
+test_method_impact_explicit_batch_uses_declared_closure (test_hooks.Hooks.test_method_impact_explicit_batch_uses_declared_closure) ... ok
+test_method_impact_only_explicit_dependencies_and_publication_hint (test_hooks.Hooks.test_method_impact_only_explicit_dependencies_and_publication_hint) ... ok
+test_missing_receipt_unknown_namespace_and_mixed_group_conflict (test_hooks.Hooks.test_missing_receipt_unknown_namespace_and_mixed_group_conflict) ... ok
+test_native_invalid_json_oversize_missing_dependency_failure_not_pass (test_hooks.Hooks.test_native_invalid_json_oversize_missing_dependency_failure_not_pass) ... ok
+test_native_projection_apply_requires_company_permissions (test_hooks.Hooks.test_native_projection_apply_requires_company_permissions) ... ok
+test_native_protocol_versions_json_denial_and_advisory_both (test_hooks.Hooks.test_native_protocol_versions_json_denial_and_advisory_both) ... ok
+test_native_timeout_explicit_failure_without_stop_block (test_hooks.Hooks.test_native_timeout_explicit_failure_without_stop_block) ... ok
+test_other_settings_preserved_idempotent_and_owned_collision (test_hooks.Hooks.test_other_settings_preserved_idempotent_and_owned_collision) ... ok
+test_payload_normalization_independent_of_method_dependencies (test_hooks.Hooks.test_payload_normalization_independent_of_method_dependencies) ... ok
+test_post_write_missing_map_advisory_and_linked_positive (test_hooks.Hooks.test_post_write_missing_map_advisory_and_linked_positive) ... ok
+test_product_root_routes_development_and_template_paths (test_hooks.Hooks.test_product_root_routes_development_and_template_paths) ... ok
+test_publication_hint_recognizes_fixed_cli_without_execution (test_hooks.Hooks.test_publication_hint_recognizes_fixed_cli_without_execution) ... ok
+test_stop_compact_dedup_revision_no_business_writes (test_hooks.Hooks.test_stop_compact_dedup_revision_no_business_writes) ... ok
+test_subdirectory_absolute_quoted_projection_executes (test_hooks.Hooks.test_subdirectory_absolute_quoted_projection_executes) ... ok
+test_unknown_task_navigation_only_disabled_scenario (test_hooks.Hooks.test_unknown_task_navigation_only_disabled_scenario) ... ok
+test_untrusted_or_missing_expected_definition_never_passes (test_hooks.Hooks.test_untrusted_or_missing_expected_definition_never_passes) ... ok
+test_update_patch_partial_metadata_is_advisory_not_denial (test_hooks.Hooks.test_update_patch_partial_metadata_is_advisory_not_denial) ... ok
+test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed (test_hooks.Hooks.test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed) ... ok
+
+----------------------------------------------------------------------
+Ran 30 tests in 6.888s
+
+OK

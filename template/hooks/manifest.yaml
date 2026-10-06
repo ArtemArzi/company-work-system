@@ -1,0 +1,142 @@
+schema_version: 1
+id: company-hooks
+version: 1
+owner: product-maintainer
+hooks:
+- id: context-entry
+  version: 1
+  owner: product-maintainer
+  purpose: Read explicit map/current owner
+  failure: Session resumed from stale memory
+  events:
+  - SessionStart
+  tools: []
+  paths: []
+  handler: context-entry
+  dependencies: &id001
+  - scripts/hooks.py
+  - scripts/core.py
+  - scripts/validation.py
+  - scripts/dependencies.py
+  - standards/hook-authoring.md
+  - standards/task-validation.md
+  - standards/runtime.md
+  severity: advisory
+  enabled: explicit-company-opt-in
+  timeout: 3
+  fallback: Shared CLI + explicit file read; no native coverage claim
+  positive: SessionStart shows canonical routes
+  negative: Missing task gives navigation only
+- id: entity-before-write
+  version: 1
+  owner: product-maintainer
+  purpose: Reject proven duplicate ID or wrong canonical placement
+  failure: A second method is written in an unrelated directory
+  events:
+  - PreToolUse
+  tools:
+  - Write
+  - Edit
+  - apply_patch
+  paths:
+  - '*.md'
+  - '**/*.md'
+  - '*.yaml'
+  - '**/*.yaml'
+  handler: entity-before-write
+  dependencies: *id001
+  severity: proved-violation
+  enabled: explicit-company-opt-in
+  timeout: 3
+  fallback: Shared CLI + explicit file read; no native coverage claim
+  positive: An ordinary business note remains allowed
+  negative: A duplicate skill ID is denied
+- id: entity-after-write
+  version: 1
+  owner: product-maintainer
+  purpose: Check affected metadata and map links
+  failure: A new standard has no map entry
+  events:
+  - PostToolUse
+  tools:
+  - Write
+  - Edit
+  - apply_patch
+  paths:
+  - '*.md'
+  - '**/*.md'
+  - '*.yaml'
+  - '**/*.yaml'
+  handler: entity-after-write
+  dependencies: *id001
+  severity: advisory
+  enabled: explicit-company-opt-in
+  timeout: 3
+  fallback: Shared CLI + explicit file read; no native coverage claim
+  positive: Linked valid standard passes selective checks
+  negative: Missing map yields advisory after write
+- id: task-continuation
+  version: 1
+  owner: product-maintainer
+  purpose: Remind main agent to save next_action/evidence
+  failure: Continuation loses current revision or observed failure
+  events:
+  - PreCompact
+  - Stop
+  tools: []
+  paths:
+  - work/
+  handler: task-continuation
+  dependencies: *id001
+  severity: advisory
+  enabled: explicit-company-opt-in
+  timeout: 3
+  fallback: Shared CLI + explicit file read; no native coverage claim
+  positive: Current selected task yields one advisory
+  negative: Recursive Stop/subagent/interrupt never starts continuation
+- id: method-impact
+  version: 1
+  owner: product-maintainer
+  purpose: Show explicit file dependency consumers
+  failure: A method changes without reconciling its tasks
+  events:
+  - PreToolUse
+  tools:
+  - Write
+  - Edit
+  - apply_patch
+  paths:
+  - standards/
+  - skills/
+  - workflows/
+  - scripts/
+  - hooks/
+  - adapters/
+  - company/standards/
+  handler: method-impact
+  dependencies: *id001
+  severity: advisory
+  enabled: explicit-company-opt-in
+  timeout: 3
+  fallback: Shared CLI + explicit file read; no native coverage claim
+  positive: Selected dependency reports actual task
+  negative: Unrelated method invents no affected task
+- id: publication-check
+  version: 1
+  owner: product-maintainer
+  purpose: Remind exact CLI history/path/policy guard
+  failure: Local HEAD is mistaken for safe publishable history
+  events:
+  - PreToolUse
+  tools:
+  - Bash
+  paths:
+  - scripts/system.py
+  handler: publication-check
+  dependencies: *id001
+  severity: advisory
+  enabled: explicit-company-opt-in
+  timeout: 3
+  fallback: Shared CLI + explicit file read; no native coverage claim
+  positive: Recognized commit/deliver reminds shared guard
+  negative: Arbitrary shell is not claimed intercepted

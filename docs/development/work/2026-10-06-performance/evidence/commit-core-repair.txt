@@ -1,0 +1,7 @@
+test_preview_tree_uses_owned_index_and_safe_commit_passes (checks.test_history.GuardedDelivery.test_preview_tree_uses_owned_index_and_safe_commit_passes) ... ok
+test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup (checks.test_history.GuardedDelivery.test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 38.465s
+
+OK

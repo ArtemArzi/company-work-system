@@ -93,8 +93,16 @@ def lock(root):
             fcntl.flock(stream, fcntl.LOCK_UN)
 
 
+def config_snapshot(root):
+    """Parse and hash the same immutable bytes, never two reads of mutable config."""
+    raw = path(root, "company/config.yaml").read_bytes()
+    value = yaml.safe_load(raw)
+    require(isinstance(value, dict), "company config must be an object")
+    return value, hashlib.sha256(raw).hexdigest()
+
+
 def config(root, writable=False):
-    value = load(path(root, "company/config.yaml"))
+    value = config_snapshot(root)[0]
     require(value.get("schema_version") == 1, "unsupported company format")
     ident(value.get("id"))
     if writable:
@@ -117,11 +125,14 @@ def event(task, action, detail):
 
 def method_bindings(root, inputs=()):
     relatives = ["company/config.yaml", "release.yaml"]
-    for directory in ["standards", "skills", "workflows", "scripts", "adapters", "company/standards"]:
+    for directory in ["standards", "skills", "workflows", "scripts", "adapters", "hooks", "company/standards"]:
         relatives += [str(p.relative_to(root)) for p in sorted(Path(root, directory).rglob("*")) if p.is_file() and p.suffix in {".py", ".md", ".yaml"}]
     relatives += list(inputs)
     return {p: digest(path(root, p)) for p in sorted(set(relatives))}
 
 
-def changed_bindings(root, bindings):
+def changed_bindings(root, bindings, scope=None):
+    if scope is not None:
+        from dependencies import changed
+        return changed(root, bindings, scope)
     return [p for p, sha in bindings.items() if not path(root, p).is_file() or digest(path(root, p)) != sha]

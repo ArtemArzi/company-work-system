@@ -1,0 +1,25 @@
+{
+  "verdict": "pass",
+  "reviewer_receipt": "company-work-system-result-pass-20261006-6ffe7f6-r2",
+  "reviewer": "/root/performance_hooks_result_acceptance",
+  "candidate_version": "1.2.0",
+  "source_identity": "docs/development/work/2026-10-06-performance/evidence/full-suite-final.json:source_hashes",
+  "source_receipt_sha256": "dd8ea4ed75bd67c7d96234d4f4fd9581f5018d374010d5352e105bac5ac99fee",
+  "source_paths_checked": 80,
+  "hash_mismatches": [],
+  "repair_list": [],
+  "evidence": {
+    "full_suite": "132/132 PASS939.529s; exit0/source_unchanged=true",
+    "commit": "16/16 + foreignlock regression PASS; real unchanged global Git precommit positive/rejection",
+    "hooks": "37/37; authorization before/after-write",
+    "evolution": "two-company update/rollback/restore/proposal; donated code inert",
+    "benchmark": "smallboundPASS;medium4.421/4.668x;equalcoverage/counts/bytes",
+    "bindings": "55to18 pins;legacy/admission retained"
+  },
+  "boundaries": [
+    "synthetic local traversal, not Work/network duration",
+    "Codex/Claude native events/trust and Claude OAuth unverified",
+    "split/sparse index and relative custom hooksPath fail closed",
+    "source acceptance; product commit/push/package pending; no company activation"
+  ]
+}

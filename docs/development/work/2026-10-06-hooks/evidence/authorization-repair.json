@@ -1,0 +1,44 @@
+{
+  "repair": "projection current authorization under shared lock",
+  "accepted_contracts": [
+    "company-work-system-a1-pass-20261006-9182c4f-source-snapshot-r1",
+    "company-work-system-hooks-proof-plan-pass-20261006-6ffe7f6-93b1"
+  ],
+  "review_scope": "same-scope correction to whole-result reject company-work-system-result-reject-20261006-6ffe7f6-rc1",
+  "candidate_base_head": "6ffe7f6eb777439c0d4f2d3caec3c0bd2a25e0fe",
+  "command": "PYTHONPATH=checks python3 -m unittest -v test_hooks",
+  "tests": 37,
+  "passed": 37,
+  "elapsed_runner_seconds": 7.849,
+  "status": "PASS",
+  "preliminary_targeted": {
+    "tests": 5,
+    "passed": 5,
+    "elapsed_runner_seconds": 0.729
+  },
+  "new_counterexamples": [
+    "Revoke local_work during second definition_hash: conflict, exact old settings/proof preserved, no autoenable.",
+    "Revoke local_work after settings write: conflict, no forged proof, retry remains unknown-section conflict."
+  ],
+  "mechanism": "Pin shared config_snapshot under same lock; shared config writable validation matches parsed/raw snapshot; config included in byte CAS after final fingerprint before settings and proof writes; exact core.write JSON bytes become target CAS expectation.",
+  "checks": {
+    "python_compile": "PASS hooks.py/test_hooks.py",
+    "tracked_owned_diff_check": "PASS",
+    "new_owned_trailing_whitespace": "PASS"
+  },
+  "owned_hashes": {
+    "template/scripts/hooks.py": "749e7c45c59c1dc3b157800fe14dce657f300f6b59a3dea62bc67b6ec2be621d",
+    "checks/test_hooks.py": "ce5d64f2601112206af0aeafda6db5b090c1bd1c279cc8d2f662a3a5eb77ca4c",
+    "template/standards/hook-authoring.md": "2414ebb75fd63cd3a6cded5c718d343a585b7a04c8823e3bccf3afa82069720e"
+  },
+  "shared_helper_hashes": {
+    "template/scripts/core.py": "c0ecb5360d09482f2c563ede87db4b151da9136182b23fa65745f82d399b3753",
+    "template/scripts/validation.py": "02a9c9824aa21b6aa8f63e99dccee62a333aecdcfabd50b8f1d926c28e635c3b",
+    "template/scripts/dependencies.py": "09f025a5348ee251b8b99dec096aacb16574076288bed23e2f535aac4b10b3f8"
+  },
+  "boundaries": [
+    "Local protocol/common-code fixtures only; native event/trust/OAuth remain unverified.",
+    "No current product/Work/global activation or settings writes.",
+    "Root owns full-suite final join and same-reviewer targeted revalidation."
+  ]
+}

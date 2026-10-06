@@ -1,0 +1,18 @@
+{
+  "scope": "synthetic configured metrics task; precision, not live sync duration",
+  "legacy_files": 55,
+  "selected_files": 18,
+  "legacy_bytes": 282224,
+  "selected_bytes": 150354,
+  "binding_scope_schema": 1,
+  "source_ids": [
+    "test-data"
+  ],
+  "other_harness_pinned": false,
+  "kernel_pinned": true,
+  "legacy_pins_preserved": true,
+  "source_hashes": {
+    "scripts/dependencies.py": "b740ec149bc63797e22c6f9e42f3df91bea15996efd62a92d84575b8b005c9ba",
+    "standards/runtime.md": "b6bc94b18785361b78b66127bf753efe690dff520f3b803aeebf44f8c7dd5b5e"
+  }
+}

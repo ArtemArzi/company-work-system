@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 import sys
+import tempfile
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "template/scripts"))
 from core import digest, require
@@ -43,7 +44,17 @@ def package(release_repo, destination):
     destination.parent.mkdir(parents=True, exist_ok=True)
     git(release_repo, "bundle", "create", str(destination), "--all")
     git(release_repo, "bundle", "verify", str(destination))
-    return {"release_sha": git(release_repo, "rev-parse", "refs/heads/main"), "bundle": str(destination), "bundle_sha256": digest(destination)}
+    bundle_sha = digest(destination)
+    # Check the actual transferred artifact, including every advertised ref.
+    # The source may have changed between its scan and bundle creation.
+    with tempfile.TemporaryDirectory(prefix="company-release-bundle-") as temporary:
+        mirror = Path(temporary) / "mirror.git"
+        git(release_repo, "clone", "--mirror", str(destination), str(mirror))
+        checked = release_isolated(mirror)
+        release_sha = checked["ref_tips"].get("refs/heads/main")
+        require(release_sha, "bundle lacks the checked main release")
+        require(digest(destination) == bundle_sha, "bundle changed during verification")
+    return {"release_sha": release_sha, "bundle": str(destination), "bundle_sha256": bundle_sha}
 
 
 if __name__ == "__main__":

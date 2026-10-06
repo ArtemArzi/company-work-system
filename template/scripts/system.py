@@ -5,11 +5,8 @@ import argparse
 import json
 from pathlib import Path
 import sys
-import connectors
 from core import load, require
 import delivery
-import knowledge
-import lifecycle
 import operations
 import validation
 
@@ -22,7 +19,7 @@ def main():
     sub.add_parser("self-test")
     p = sub.add_parser("preflight"); p.add_argument("--remote"); p.add_argument("--branch", default="main")
     p = sub.add_parser("context"); p.add_argument("--task")
-    p = sub.add_parser("intake"); p.add_argument("id"); p.add_argument("--request", required=True); p.add_argument("--owner", required=True); p.add_argument("--acceptance", type=Path, required=True); p.add_argument("--confirmed", action="store_true"); p.add_argument("--unknown", action="append", default=[]); p.add_argument("--input", action="append", default=[]); p.add_argument("--independent-required", action="store_true")
+    p = sub.add_parser("intake"); p.add_argument("id"); p.add_argument("--request", required=True); p.add_argument("--owner", required=True); p.add_argument("--acceptance", type=Path, required=True); p.add_argument("--confirmed", action="store_true"); p.add_argument("--unknown", action="append", default=[]); p.add_argument("--input", action="append", default=[]); p.add_argument("--independent-required", action="store_true"); p.add_argument("--skill"); p.add_argument("--harness", choices=['codex', 'claude']); p.add_argument("--source-id", action='append', default=[])
     p = sub.add_parser("decide"); p.add_argument("id"); p.add_argument("action", choices=["confirm", "cancel", "resume"]); p.add_argument("--revision", type=int, required=True); p.add_argument("--reason", required=True); p.add_argument("--actor", required=True)
     p = sub.add_parser("execute"); p.add_argument("id"); p.add_argument("--artifact", type=Path, required=True); p.add_argument("--critical", type=Path, required=True); p.add_argument("--review", type=Path)
     p = sub.add_parser("observe"); p.add_argument("id"); p.add_argument("layer", choices=["application", "effect"]); p.add_argument("--evidence", required=True); p.add_argument("--actor", required=True)
@@ -45,14 +42,22 @@ def main():
     p = sub.add_parser("restore"); p.add_argument("backup", type=Path); p.add_argument("destination", type=Path)
     p = sub.add_parser("proposal"); p.add_argument("package", type=Path); p.add_argument("destination", type=Path)
     p = sub.add_parser("proposal-candidate"); p.add_argument("package", type=Path); p.add_argument("product", type=Path); p.add_argument("remote"); p.add_argument("destination", type=Path)
+    p = sub.add_parser('hooks-check'); p.add_argument('event', choices=['SessionStart','PreToolUse','PostToolUse','PreCompact','Stop','context-entry','entity-before-write','entity-after-write','method-impact','task-continuation','publication-check']); p.add_argument('--payload', type=Path); p.add_argument('--task')
+    p = sub.add_parser('hooks-project'); p.add_argument('harness', choices=['codex','claude']); p.add_argument('--apply', action='store_true'); p.add_argument('--enabled', action='store_true')
     args = parser.parse_args()
     root = args.root.resolve()
     c = args.command
+    if c == 'source-read':
+        import connectors
+    if c in {'search', 'kb-read'}:
+        import knowledge
+    if c in {'create', 'update', 'finish-update', 'rollback', 'backup', 'restore', 'proposal', 'proposal-candidate'}:
+        import lifecycle
     if c == "validate": result = validation.repository(root)
     elif c == "self-test": result = validation.self_test()
     elif c == "preflight": result = delivery.preflight(root, args.remote, args.branch)
     elif c == "context": result = operations.context(root, args.task)
-    elif c == "intake": result = operations.intake(root, args.id, args.request, args.owner, load(args.acceptance), args.confirmed, args.unknown, args.input, args.independent_required)
+    elif c == "intake": result = operations.intake(root, args.id, args.request, args.owner, load(args.acceptance), args.confirmed, args.unknown, args.input, args.independent_required, args.skill, args.harness, args.source_id)
     elif c == "decide": result = operations.decide(root, args.id, args.revision, args.action, args.reason, args.actor)
     elif c == "execute": result = operations.execute(root, args.id, load(args.artifact), load(args.critical), load(args.review) if args.review else None)
     elif c == "observe": result = operations.observe(root, args.id, args.layer, args.evidence, args.actor)
@@ -75,6 +80,12 @@ def main():
     elif c == "restore": result = lifecycle.restore(args.backup, args.destination)
     elif c == "proposal": result = lifecycle.proposal(root, args.package, args.destination)
     elif c == "proposal-candidate": result = lifecycle.proposal_candidate(root, args.package, args.product, args.remote, args.destination)
+    elif c == 'hooks-check':
+        import hooks
+        result = hooks.dispatch(root, 'common', args.event, load(args.payload) if args.payload else {}, task_id=args.task)
+    elif c == 'hooks-project':
+        import hooks
+        result = hooks.project(root, args.harness, apply=args.apply, enabled=args.enabled)
     else: raise ValueError("unsupported operation")
     if c == "preflight" and result["status"] == "blocked":
         print(json.dumps(result, ensure_ascii=False, indent=2), file=sys.stderr)

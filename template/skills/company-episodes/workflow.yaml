@@ -10,25 +10,31 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: Verified episode analysis with agreed denominator, provenance and explicit unknowns
+output: Verified episode analysis with agreed denominator, provenance and explicit
+  unknowns
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: analyze-episodes
   operation: episodes
-  instruction: Использовать разрешённый источник; при отсутствии сохранённой выгрузки сначала source-read.
-    Вызвать episodes по runtime, затем подготовить Result с источником, периодом/единицами и явным знаменателем
-    для принятого критерия.
+  instruction: Использовать разрешённый источник; при отсутствии сохранённой выгрузки
+    сначала source-read. Вызвать episodes по runtime, затем подготовить Result с источником,
+    периодом/единицами и явным знаменателем для принятого критерия.
   depends_on:
   - read-context
 - id: execute-episode-result
   operation: execute
-  instruction: Один execute подготовленного Result, critical и обязательного review. Сырой транспортный envelope
-    или receipt не заменяет Result.
+  instruction: Один execute подготовленного Result, critical и обязательного review.
+    Сырой транспортный envelope или receipt не заменяет Result.
   depends_on:
   - analyze-episodes
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/operations.py

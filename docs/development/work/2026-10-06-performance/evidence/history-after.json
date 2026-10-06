@@ -1,0 +1,88 @@
+{
+  "scope": "synthetic company histories; naive reference of repeated ls-tree/cat-file, NOT a live Work benchmark",
+  "git": "git version 2.43.0",
+  "python": "3.12.3",
+  "variants": [
+    {
+      "commits": 1,
+      "files": 40,
+      "reference": {
+        "commits": 1,
+        "blobs": 40,
+        "bytes": 1070,
+        "git_processes": 42,
+        "coverage_sha256": "5199200e5b53ecc1017b88e82078db55f1561056bd4296ccc50bb5e0b9254540",
+        "runs": 20,
+        "median_ms": 81.177,
+        "p95_ms": 87.041
+      },
+      "candidate": {
+        "commits": 1,
+        "blobs": 40,
+        "bytes": 1070,
+        "git_processes": 9,
+        "coverage_sha256": "5199200e5b53ecc1017b88e82078db55f1561056bd4296ccc50bb5e0b9254540",
+        "policy": "benchmark",
+        "content_checked": true,
+        "runs": 20,
+        "median_ms": 23.088,
+        "p95_ms": 25.419
+      },
+      "speedup": 3.516
+    },
+    {
+      "commits": 20,
+      "files": 40,
+      "reference": {
+        "commits": 20,
+        "blobs": 59,
+        "bytes": 1593,
+        "git_processes": 80,
+        "coverage_sha256": "886c1742a57fe0d8797fd887a3125f482b4a49f5858f18d03df46d0c6e080e98",
+        "runs": 20,
+        "median_ms": 154.787,
+        "p95_ms": 167.293
+      },
+      "candidate": {
+        "commits": 20,
+        "blobs": 59,
+        "bytes": 1593,
+        "git_processes": 9,
+        "coverage_sha256": "886c1742a57fe0d8797fd887a3125f482b4a49f5858f18d03df46d0c6e080e98",
+        "policy": "benchmark",
+        "content_checked": true,
+        "runs": 20,
+        "median_ms": 37.935,
+        "p95_ms": 39.413
+      },
+      "speedup": 4.08
+    },
+    {
+      "commits": 100,
+      "files": 40,
+      "reference": {
+        "commits": 100,
+        "blobs": 139,
+        "bytes": 3833,
+        "git_processes": 240,
+        "coverage_sha256": "e50f516526d66eb69fa3d3a9658ef5c4e6bf7e2012135242831e611550be77aa",
+        "runs": 20,
+        "median_ms": 469.503,
+        "p95_ms": 506.459
+      },
+      "candidate": {
+        "commits": 100,
+        "blobs": 139,
+        "bytes": 3833,
+        "git_processes": 9,
+        "coverage_sha256": "e50f516526d66eb69fa3d3a9658ef5c4e6bf7e2012135242831e611550be77aa",
+        "policy": "benchmark",
+        "content_checked": true,
+        "runs": 20,
+        "median_ms": 101.049,
+        "p95_ms": 107.987
+      },
+      "speedup": 4.646
+    }
+  ]
+}

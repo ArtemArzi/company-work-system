@@ -1,6 +1,6 @@
 # Полезные хуки и стандарт их создания
 
-Статус: план A0/H0 принят независимо 06.10.2026. Хуки продукта не установлены/не включены.
+Статус: реализация1.2.0 проверена и принята независимо; product commit/push/bundle в работе. Native provider events/trust не подтверждены, host/Work не включены.
 Общий прогресс и порядок: [PLAN](../../PLAN.md#следующий-этап-скорость-и-хуки).
 Область: главный company-work-system, template и его проверенные release/update кандидаты. Work, глобальные host configs, сайт и сторонние плагины не изменять.
 
@@ -67,3 +67,122 @@
 ### Ошибка сохранения плана
 
 Наблюдение: первый scoped commit остановлен Git с `Author identity unknown`; ожидаемые семь документов остались staged, исходные байты сохранены. Причина: в текущей среде нет применимой author identity, хотя предыдущий product commit использовал технического автора Company Work System. Исправление: взять уже существующего технического автора из product HEAD и передать user.name/email только через одноразовые git -c, не менять local/global config. Проверка git var GIT_AUTHOR_IDENT с этими параметрами PASS. Конечный commit/push/readback фиксируется в ignored .local/performance-hooks-plan-delivery.json; отдельный повторный синк receipt не нужен.
+
+### H1/H2: bounded реализация
+
+A1 принят: company-work-system-a1-pass-20261006-9182c4f-source-snapshot-r1;
+план/архитектура/общий task-validation сохраняются. Task Delivery implement,
+native workflow без нового controller; входной product preflight root готов,
+локальный 6ffe7f6 при remote 9182c4f, тот же проход переиспользован worker.
+
+Сделано: canonical six-scenario manifest, fixed dispatcher, fingerprint
+manifest/handler/helpers/методов и выбранного adapter, безопасный exact-owned
+merge для двух project-local настроек, стандарт hook-authoring и честные
+common-code/native-unverified профили. Состояние задачи не переносится в hook;
+raw prompts/transcripts не записываются. Activation текущего продукта/Work,
+global settings, login/trust bypass, version/commit/push не выполнялись.
+
+Проверено на реальных shared helpers: `PYTHONPATH=checks python3 -m unittest -v
+test_hooks`, 30/30 PASS, 6.888s. Python compile и diff whitespace PASS.
+Полный вывод — [implementation-suite](evidence/implementation-suite.txt), exact
+owned hashes/команда/границы — [implementation.json](evidence/implementation.json).
+Первый общий проход 26/27 выявил ошибку: development slug с датой ошибочно
+проверялся как company ID. Исправлен только product маршрут; повтор PASS.
+Проверены два JSON протокола, native-флаг disabled/untrusted, malformed/oversize,
+fingerprint helper change, denial/advisory, timeout, Stop/compact/subagent/
+interrupt, revision/dedup, concurrent settings edit, maps и scopes/root paths.
+Нативный host/trust эти fixtures не подтверждают.
+
+Локальный overhead — [dispatch-overhead](evidence/dispatch-overhead.json), 1
+warmup + 20 одинаковых повторов без/с dispatcher: context p95 20.782ms,
+обычная note 19.451ms, method-impact 43.726ms; median overhead 18.270–21.047ms.
+Внутри этого замера fetch/push/review/network=0. Измерен common-code, без
+provider/process startup; это расход локальной проверки, не заявленное
+ускорение host или бизнес-эффект. Промежуточные 2 parser и 5 изолированных
+projection checks ранее PASS; окончательный проход supersedes их seam gap.
+
+API: dispatch(root,harness,event,payload,task_id=None) принимает canonical
+scenario либо supported native event; native=False — fallback независимо от
+activation. method-impact дополнительно принимает явный paths batch и
+показывает actual task bindings/declared recipe closure. project(root,harness,
+apply=False,enabled=False) — preview; apply требует adapted company writable
+config, product read-only. Оба adapters остаются native-unverified.
+
+После полного прохода уточнены exact поля ownership receipt и фактическое
+имя общего CLI `hooks-check`; 3 затронутые проверки PASS, 0.829s. Product CLI
+`hooks-project codex` реально вернул preview/enabled=false/changed=false.
+Отпечатки до/после и targeted evidence разделены в implementation.json.
+Для обычной business note общая entity_kind распознаёт отсутствие сущности
+до metadata scan; отдельный validator не создавался.
+
+Persistence amendment принят: company-work-system-hooks-proof-plan-pass-20261006-
+6ffe7f6-93b1. Единственный proof теперь tracked
+`.system/hooks-project-<harness>.json`; это derived exact projection state, не
+метод/право/trust. Legacy ignored receipt мигрирует только при отсутствии нового
+proof, валидной схеме и exact actual groups. При новом proof legacy вообще не
+читается. Malformed/mismatch/обрыв settings → proof дают detectable conflict
+с сохранением bytes; namespace сам по себе не принимается. Continuation dedup
+остаётся ignored. Clone/regeneration меняет абсолютный root, статус native
+unverified сохраняется; release/proposal не получают company proof.
+
+После amendment: `PYTHONPATH=checks python3 -m unittest -v test_hooks`, 35/35 PASS,
+7.590s. Exact hashes/границы — [implementation-proof](evidence/implementation-proof.json).
+Проверены migration/precedence, malformed/mismatch preservation, interruption
+и relocation. PostToolUse теперь читает actual file через shared validator:
+payload записи не доказывает реально записанные metadata. При добавлении
+interruption fixture обнаружен NameError из-за переноса строки соседнего теста;
+исправлено размещение assertion, targeted 5/5 и общий 35/35 PASS. Contract и
+проверки не ослаблены. Runtime code compile и whitespace PASS.
+
+Root продолжает полноценный clone/update/rollback/backup/restore и whole-result
+приёмку; child не менял их modules, version, index, commits или внешний state.
+
+Продолжение root: один common CLI вызов dispatch/project, выборочный validator,
+ссылки карт/author/release/update; полный integration/suite и независимая
+приёмка всего outcome остаются у root. Native smoke требует фактического
+event/matcher/trust на каждой версии; Claude OAuth/access остаётся open.
+
+### H2: отзыв права во время projection
+
+Whole-result reviewer воспроизвёл ошибку: local_work отзывался во время final
+definition_hash, но projection записывал settings/proof. Первое неверное
+допущение — проверка writable config до lock достаточно защищает запись;
+общий lock сам по себе не запрещает внешнюю правку файла. Принятый A1 уже
+требует shared byte snapshot; новый validator/контракт прав не нужен.
+
+Repair-forward в том же scope: config_snapshot под company lock; shared
+config(writable=True) обязан описывать те же parsed/raw bytes. Config SHA
+добавлен к CAS settings/proof/legacy. Final fingerprint вычисляется перед
+byte CAS, проверка повторяется перед первой записью и перед отдельной записью
+proof. После собственной settings write ожидаются точные bytes общего atomic
+writer, без принятия последующей чужой правки. При config change возвращается
+conflict; apply не меняет activation/trust. Если settings уже записаны, новый
+proof не создаётся и повторный preview обнаруживает mismatch.
+
+Предварительно 5/5 affected tests PASS, 0.729s: отзыв права на втором
+definition_hash сохраняет exact прежние settings/proof; изменение config
+после settings write не создаёт proof, повтор не принимает unknown section;
+initial unauthorized, interruption и idempotence сохраняют поведение.
+Полный focused hooks rerun ждёт join текущего root full-suite; после него
+сохранить evidence и передать затронутую поправку прежнему result reviewer.
+
+После root full-suite join: `PYTHONPATH=checks python3 -m unittest -v test_hooks`,
+37/37 PASS, 7.849s; compile hooks/test_hooks и owned whitespace PASS.
+[Authorization repair evidence](evidence/authorization-repair.json) фиксирует
+exact owned/shared hashes, команду, контрпримеры и границы. Полный root suite
+до окончательного объединения имел 118 tests и две отдельные не-hooks проблемы;
+его текущий результат не объявлен PASS. Дальше root объединяет остальные
+исправления и передаёт эту область прежнему whole-result reviewer для
+targeted revalidation. Native/OAuth/trust остаются unverified.
+
+### V: положительный обратный поток хуков
+
+Observed rc1 gap: proposal allowlist исключал hooks/code, proposal-candidate поддерживал только new standards; negative proof test не доказывал весь обратный путь. Repair-forward accepted within H evolution: exact sanitized hooks/manifest.yaml, hooks/README.md, scripts/hooks.py/checks, owner approval hashes и общий history content/path guard. Содержимое approved files закреплено в памяти; перед export повторно проверены company config/permission и approval bytes. Canonical code routing literals не считаются company file contents, actual company ID/known credentials запрещены. Automated scan не доказывает полную анонимность; exact owner решение остаётся необходимым. Proof/settings/arbitrary scripts/company/history не входят.
+
+Product candidate отдельный, replacements возвращают base/candidate hashes, существующая product base сохраняется в Git. Trusted current validator не импортирует donated handler и не выполняет tests; до maintainer review это только предложение. Positive+negative proposal-repair.txt2/2PASS20.588s, включая inert poisoned donated code, exact hook replacement и отказ settings/proof/company/arbitrary script. Native статус не повышался.
+
+37hooks checks PASS7.849s authorization-repair.json; полный source suite и same result reviewer в работе. Общий dispatch overhead исторической серии18–21ms, без fetch/push/review/network; это common Python invocation, не native latency. New config CAS не добавляет синков/приёмок. Следующий шаг — join suite/reviewer, release1.2.0 и product delivery в разрешённом объёме.
+
+Full candidate source suite:132/132PASS939.529s, exit0/source_unchanged=true, source hashes in performance/evidence/full-suite-final.json. Hooks37 cases and two-company proposal/persistence included. Await final independent verdict then release/delivery. Provider-native callbacks/trust/OAuth not claimed.
+
+Итоговая независимая приёмка PASS: company-work-system-result-pass-20261006-6ffe7f6-r2, все80recorded sourcehashes совпали, repair_list пуст. Доставка продукта и реальный isolated artifact — следующий разрешённый шаг; настоящий Work/companies/native activation отдельно. Receipt: ../2026-10-06-performance/evidence/result-review-r2.json.

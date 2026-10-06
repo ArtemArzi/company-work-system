@@ -6,21 +6,30 @@ import json
 import math
 from pathlib import Path
 import re
-from core import config, digest, ident, load, object_hash, path, require, tasks, changed_bindings
+from core import config, config_snapshot, digest, ident, load, object_hash, path, require, tasks, changed_bindings
 
 CAPABILITIES = {"files", "validation", "git", "source-read", "critical", "tick", "graph", "independent-review"}
 OPERATIONS = {"preflight", "context", "intake", "execute", "summary", "episodes", "research", "marketing", "source-read", "deliver", "author", "incident", "knowledge"}
 
 
 def frontmatter(file):
-    text = Path(file).read_text()
-    require(text.startswith("---\n"), f"missing frontmatter: {file}")
+    return frontmatter_text(Path(file).read_text())
+
+
+def frontmatter_text(text):
+    require(text.startswith("---\n"), "missing frontmatter")
     import yaml
-    return yaml.safe_load(text.split("---", 2)[1])
+    value = yaml.safe_load(text.split("---", 2)[1])
+    require(isinstance(value, dict), "frontmatter must be an object")
+    return value
 
 
 def recipe(root, file):
     value = load(file)
+    return recipe_contract(root, value)
+
+
+def recipe_contract(root, value):
     require(value.get("schema_version") == 1, "unsupported workflow format")
     ident(value.get("id"))
     require(isinstance(value.get("version"), int) and value["version"] > 0, "workflow version")
@@ -37,7 +46,110 @@ def recipe(root, file):
         seen.add(step_id)
     for relative in value.get("standards", []):
         require(path(root, relative).is_file(), f"missing standard: {relative}")
+    if 'dependency_paths' in value:
+        require(isinstance(value['dependency_paths'], list), 'dependency_paths must be paths')
+        for relative in value['dependency_paths']:
+            require(path(root, relative).is_file(), 'missing declared dependency: '+relative)
     return value
+
+
+def entity_place(relative, kind, entity):
+    """The same canonical placement predicate for repository and write hooks."""
+    file = Path(relative)
+    if kind == 'skill':
+        return relative == f'skills/{entity}/SKILL.md'
+    if kind == 'skill-recipe':
+        return relative == f'skills/{entity}/workflow.yaml'
+    if kind == 'standard':
+        return relative in {f'standards/{entity}.md', f'company/standards/{entity}.md'}
+    if kind == 'source':
+        return relative == f'company/sources/{entity}/source.yaml'
+    return relative == f'workflows/{entity}.yaml'
+
+
+def entity_contract(root, relative, kind, meta):
+    entity = meta.get('id', meta.get('name'))
+    ident(entity)
+    require(entity_place(relative, kind, entity), kind+' in wrong place')
+    require(meta.get('owner') or kind == 'skill', 'entity owner missing')
+    if kind == 'skill':
+        require(meta.get('description'), 'skill description missing')
+        paired = recipe(root, path(root, relative).with_name('workflow.yaml'))
+        require(paired['id'] == entity, 'skill/recipe disagreement')
+    elif kind in {'workflow', 'skill-recipe'}:
+        recipe_contract(root, meta)
+    elif kind == 'source':
+        require(meta.get('origin') and meta.get('status'), 'source provenance missing')
+    else:
+        require(meta.get('version'), 'standard version missing')
+    return entity
+
+
+def entity_kind(relative):
+    file = Path(relative)
+    if file.name == 'SKILL.md': return 'skill'
+    if file.name == 'workflow.yaml' and relative.startswith('skills/'): return 'skill-recipe'
+    if file.name == 'source.yaml' and relative.startswith('company/sources/'): return 'source'
+    if relative.startswith('workflows/') and file.suffix == '.yaml': return 'workflow'
+    if relative.startswith(('standards/', 'company/standards/')) and file.suffix == '.md' and file.name != 'README.md': return 'standard'
+    return None
+
+
+def entity_changes(root, changes, before=False):
+    """Small write check. Incomplete writes advise; only proved placement/ID denies."""
+    import yaml
+    violations, advisories, checked = [], [], False
+    existing = {}
+    for directory, pattern in [('standards','*.md'), ('company/standards','*.md'), ('skills','*/SKILL.md'), ('workflows','*.yaml'), ('company/sources','*/source.yaml')]:
+        for file in (Path(root)/directory).glob(pattern):
+            if file.name == 'README.md': continue
+            try:
+                meta = frontmatter(file) if file.suffix == '.md' else load(file)
+                name = meta.get('id', meta.get('name'))
+                if name: existing.setdefault(name, []).append(str(file.relative_to(root)))
+            except Exception:
+                continue
+    proposed = {}
+    for change in changes:
+        relative = change['path']; file = path(root, relative); kind = entity_kind(relative)
+        if not kind: continue
+        checked = True
+        content = change.get('content')
+        if content is None:
+            if before:
+                advisories.append(relative+': incomplete edit; check actual file after write'); continue
+            if not file.is_file():
+                advisories.append(relative+': file removed; update its map and consumers'); continue
+            content = file.read_text()
+        try:
+            meta = frontmatter_text(content) if file.suffix == '.md' else yaml.safe_load(content)
+            require(isinstance(meta, dict), 'entity metadata missing')
+            name = meta.get('id', meta.get('name')); ident(name)
+        except Exception as exc:
+            advisories.append(relative+': '+str(exc)); continue
+        if not entity_place(relative, kind, name):
+            violations.append(relative+': '+kind+' in wrong place')
+        others = [p for p in existing.get(name, []) if p != relative and not (kind == 'skill-recipe' and p == f'skills/{name}/SKILL.md')]
+        if others or (name in proposed and proposed[name] != relative and kind != 'skill-recipe'):
+            violations.append(relative+': duplicate entity ID '+name)
+        proposed[name] = relative
+        if before: continue
+        try: entity_contract(root, relative, kind, meta)
+        except Exception as exc: advisories.append(relative+': '+str(exc))
+        index = {'standard': 'standards/README.md' if relative.startswith('standards/') else None,
+                 'skill': 'skills/README.md', 'source': 'company/sources/README.md'}.get(kind)
+        if index:
+            map_file = path(root, index)
+            targets = [(map_file.parent/t.strip('<>').split('#')[0]).resolve()
+                       for t in re.findall(r'\]\(([^)]+)\)', map_file.read_text()) if not re.match(r'[a-z]+://', t)]
+            if file.resolve() not in targets: advisories.append(relative+': entity missing from map '+index)
+        if file.suffix == '.md':
+            for target in re.findall(r'\]\(([^)]+)\)', content):
+                if re.match(r'[a-z]+://', target) or target.startswith('#'): continue
+                target = target.strip('<>').split('#')[0]
+                if not (file.parent/target).resolve().is_relative_to(Path(root).resolve()) or not (file.parent/target).exists():
+                    advisories.append(relative+': broken/outside link '+target)
+    return {'checked': checked, 'violations': violations, 'advisories': advisories}
 
 
 def source_specification(specification):
@@ -51,9 +163,9 @@ def source_specification(specification):
     return specification
 
 
-def source_admission(root, value):
+def source_admission(root, value, snapshot=None):
     """Pin independent accepted definitions in existing task evidence, never infer them from data."""
-    cfg = config(root)
+    cfg, config_sha = snapshot if snapshot is not None else config_snapshot(root)
     refs = value.get("sources", [])
     require(refs, "metrics source missing")
     primary = refs[0]
@@ -65,10 +177,12 @@ def source_admission(root, value):
         source_id = matches[0]
     ident(source_id)
     spec = source_specification(available.get(source_id))
+    if spec['type'] == 'export':
+        require(spec.get('path') and path(root, spec['path']) == path(root, primary['path']), 'primary export differs from accepted source path')
     fields = ["type", "approved_by", "account", "scope", "period", "unit", "max_age_seconds", "max_pages", "timeout_seconds"]
     snapshot = {key: spec[key] for key in fields}
     from core import now
-    return {"schema_version": 1, "source_id": source_id, "primary": {"path": primary["path"], "sha256": primary["sha256"]}, "specification": snapshot, "specification_sha256": object_hash(snapshot), "config_sha256": digest(path(root, "company/config.yaml")), "at": now()}
+    return {"schema_version": 1, "source_id": source_id, "primary": {"path": primary["path"], "sha256": primary["sha256"]}, "specification": snapshot, "specification_sha256": object_hash(snapshot), "config_sha256": config_sha, "at": now()}
 
 
 def source_envelope(value, company, specification, evaluation_time=None):
@@ -148,6 +262,10 @@ def task(root, value, freshness=True):
     require(value.get("delivery", {}).get("status") in {"local", "pending", "delivered"}, "delivery status")
     require(value.get("application", {}).get("status") in {"unknown", "observed"} and value.get("effect", {}).get("status") in {"unknown", "observed"}, "observation status")
     require(value.get("acceptance_hash") == object_hash(value["acceptance"]), "accepted criterion was changed")
+    scope = value.get('binding_scope')
+    if scope is not None:
+        from dependencies import contract
+        contract(scope)
     for layer in ["application", "effect"]:
         observation = value[layer]
         if observation["status"] == "observed":
@@ -159,15 +277,21 @@ def task(root, value, freshness=True):
         artifact = value["output"]
         require(digest(path(root, artifact["path"])) == artifact["sha256"], "output changed")
         evidence = value["evidence"]
+        if scope is not None:
+            require(evidence.get('binding_scope') == scope and evidence.get('binding_scope_sha256') == scope['sha256'], 'evidence binding scope mismatch')
+            require(evidence.get('bindings') == value['bindings'], 'evidence flat bindings mismatch')
         admission = evidence.get("source_admission")
         if value["acceptance"]["kind"] == "metrics":
             require(admission and evidence.get("source_admission_sha256") == object_hash(admission), "historical metrics source admission missing/changed; reconcile explicitly")
             require(admission.get("config_sha256") == evidence["bindings"].get("company/config.yaml") and admission.get("at") == evidence.get("at"), "source admission not bound to accepted config/time")
+            if scope is not None:
+                from dependencies import admission_contract
+                admission_contract(scope, admission)
         result(root, load(path(root, artifact["path"])), value["acceptance"], admission, fresh=freshness and value["delivery"]["status"] != "delivered")
         require(evidence.get("exit_code") == 0 and evidence.get("critical_sha256") == object_hash(value["critical"]) and evidence.get("result_sha256") == artifact["sha256"], "unbound evidence")
         require(evidence.get("acceptance_sha256") == value["acceptance_hash"], "evidence criterion mismatch")
         if freshness and value["delivery"]["status"] != "delivered":
-            require(not changed_bindings(root, evidence["bindings"]), "verification dependencies changed")
+            require(not changed_bindings(root, evidence["bindings"], scope), "verification dependencies changed")
         if value["delivery"]["status"] == "delivered":
             require(value["delivery"].get("result_sha256") == artifact["sha256"] and value["delivery"].get("commit") and value["delivery"].get("readback") is True, "delivery not bound to result/readback")
         if value.get("independent_required"):
@@ -190,6 +314,11 @@ def repository(root, freshness=True):
         require(release.get("schema_version") == 1 and release.get("state_format") == 1 and release.get("workflow_format") == 1, "unsupported release/state/workflow version")
         require(isinstance(release.get("version"), str) and re.fullmatch(r"\d+\.\d+\.\d+", release["version"]), "release version missing")
     check(release_contract, "release")
+    if (root / 'hooks/manifest.yaml').is_file():
+        def hooks_contract():
+            from hooks import manifest
+            manifest(root)
+        check(hooks_contract, 'hooks')
     identities = {}
     canonical_skills = set()
     for directory, pattern, kind in [("standards", "*.md", "standard"), ("company/standards", "*.md", "standard"), ("skills", "*/SKILL.md", "skill"), ("workflows", "*.yaml", "workflow"), ("company/sources", "*/source.yaml", "source")]:
@@ -198,23 +327,13 @@ def repository(root, freshness=True):
                 continue
             def inspect(file=file, kind=kind):
                 meta = frontmatter(file) if file.suffix == ".md" else load(file)
-                entity = meta.get("id", meta.get("name"))
+                entity = meta.get('id', meta.get('name'))
                 ident(entity)
                 require(entity not in identities, f"duplicate entity ID {entity}")
                 identities[entity] = str(file.relative_to(root))
-                require(meta.get("owner") or kind == "skill", "entity owner missing")
+                entity_contract(root, str(file.relative_to(root)), kind, meta)
                 if kind == "skill":
-                    require(file.parent.name == entity and meta.get("description"), "skill in wrong place")
-                    paired = recipe(root, file.with_name("workflow.yaml"))
-                    require(paired["id"] == entity, "skill/recipe disagreement")
                     canonical_skills.add(entity)
-                elif kind == "workflow":
-                    require(file.stem == entity, "workflow in wrong place")
-                    recipe(root, file)
-                elif kind == "source":
-                    require(file.parent.name == entity and meta.get("origin") and meta.get("status"), "source provenance/place")
-                else:
-                    require(file.stem == entity and meta.get("version"), "standard place/version")
             check(inspect, str(file.relative_to(root)))
     for file in root.rglob("SKILL.md"):
         if not file.is_relative_to(root / "skills") and not file.is_relative_to(root / ".agents") and not file.is_relative_to(root / ".claude") and not file.is_relative_to(root / ".git"):

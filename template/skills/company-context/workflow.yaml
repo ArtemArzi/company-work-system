@@ -12,18 +12,24 @@ capabilities:
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
 - task entry preflight, reused within the same task according to task-validation
-output: Company identity, permitted scope and actual state owner; read-only context, not a task artifact
+output: Company identity, permitted scope and actual state owner; read-only context,
+  not a task artifact
 steps:
 - id: receive-shared-state
   operation: preflight
-  instruction: Один вход на самостоятельную задачу. При вложенном вызове использовать уже подтверждённую версию
-    по task-validation; не выполнять повторный fetch без основания.
+  instruction: Один вход на самостоятельную задачу. При вложенном вызове использовать
+    уже подтверждённую версию по task-validation; не выполнять повторный fetch без
+    основания.
   depends_on: []
 - id: read-context
   operation: context
-  instruction: Прочитать фактический контекст/владельца с диска; вернуть контекст. Просмотр не создаёт отдельную
-    задачу результата и не вызывает execute.
+  instruction: Прочитать фактический контекст/владельца с диска; вернуть контекст.
+    Просмотр не создаёт отдельную задачу результата и не вызывает execute.
   depends_on:
   - receive-shared-state
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/operations.py

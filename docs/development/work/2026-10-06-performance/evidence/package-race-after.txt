@@ -1,0 +1,6 @@
+test_bundle_rechecks_actual_exported_refs_after_source_race (checks.test_history.History.test_bundle_rechecks_actual_exported_refs_after_source_race) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.758s
+
+OK

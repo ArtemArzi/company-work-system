@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "at": "2026-10-06T11:42:37.543482+00:00",
+  "command": "PYTHONPATH=checks python3 -m unittest -v test_hooks",
+  "cwd": "/home/artem/projects/work/studio/products/company-work-system",
+  "purpose": "positive/negative shared-code and provider protocol fixtures",
+  "exit_code": 0,
+  "expected_exit_codes": [
+    0
+  ],
+  "matches_expectation": true,
+  "elapsed_seconds": 6.961,
+  "tests": 30,
+  "source_sha256": {
+    "template/scripts/hooks.py": "690e0f35e63dde4350f6c634ae1652e1259ba30b52262ef0bce78e23248e3437",
+    "template/hooks/manifest.yaml": "e7d87c5443f9f9b9f1a0f83f488322c808e3f04bbf21d649de81e9a4d3c47e2f",
+    "template/hooks/README.md": "8962791b37da03324abf997e0fb8c9309effd832430e9c57f96f17137cabab92",
+    "template/standards/hook-authoring.md": "5e2881a263bc1fc3ec723e1ac0a896a760fb429d42a63de5efd8973090e36886",
+    "template/adapters/codex/README.md": "95582e8900d064ef27962621766c729e823c78bacafbae479c139307ef328d21",
+    "template/adapters/codex/profile.yaml": "967e008bae19b40d5873048d951cc0399568f461b9735172f8798186c76957f6",
+    "template/adapters/claude/README.md": "6ef5a7f1d02429ce96348004a048c3a3a8f24d98c85d915679be804d3c749398",
+    "template/adapters/claude/profile.yaml": "30901e31f3614d9f577b840e3c2c6f539347ce110e9f082a804e2e4472abf606",
+    "checks/test_hooks.py": "1a9b39fa21c220c5dff400a02adf0920ca00fd459465f984512aae90da59a5c1"
+  },
+  "native": "unverified; no host activation, OAuth/trust bypass, Work or global settings edit",
+  "constraints": [
+    "accepted A1/H0 and Task Delivery native implementation; no second validator/controller",
+    "fixed allowlisted handlers; no YAML command execution",
+    "company writable config required for project apply; product preview only",
+    "exact previous owned definitions and concurrent native bytes preserved",
+    "shared dependencies/validation and common lock/atomic writer",
+    "no network/sync/agents/full-suite/timers in hook dispatch"
+  ],
+  "remaining": [
+    "root common CLI/release/update integration and whole-result acceptance",
+    "actual native event/matcher/trust/negative/timeout proof for each available host version",
+    "Root targeted plan review for ownership proof persistence; ignored path unchanged until accepted amendment"
+  ],
+  "targeted_after_full_suite": [
+    {
+      "command": "PYTHONPATH=checks python3 -m unittest -v test_hooks.Hooks.test_other_settings_preserved_idempotent_and_owned_collision test_hooks.Hooks.test_disabling_removes_exact_owned_groups_only test_hooks.Hooks.test_native_protocol_versions_json_denial_and_advisory_both",
+      "exit_code": 0,
+      "tests": 3,
+      "runner_seconds": 0.829,
+      "purpose": "strict receipt fields and CLI naming/profile fingerprint refinement"
+    },
+    {
+      "command": "python3 template/scripts/system.py --root /home/artem/projects/work/studio/products/company-work-system hooks-project codex",
+      "exit_code": 0,
+      "status": "preview",
+      "enabled": false,
+      "changed": false
+    }
+  ],
+  "current_source_sha256": {
+    "template/scripts/hooks.py": "9f01212139396b73d9a286a5059d2e6f5ec2dd5808495a35cdaf76350f9fcb03",
+    "template/hooks/manifest.yaml": "e7d87c5443f9f9b9f1a0f83f488322c808e3f04bbf21d649de81e9a4d3c47e2f",
+    "template/hooks/README.md": "6b4e367aaa57063dd5f2c6cd9b6a1a3133cbb7892cce96fecde79e649a8c25c5",
+    "template/standards/hook-authoring.md": "5e2881a263bc1fc3ec723e1ac0a896a760fb429d42a63de5efd8973090e36886",
+    "template/adapters/codex/README.md": "18663576647613c35c7e823b2f852f6d9b3d41be88755b8525899aad23c9e7e8",
+    "template/adapters/codex/profile.yaml": "414f3855b660c74e08e93ffe8568e5124d6d04fca247739d0e091802b6b2eb41",
+    "template/adapters/claude/README.md": "4338c47cc29ba72bb93ce96520bb347d528d255b788b9c3117fa2bd8e433317d",
+    "template/adapters/claude/profile.yaml": "31eb733cda911add06c03ee0067565cc9fad456dfe02469f0797150a9414d68c",
+    "checks/test_hooks.py": "1a9b39fa21c220c5dff400a02adf0920ca00fd459465f984512aae90da59a5c1"
+  }
+}

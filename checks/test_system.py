@@ -295,14 +295,23 @@ class SourcesAndBackground(Fixture):
 
 class GitAcceptance(Fixture):
     def test_release_guide_allowed_but_development_history_rejected(self):
+        source = self.base / "release-source"; source.mkdir()
+        delivery.git(source, "init", "-b", "main"); delivery.identity(source)
+        (source / "docs").mkdir()
+        (source / "docs/company-system-guide.html").write_text("Synthetic portable guide")
+        delivery.git(source, "add", "."); delivery.git(source, "commit", "-m", "Allowed guide")
         release = self.base / "release.git"
-        with patch.object(lifecycle, "git") as command:
-            command.side_effect = ["tree docs\nblob docs/company-system-guide.html", "true"]
-            lifecycle.release_isolated(release)
-        for forbidden in ("docs/development/PLAN.md", "docs/private.html"):
-            with self.subTest(path=forbidden), patch.object(lifecycle, "git", return_value="blob " + forbidden):
+        delivery.git(source, "clone", "--bare", str(source), str(release))
+        self.assertEqual(lifecycle.release_isolated(release)["policy"], "release")
+        for number, forbidden in enumerate(("docs/development/PLAN.md", "docs/private.html")):
+            with self.subTest(path=forbidden):
+                delivery.git(source, "checkout", "-b", f"forbidden-{number}", "main")
+                file = source / forbidden; file.parent.mkdir(parents=True, exist_ok=True); file.write_text("Private development")
+                delivery.git(source, "add", "--", forbidden); delivery.git(source, "commit", "-m", "Forbidden guide sibling")
+                invalid = self.base / f"invalid-{number}.git"
+                delivery.git(source, "clone", "--bare", str(source), str(invalid))
                 with self.assertRaisesRegex(Rejected, "non-template history"):
-                    lifecycle.release_isolated(release)
+                    lifecycle.release_isolated(invalid)
 
     def product_release(self):
         p = self.base / "product"; p.mkdir()

@@ -1,0 +1,148 @@
+test_cancelled_incident_preserves_terminal_state_and_bytes (test_consistency.Consistency.test_cancelled_incident_preserves_terminal_state_and_bytes) ... ok
+test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) ... ok
+test_metrics_require_unambiguous_independent_source_admission (test_consistency.Consistency.test_metrics_require_unambiguous_independent_source_admission) ... ok
+test_foreign_index_is_not_used_or_modified_by_delivery (test_consistency.Consistency.test_foreign_index_is_not_used_or_modified_by_delivery) ... ok
+test_relative_prepare_is_relative_to_caller_not_source_checkout (test_consistency.Consistency.test_relative_prepare_is_relative_to_caller_not_source_checkout) ... ok
+test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) ... ok
+test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) ... ok
+test_resume_and_supersede_keep_original_verification_in_task_history (test_consistency.Consistency.test_resume_and_supersede_keep_original_verification_in_task_history) ... ok
+test_interrupted_finish_update_preserves_original_rollback_base (test_consistency.EvolutionConsistency.test_interrupted_finish_update_preserves_original_rollback_base) ... ok
+test_relative_company_update_backup_restore_and_rollback (test_consistency.EvolutionConsistency.test_relative_company_update_backup_restore_and_rollback) ... ok
+test_delivered_metrics_keep_historical_admission_after_age_and_config_change (test_consistency.EvolutionConsistency.test_delivered_metrics_keep_historical_admission_after_age_and_config_change) ... ok
+test_blocked_update_cannot_finish_without_owner_binding_reconciliation (test_consistency.EvolutionConsistency.test_blocked_update_cannot_finish_without_owner_binding_reconciliation) ... FAIL
+test_ambiguous_custom_and_undeclared_fallback (test_dependencies.Dependencies.test_ambiguous_custom_and_undeclared_fallback) ... ok
+test_config_race_before_evidence_never_verified (test_dependencies.Dependencies.test_config_race_before_evidence_never_verified) ... ok
+test_declared_dependency_add_remove_and_kernel_change (test_dependencies.Dependencies.test_declared_dependency_add_remove_and_kernel_change) ... ok
+test_delivered_admission_uses_historical_specification (test_dependencies.Dependencies.test_delivered_admission_uses_historical_specification) ... ok
+test_explicit_harness_and_transitive_skill_selection (test_dependencies.Dependencies.test_explicit_harness_and_transitive_skill_selection) ... ok
+test_legacy_read_and_resume_preserve_scope_history (test_dependencies.Dependencies.test_legacy_read_and_resume_preserve_scope_history) ... ok
+test_scope_tampering_and_export_primary_path_rejected (test_dependencies.Dependencies.test_scope_tampering_and_export_primary_path_rejected) ... ok
+test_selected_source_same_id_change_and_rights_block (test_dependencies.Dependencies.test_selected_source_same_id_change_and_rights_block) ... ok
+test_selected_sources_harness_and_unrelated_methods (test_dependencies.Dependencies.test_selected_sources_harness_and_unrelated_methods) ... ok
+test_company_proofs_survive_delivery_update_rollback_restore (test_evolution_hooks.Evolution.test_company_proofs_survive_delivery_update_rollback_restore) ... ok
+test_author_new_skill_pair_and_safe_projections_use_common_commit (test_history.GuardedDelivery.test_author_new_skill_pair_and_safe_projections_use_common_commit) ... ok
+test_concurrent_policy_change_before_index_blocks (test_history.GuardedDelivery.test_concurrent_policy_change_before_index_blocks) ... ok
+test_external_delivery_requires_explicit_policy_before_network (test_history.GuardedDelivery.test_external_delivery_requires_explicit_policy_before_network) ... ok
+test_foreign_staged_work_is_preserved (test_history.GuardedDelivery.test_foreign_staged_work_is_preserved) ... ok
+test_head_race_does_not_attach_own_result_to_new_parent (test_history.GuardedDelivery.test_head_race_does_not_attach_own_result_to_new_parent) ... ok
+test_index_race_before_actual_staging_preserves_foreign_bytes (test_history.GuardedDelivery.test_index_race_before_actual_staging_preserves_foreign_bytes) ... ok
+test_preview_tree_uses_owned_index_and_safe_commit_passes (test_history.GuardedDelivery.test_preview_tree_uses_owned_index_and_safe_commit_passes) ... ok
+test_rejection_preserves_working_file_and_index (test_history.GuardedDelivery.test_rejection_preserves_working_file_and_index) ... ok
+test_additional_high_signal_forms_are_rejected_without_logging_values (test_history.History.test_additional_high_signal_forms_are_rejected_without_logging_values) ... ok
+test_all_refs_release_alias_tags_and_direct_blob (test_history.History.test_all_refs_release_alias_tags_and_direct_blob) ... ok
+test_baseline_exact_content_and_foreign_merge (test_history.History.test_baseline_exact_content_and_foreign_merge) ... ok
+test_binary_permission_does_not_skip_secret_or_text_alias (test_history.History.test_binary_permission_does_not_skip_secret_or_text_alias) ... ok
+test_git_selectors_cleared_and_rewrites_rejected (test_history.History.test_git_selectors_cleared_and_rewrites_rejected) ... ok
+test_large_blob_is_streamed_and_cross_chunk_marker_rejected (test_history.History.test_large_blob_is_streamed_and_cross_chunk_marker_rejected) ... ok
+test_noncanonical_names_modes_and_symlinks (test_history.History.test_noncanonical_names_modes_and_symlinks) ... ok
+test_release_forbidden_historical_alias_even_if_head_removed (test_history.History.test_release_forbidden_historical_alias_even_if_head_removed) ... ok
+test_secret_removed_from_head_is_still_rejected (test_history.History.test_secret_removed_from_head_is_still_rejected) ... ok
+test_shallow_and_alternate_store_rejected (test_history.History.test_shallow_and_alternate_store_rejected) ... ok
+test_shared_positive_and_same_blob_all_paths_checked (test_history.History.test_shared_positive_and_same_blob_all_paths_checked) ... ok
+test_truncated_reader_detects_eof (test_history.History.test_truncated_reader_detects_eof) ... ok
+test_wrong_baseline_and_missing_object (test_history.History.test_wrong_baseline_and_missing_object) ... ok
+test_add_patch_and_edit_use_shared_validator (test_hooks.Hooks.test_add_patch_and_edit_use_shared_validator) ... ok
+test_bad_payload_event_root_and_paths_rejected (test_hooks.Hooks.test_bad_payload_event_root_and_paths_rejected) ... ok
+test_code_dependency_change_invalidates_command_and_old_dispatch (test_hooks.Hooks.test_code_dependency_change_invalidates_command_and_old_dispatch) ... ok
+test_concurrent_cache_lock_failure_and_handler_crash_not_pass (test_hooks.Hooks.test_concurrent_cache_lock_failure_and_handler_crash_not_pass) ... ok
+test_concurrent_foreign_settings_edit_not_overwritten (test_hooks.Hooks.test_concurrent_foreign_settings_edit_not_overwritten) ... ok
+test_copied_company_proof_regenerates_absolute_paths_without_trust (test_hooks.Hooks.test_copied_company_proof_regenerates_absolute_paths_without_trust) ... ok
+test_default_project_is_preview_without_activation_or_files (test_hooks.Hooks.test_default_project_is_preview_without_activation_or_files) ... ok
+test_disabled_native_and_working_common_fallback (test_hooks.Hooks.test_disabled_native_and_working_common_fallback) ... ok
+test_disabling_removes_exact_owned_groups_only (test_hooks.Hooks.test_disabling_removes_exact_owned_groups_only) ... ok
+test_interrupt_subagent_recursive_stop_never_continues (test_hooks.Hooks.test_interrupt_subagent_recursive_stop_never_continues) ... ok
+test_interruption_between_settings_and_proof_detectable_on_retry (test_hooks.Hooks.test_interruption_between_settings_and_proof_detectable_on_retry) ... ok
+test_legacy_proof_migration_exact_and_new_proof_precedence (test_hooks.Hooks.test_legacy_proof_migration_exact_and_new_proof_precedence) ... ok
+test_legacy_proof_mismatch_and_malformed_preserve_all_bytes (test_hooks.Hooks.test_legacy_proof_mismatch_and_malformed_preserve_all_bytes) ... ok
+test_malformed_native_settings_preserved_as_conflict (test_hooks.Hooks.test_malformed_native_settings_preserved_as_conflict) ... ok
+test_manifest_exact_six_schema_and_no_yaml_commands (test_hooks.Hooks.test_manifest_exact_six_schema_and_no_yaml_commands) ... ok
+test_manifest_invalid_event_and_timeout (test_hooks.Hooks.test_manifest_invalid_event_and_timeout) ... ok
+test_method_impact_explicit_batch_uses_declared_closure (test_hooks.Hooks.test_method_impact_explicit_batch_uses_declared_closure) ... ok
+test_method_impact_only_explicit_dependencies_and_publication_hint (test_hooks.Hooks.test_method_impact_only_explicit_dependencies_and_publication_hint) ... ok
+test_missing_receipt_unknown_namespace_and_mixed_group_conflict (test_hooks.Hooks.test_missing_receipt_unknown_namespace_and_mixed_group_conflict) ... ok
+test_native_invalid_json_oversize_missing_dependency_failure_not_pass (test_hooks.Hooks.test_native_invalid_json_oversize_missing_dependency_failure_not_pass) ... ok
+test_native_projection_apply_requires_company_permissions (test_hooks.Hooks.test_native_projection_apply_requires_company_permissions) ... ok
+test_native_protocol_versions_json_denial_and_advisory_both (test_hooks.Hooks.test_native_protocol_versions_json_denial_and_advisory_both) ... ok
+test_native_timeout_explicit_failure_without_stop_block (test_hooks.Hooks.test_native_timeout_explicit_failure_without_stop_block) ... ok
+test_other_settings_preserved_idempotent_and_owned_collision (test_hooks.Hooks.test_other_settings_preserved_idempotent_and_owned_collision) ... ok
+test_payload_normalization_independent_of_method_dependencies (test_hooks.Hooks.test_payload_normalization_independent_of_method_dependencies) ... ok
+test_post_write_missing_map_advisory_and_linked_positive (test_hooks.Hooks.test_post_write_missing_map_advisory_and_linked_positive) ... ok
+test_post_write_reads_actual_bytes_instead_of_proposed_payload (test_hooks.Hooks.test_post_write_reads_actual_bytes_instead_of_proposed_payload) ... ok
+test_product_root_routes_development_and_template_paths (test_hooks.Hooks.test_product_root_routes_development_and_template_paths) ... ok
+test_publication_hint_recognizes_fixed_cli_without_execution (test_hooks.Hooks.test_publication_hint_recognizes_fixed_cli_without_execution) ... ok
+test_stop_compact_dedup_revision_no_business_writes (test_hooks.Hooks.test_stop_compact_dedup_revision_no_business_writes) ... ok
+test_subdirectory_absolute_quoted_projection_executes (test_hooks.Hooks.test_subdirectory_absolute_quoted_projection_executes) ... ok
+test_unknown_task_navigation_only_disabled_scenario (test_hooks.Hooks.test_unknown_task_navigation_only_disabled_scenario) ... ok
+test_untrusted_or_missing_expected_definition_never_passes (test_hooks.Hooks.test_untrusted_or_missing_expected_definition_never_passes) ... ok
+test_update_patch_partial_metadata_is_advisory_not_denial (test_hooks.Hooks.test_update_patch_partial_metadata_is_advisory_not_denial) ... ok
+test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed (test_hooks.Hooks.test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed) ... ok
+test_dirty_staged_and_untracked_preserved_even_with_new_remote (test_preflight.Preflight.test_dirty_staged_and_untracked_preserved_even_with_new_remote) ... ok
+test_diverged_keeps_both_committed_histories (test_preflight.Preflight.test_diverged_keeps_both_committed_histories) ... ok
+test_fast_forward_uses_received_validator_and_blocks_invalid_version (test_preflight.Preflight.test_fast_forward_uses_received_validator_and_blocks_invalid_version) ... ok
+test_fetch_timeout_is_bounded_and_preserves_snapshot (test_preflight.Preflight.test_fetch_timeout_is_bounded_and_preserves_snapshot) ... ok
+test_ignored_local_file_cannot_be_overwritten_by_fast_forward (test_preflight.Preflight.test_ignored_local_file_cannot_be_overwritten_by_fast_forward) ... ok
+test_offline_reports_local_snapshot_without_freshness (test_preflight.Preflight.test_offline_reports_local_snapshot_without_freshness) ... ok
+test_receive_latest_and_deliver_other_employee_without_manual_sync (test_preflight.Preflight.test_receive_latest_and_deliver_other_employee_without_manual_sync) ... ok
+test_unfinished_git_and_detached_and_no_remote_do_not_change_head (test_preflight.Preflight.test_unfinished_git_and_detached_and_no_remote_do_not_change_head) ... ok
+test_wrong_company_and_unapproved_external_are_rejected (test_preflight.Preflight.test_wrong_company_and_unapproved_external_are_rejected) ... ok
+test_backup_restore_and_corruption_dirty_tree (test_system.GitAcceptance.test_backup_restore_and_corruption_dirty_tree) ... ok
+test_common_delivery_concurrent_results_stale_and_conflict (test_system.GitAcceptance.test_common_delivery_concurrent_results_stale_and_conflict) ... ok
+test_company_method_proposal_uses_same_product_delivery_without_data (test_system.GitAcceptance.test_company_method_proposal_uses_same_product_delivery_without_data) ... ok
+test_copy_update_two_companies_history_and_local_rule (test_system.GitAcceptance.test_copy_update_two_companies_history_and_local_rule) ... ok
+test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session (test_system.GitAcceptance.test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session) ... ok
+test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes (test_system.GitAcceptance.test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes) ... ok
+test_portable_feature_release_updates_client_without_development_or_data_loss (test_system.GitAcceptance.test_portable_feature_release_updates_client_without_development_or_data_loss) ... ok
+test_proposal_rejects_noncanonical_paths_before_copy_or_candidate (test_system.GitAcceptance.test_proposal_rejects_noncanonical_paths_before_copy_or_candidate) ... ok
+test_release_guide_allowed_but_development_history_rejected (test_system.GitAcceptance.test_release_guide_allowed_but_development_history_rejected) ... ok
+test_result_delivery_ack_and_lost_push_response_readback (test_system.GitAcceptance.test_result_delivery_ack_and_lost_push_response_readback) ... ok
+test_sanitized_proposal_exact_permission_no_company_history (test_system.GitAcceptance.test_sanitized_proposal_exact_permission_no_company_history) ... ok
+test_semantic_binding_change_stops_even_text_merge_clean (test_system.GitAcceptance.test_semantic_binding_change_stops_even_text_merge_clean) ... ok
+test_clean_template_and_all_pairs (test_system.LocalContracts.test_clean_template_and_all_pairs) ... ok
+test_decimal_sum_is_exact_without_business_rounding_rule (test_system.LocalContracts.test_decimal_sum_is_exact_without_business_rounding_rule) ... ok
+test_episode_denominator_and_cross_source_outcome (test_system.LocalContracts.test_episode_denominator_and_cross_source_outcome) ... ok
+test_independence_and_observation_are_separate (test_system.LocalContracts.test_independence_and_observation_are_separate) ... ok
+test_lock_prevents_parallel_mutation_without_stale_lock_repair (test_system.LocalContracts.test_lock_prevents_parallel_mutation_without_stale_lock_repair) ... ok
+test_marketing_and_research_contracts_preserve_unknowns (test_system.LocalContracts.test_marketing_and_research_contracts_preserve_unknowns) ... ok
+test_new_process_reads_file_memory_and_blocks_changed_method (test_system.LocalContracts.test_new_process_reads_file_memory_and_blocks_changed_method) ... ok
+test_observations_bound_to_result_and_reset_with_history (test_system.LocalContracts.test_observations_bound_to_result_and_reset_with_history) ... ok
+test_result_rejects_known_bad_provenance_count_null_and_pass (test_system.LocalContracts.test_result_rejects_known_bad_provenance_count_null_and_pass) ... ok
+test_task_id_semantic_conflict_preserves_original (test_system.LocalContracts.test_task_id_semantic_conflict_preserves_original) ... ok
+test_unconfirmed_stale_revision_cancel_and_unknowns (test_system.LocalContracts.test_unconfirmed_stale_revision_cancel_and_unknowns) ... ok
+test_validator_itself_rejects_wrong_place_duplicate_link_cycle (test_system.LocalContracts.test_validator_itself_rejects_wrong_place_duplicate_link_cycle) ... ok
+test_workflow_disabled_missing_capability_unknown_version_and_index (test_system.LocalContracts.test_workflow_disabled_missing_capability_unknown_version_and_index) ... ok
+test_wrong_arithmetic_then_original_case_repairs (test_system.LocalContracts.test_wrong_arithmetic_then_original_case_repairs) ... ok
+test_graph_current_source_aliases_and_disabled_fallback (test_system.SourcesAndBackground.test_graph_current_source_aliases_and_disabled_fallback) ... ok
+test_http_pagination_429_redirect_and_limit (test_system.SourcesAndBackground.test_http_pagination_429_redirect_and_limit) ... ERROR
+test_one_shot_ticks_change_only_limits_off_and_recovery (test_system.SourcesAndBackground.test_one_shot_ticks_change_only_limits_off_and_recovery) ... ok
+test_real_file_export_and_wrong_company_partial_stale (test_system.SourcesAndBackground.test_real_file_export_and_wrong_company_partial_stale) ... ok
+test_stdio_mcp_negotiation_read_tool_and_error (test_system.SourcesAndBackground.test_stdio_mcp_negotiation_read_tool_and_error) ... ok
+
+======================================================================
+ERROR: test_http_pagination_429_redirect_and_limit (test_system.SourcesAndBackground.test_http_pagination_429_redirect_and_limit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_system.py", line 248, in test_http_pagination_429_redirect_and_limit
+    server = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socketserver.py", line 453, in __init__
+    self.socket = socket.socket(self.address_family,
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/socket.py", line 233, in __init__
+    _socket.socket.__init__(self, family, type, proto, fileno)
+PermissionError: [Errno 1] Operation not permitted
+
+======================================================================
+FAIL: test_blocked_update_cannot_finish_without_owner_binding_reconciliation (test_consistency.EvolutionConsistency.test_blocked_update_cannot_finish_without_owner_binding_reconciliation)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 179, in test_blocked_update_cannot_finish_without_owner_binding_reconciliation
+    self.assertEqual(update['status'], 'needs-reconciliation')
+AssertionError: 'verified-candidate' != 'needs-reconciliation'
+- verified-candidate
++ needs-reconciliation
+
+
+----------------------------------------------------------------------
+Ran 118 tests in 747.274s
+
+FAILED (failures=1, errors=1)

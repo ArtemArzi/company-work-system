@@ -1,0 +1,6 @@
+test_blocked_update_cannot_finish_without_owner_binding_reconciliation (test_consistency.EvolutionConsistency.test_blocked_update_cannot_finish_without_owner_binding_reconciliation) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 21.260s
+
+OK

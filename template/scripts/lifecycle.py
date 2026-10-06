@@ -1,6 +1,8 @@
 """Company creation, evolution and recovery; deliveries use delivery.py."""
 from __future__ import annotations
 import json
+import ast
+import hashlib
 from pathlib import Path
 import shutil
 import subprocess
@@ -12,19 +14,16 @@ import validation
 
 def release_isolated(release):
     release = Path(release)
-    allowed = {"README.md", "AGENTS.md", ".gitignore", "requirements.txt", "release.yaml", "company", "standards", "skills", "workflows", "scripts", "adapters", ".agents", ".claude", "checks"}
-    for row in git(release, "rev-list", "--objects", "--all").splitlines():
-        if " " in row:
-            relative = row.split(" ", 1)[1]
-            if not relative:
-                continue  # Git names the root tree with an empty path.
-            guide_path = relative in {"docs", "docs/company-system-guide.html"}
-            require(relative.split("/", 1)[0] in allowed or guide_path, "release includes non-template history")
     require(git(release, "rev-parse", "--is-bare-repository") == "true", "release-only bare repository required")
+    from history import release_policy, scan
+    return scan(release, release_policy(), all_refs=True)
+
 
 
 def create(release, destination, company_id, owner):
-    release_isolated(release)
+    checked = release_isolated(release)
+    expected_release = checked["ref_tips"].get("refs/heads/main")
+    require(expected_release, "release lacks checked main")
     destination = Path(destination).resolve()
     require(not destination.exists(), "existing company destination; no overwrite")
     ident(company_id)
@@ -32,6 +31,7 @@ def create(release, destination, company_id, owner):
     git(Path(release).parent, "clone", "--no-local", "--single-branch", "--branch", "main", str(Path(release).resolve()), str(destination))
     identity(destination)
     base = git(destination, "rev-parse", "HEAD")
+    require(base == expected_release, "release changed after validation; preserve unadapted candidate")
     cfg = config(destination)
     cfg.update(id=company_id, name=company_id, owner=owner)
     cfg["permissions"]["local_work"] = True
@@ -48,7 +48,9 @@ def update(root, release, destination):
     config(root, True)
     metadata = load(path(root, ".system/base.json"))
     require(metadata.get("schema_version") == 1, "unknown template ancestry")
-    release_isolated(release)
+    checked = release_isolated(release)
+    expected_release = checked["ref_tips"].get("refs/heads/main")
+    require(expected_release, "release lacks checked main")
     clean(root)
     candidate = Path(destination).resolve()
     require(not candidate.exists(), "update candidate already exists")
@@ -57,6 +59,7 @@ def update(root, release, destination):
     previous_head = git(candidate, "rev-parse", "HEAD")
     git(candidate, "fetch", str(Path(release).resolve()), "main")
     target = git(candidate, "rev-parse", "FETCH_HEAD")
+    require(target == expected_release, "release changed after validation; preserve unmerged candidate")
     require(git(candidate, "merge-base", "--is-ancestor", metadata["installed"], target, check=False).returncode == 0, "release lacks installed ancestry")
     if target == metadata["installed"]:
         return {"status": "already-installed", "candidate": str(candidate), "target": target}
@@ -80,7 +83,7 @@ def update(root, release, destination):
         t = load(file)
         if t["status"] in {"active", "blocked", "waiting"}:
             from core import changed_bindings
-            if changed_bindings(candidate, t["bindings"]):
+            if changed_bindings(candidate, t["bindings"], t.get("binding_scope")):
                 failures.append("active task pinned to previous version: " + t["id"])
     if failures:
         return {"status": "needs-reconciliation", "candidate": str(candidate), "target": target, "issues": failures, "next_action": "Keep exact candidate; reconcile bindings and old sessions; finish-update"}
@@ -95,7 +98,7 @@ def finish_update(candidate, target, expected_company):
     from core import changed_bindings
     for file in tasks(candidate):
         t = load(file)
-        require(t["status"] not in {"active", "waiting", "blocked"} or not changed_bindings(candidate, t["bindings"]), "active task must explicitly reconcile methods")
+        require(t["status"] not in {"active", "waiting", "blocked"} or not changed_bindings(candidate, t["bindings"], t.get("binding_scope")), "active task must explicitly reconcile methods")
     version = load(path(candidate, "release.yaml"))["version"]
     metadata = load(path(candidate, ".system/base.json"))
     if metadata["installed"] != target:
@@ -161,7 +164,7 @@ def rollback(root, destination):
     identity(candidate)
     current, previous = metadata["installed"], metadata["previous"]
     protected = {str(p.relative_to(candidate)): digest(p) for d in ["company", "work"] for p in Path(candidate, d).rglob("*") if p.is_file()}
-    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude", "requirements.txt", "docs/company-system-guide.html", check=False)
+    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "hooks", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude/skills", ".gitignore", "requirements.txt", "docs/company-system-guide.html", check=False)
     require(delta.returncode == 0, "rollback diff unavailable")
     patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, text=True, capture_output=True, env=git_environment())
     if patch.returncode:
@@ -178,23 +181,46 @@ def rollback(root, destination):
 def proposal(root, package, destination):
     """Only a deliberately authored sanitized package, never company Git history."""
     cfg = config(root, True)
+    config_sha = digest(path(root, "company/config.yaml"))
+    require(config(root, True) == cfg, "company configuration changed before proposal")
     package, destination = Path(package).resolve(), Path(destination).resolve()
-    approval = load(package / "approval.json")
+    approval_raw = (package / "approval.json").read_bytes()
+    approval = json.loads(approval_raw)
     require(approval.get("approved_by") == cfg["owner"] and approval.get("permission") == "share-sanitized-method" and approval.get("purpose"), "proposal sharing permission missing")
     require(not destination.exists(), "proposal destination exists")
     files = approval.get("files", {})
     require(files, "empty proposal")
+    import history
+    hook_files = {"hooks/manifest.yaml", "hooks/README.md", "scripts/hooks.py"}
+    contents = {}
+    policy = history.Policy("sanitized-proposal", files=tuple(files))
     for relative, sha in files.items():
-        require(relative.startswith(("standards/", "skills/", "workflows/", "checks/")), "proposal allowlist excludes company data/history")
+        require(relative.startswith(("standards/", "skills/", "workflows/", "checks/")) or relative in hook_files, "proposal allowlist excludes company data/history")
         file = path(package, relative)
-        require(file.is_file() and digest(file) == sha, "proposal approval does not match exact file")
-        text = file.read_text()
-        require(not any(marker in text for marker in ["PRIVATE KEY", "Bearer ", "api_key", cfg["id"], "company/config", "work/"]), "proposal contains company/private identifiers")
+        require(file.is_file(), "proposal approved file missing")
+        raw = file.read_bytes()
+        require(hashlib.sha256(raw).hexdigest() == sha, "proposal approval does not match exact file")
+        contents[relative] = raw
+        policy.permits(relative, "100644")
+        policy.content(relative, [raw])
+        text = raw.decode()
+        require(not any(marker in text for marker in ["PRIVATE KEY", "Bearer ", cfg["id"]]), "proposal contains company/private identifiers")
+        if relative == "scripts/hooks.py":
+            # Parse donated code, never import/execute it. These routing literals
+            # are part of the shared runtime, not company file contents.
+            try:
+                ast.parse(text)
+            except SyntaxError:
+                require(False, "proposal Python syntax invalid")
+        else:
+            require(not any(marker in text for marker in ["api_key", "company/config", "work/"]) or relative in {"hooks/manifest.yaml", "hooks/README.md"}, "proposal contains company/private identifiers")
+    require(digest(path(root, "company/config.yaml")) == config_sha and config(root, True) == cfg, "company configuration/authorization changed before proposal export")
+    require((package / "approval.json").read_bytes() == approval_raw, "proposal approval changed before export")
     destination.mkdir(parents=True)
     for relative in files:
         target = path(destination, relative)
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(path(package, relative), target)
+        target.write_bytes(contents[relative])
     write(destination / "proposal.json", {"schema_version": 1, "purpose": approval["purpose"], "files": files, "status": "sanitized-candidate", "limitations": ["Automated scan cannot prove anonymity; owner approval covers exact authored files", "Not accepted into the general product"]})
     return {"path": str(destination), "status": "sanitized-candidate", "files": list(files)}
 
@@ -209,16 +235,28 @@ def proposal_candidate(root, package, product_root, product_remote, destination)
         sanitized = Path(temporary) / "package"
         approved = proposal(root, package, sanitized)
         prepared = delivery.prepare(product_root, product_remote, "main", destination)
+        replacements = {}
+        hook_files = {"hooks/manifest.yaml", "hooks/README.md", "scripts/hooks.py"}
         for relative in approved["files"]:
             target = path(destination / "template", relative)
-            require(not target.exists(), "proposal replacement needs maintainer review; existing method preserved")
+            if target.exists():
+                require(relative in hook_files, "proposal replacement needs maintainer review; existing method preserved")
+                replacements["template/" + relative] = {"base_sha256": digest(target), "candidate_sha256": digest(path(sanitized, relative))}
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(path(sanitized, relative), target)
-        require(all(f.startswith("standards/") for f in approved["files"]), "automatic navigation supports new standards only; other packages need explicit consumer wiring")
-        index = destination / "template/standards/README.md"
-        text = index.read_text() if index.exists() else "# Карта стандартов\n\n"
-        for relative in approved["files"]:
-            text += f"- [{Path(relative).stem}]({Path(relative).name}) — proposal, maintainer acceptance pending\n"
-        index.write_text(text)
+        supported = all(f.startswith("standards/") or f in hook_files or f.startswith("checks/") for f in approved["files"])
+        require(supported, "automatic navigation supports standards/hooks/checks only; other packages need explicit consumer wiring")
+        changed = ["template/" + f for f in approved["files"]]
+        standards = [f for f in approved["files"] if f.startswith("standards/")]
+        if standards:
+            index = destination / "template/standards/README.md"
+            text = index.read_text() if index.exists() else "# Карта стандартов\n\n"
+            for relative in standards:
+                text += f"- [{Path(relative).stem}]({Path(relative).name}) — proposal, maintainer acceptance pending\n"
+            index.write_text(text)
+            changed.append("template/standards/README.md")
+        # This process uses its trusted validator/handler allowlist, not donated
+        # scripts. New executable contracts still require maintainer review.
         validation.repository(destination / "template")
-        return {**prepared, "status": "reviewable-product-candidate", "paths": ["template/" + f for f in approved["files"]] + ["template/standards/README.md"], "acceptance": "proposal only; general release requires maintainer review"}
+        return {**prepared, "status": "reviewable-product-candidate", "paths": changed, "replacements": replacements,
+                "acceptance": "proposal only; replacements/code/tests need maintainer review; donated code was not executed"}

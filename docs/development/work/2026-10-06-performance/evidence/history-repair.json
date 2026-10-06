@@ -1,0 +1,123 @@
+{
+  "scope": "synthetic company histories; naive reference of repeated ls-tree/cat-file, NOT a live Work benchmark",
+  "git": "git version 2.43.0",
+  "python": "3.12.3",
+  "source_hashes": {
+    "template/scripts/history.py": "11024fe633da408569746305f8c77ac651be584cc33dba2409c8ac1568336e88",
+    "checks/benchmark_history.py": "61a5f9b1855f56bee5dbdb15dae471113dc964d0d841885d70400c51365450dc"
+  },
+  "variants": [
+    {
+      "commits": 1,
+      "files": 1,
+      "reference": {
+        "commits": 1,
+        "blobs": 1,
+        "bytes": 26,
+        "git_processes": 3,
+        "coverage_sha256": "d29766475f8eec2c1cf91587f26385adbbc8edd7cb84c26583914641484be25e",
+        "runs": 20,
+        "median_ms": 5.381,
+        "p95_ms": 5.667
+      },
+      "small_case_bound_pass": true,
+      "candidate": {
+        "commits": 1,
+        "blobs": 1,
+        "bytes": 26,
+        "git_processes": 7,
+        "coverage_sha256": "d29766475f8eec2c1cf91587f26385adbbc8edd7cb84c26583914641484be25e",
+        "policy": "benchmark",
+        "content_checked": true,
+        "runs": 20,
+        "median_ms": 12.61,
+        "p95_ms": 13.077
+      },
+      "speedup": 0.427
+    },
+    {
+      "commits": 1,
+      "files": 40,
+      "reference": {
+        "commits": 1,
+        "blobs": 40,
+        "bytes": 1070,
+        "git_processes": 42,
+        "coverage_sha256": "5199200e5b53ecc1017b88e82078db55f1561056bd4296ccc50bb5e0b9254540",
+        "runs": 20,
+        "median_ms": 80.981,
+        "p95_ms": 93.09
+      },
+      "small_case_bound_pass": true,
+      "candidate": {
+        "commits": 1,
+        "blobs": 40,
+        "bytes": 1070,
+        "git_processes": 7,
+        "coverage_sha256": "5199200e5b53ecc1017b88e82078db55f1561056bd4296ccc50bb5e0b9254540",
+        "policy": "benchmark",
+        "content_checked": true,
+        "runs": 20,
+        "median_ms": 18.36,
+        "p95_ms": 19.432
+      },
+      "speedup": 4.411
+    },
+    {
+      "commits": 20,
+      "files": 40,
+      "reference": {
+        "commits": 20,
+        "blobs": 59,
+        "bytes": 1593,
+        "git_processes": 80,
+        "coverage_sha256": "886c1742a57fe0d8797fd887a3125f482b4a49f5858f18d03df46d0c6e080e98",
+        "runs": 20,
+        "median_ms": 144.92,
+        "p95_ms": 154.215
+      },
+      "small_case_bound_pass": null,
+      "candidate": {
+        "commits": 20,
+        "blobs": 59,
+        "bytes": 1593,
+        "git_processes": 7,
+        "coverage_sha256": "886c1742a57fe0d8797fd887a3125f482b4a49f5858f18d03df46d0c6e080e98",
+        "policy": "benchmark",
+        "content_checked": true,
+        "runs": 20,
+        "median_ms": 31.954,
+        "p95_ms": 35.863
+      },
+      "speedup": 4.535
+    },
+    {
+      "commits": 100,
+      "files": 40,
+      "reference": {
+        "commits": 100,
+        "blobs": 139,
+        "bytes": 3833,
+        "git_processes": 240,
+        "coverage_sha256": "e50f516526d66eb69fa3d3a9658ef5c4e6bf7e2012135242831e611550be77aa",
+        "runs": 20,
+        "median_ms": 438.862,
+        "p95_ms": 478.898
+      },
+      "small_case_bound_pass": null,
+      "candidate": {
+        "commits": 100,
+        "blobs": 139,
+        "bytes": 3833,
+        "git_processes": 7,
+        "coverage_sha256": "e50f516526d66eb69fa3d3a9658ef5c4e6bf7e2012135242831e611550be77aa",
+        "policy": "benchmark",
+        "content_checked": true,
+        "runs": 20,
+        "median_ms": 83.583,
+        "p95_ms": 88.562
+      },
+      "speedup": 5.251
+    }
+  ]
+}

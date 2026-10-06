@@ -1,0 +1,6 @@
+test_commit_lock_cleanup_preserves_consumed_or_replaced_foreign_locks (checks.test_history.GuardedDelivery.test_commit_lock_cleanup_preserves_consumed_or_replaced_foreign_locks) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.036s
+
+OK

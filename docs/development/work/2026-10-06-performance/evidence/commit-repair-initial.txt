@@ -1,0 +1,55 @@
+test_author_new_skill_pair_and_safe_projections_use_common_commit (checks.test_history.GuardedDelivery.test_author_new_skill_pair_and_safe_projections_use_common_commit) ... ERROR
+test_concurrent_policy_change_before_index_blocks (checks.test_history.GuardedDelivery.test_concurrent_policy_change_before_index_blocks) ... ok
+test_external_delivery_requires_explicit_policy_before_network (checks.test_history.GuardedDelivery.test_external_delivery_requires_explicit_policy_before_network) ... ok
+test_foreign_staged_work_is_preserved (checks.test_history.GuardedDelivery.test_foreign_staged_work_is_preserved) ... ok
+test_head_race_does_not_attach_own_result_to_new_parent (checks.test_history.GuardedDelivery.test_head_race_does_not_attach_own_result_to_new_parent) ... ok
+test_index_race_before_actual_staging_preserves_foreign_bytes (checks.test_history.GuardedDelivery.test_index_race_before_actual_staging_preserves_foreign_bytes) ... ok
+test_preview_tree_uses_owned_index_and_safe_commit_passes (checks.test_history.GuardedDelivery.test_preview_tree_uses_owned_index_and_safe_commit_passes) ... ERROR
+test_rejection_preserves_working_file_and_index (checks.test_history.GuardedDelivery.test_rejection_preserves_working_file_and_index) ... ok
+
+======================================================================
+ERROR: test_author_new_skill_pair_and_safe_projections_use_common_commit (checks.test_history.GuardedDelivery.test_author_new_skill_pair_and_safe_projections_use_common_commit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_history.py", line 153, in test_author_new_skill_pair_and_safe_projections_use_common_commit
+    head=delivery.commit(self.root,relatives,'Share new canonical method through common delivery')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/delivery.py", line 275, in commit
+    git(root, "update-ref", "--no-deref", "-m", "guarded commit: " + message, branch, new_head, old_head or "0" * len(new_head))
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/delivery.py", line 40, in git
+    require(value.returncode == 0, "Git operation failed: " + (value.stderr.decode(errors="replace") if binary else value.stderr).strip()[:1500])
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/core.py", line 20, in require
+    raise Rejected(message)
+core.Rejected: Git operation failed: fatal: update_ref failed for ref 'refs/heads/main': cannot lock ref 'HEAD': Unable to create '/tmp/company-acceptance-3972k612/company/.git/HEAD.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+
+======================================================================
+ERROR: test_preview_tree_uses_owned_index_and_safe_commit_passes (checks.test_history.GuardedDelivery.test_preview_tree_uses_owned_index_and_safe_commit_passes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_history.py", line 176, in test_preview_tree_uses_owned_index_and_safe_commit_passes
+    head=delivery.commit(self.root,['company/README.md'],'Allowed fixture change')
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/delivery.py", line 275, in commit
+    git(root, "update-ref", "--no-deref", "-m", "guarded commit: " + message, branch, new_head, old_head or "0" * len(new_head))
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/delivery.py", line 40, in git
+    require(value.returncode == 0, "Git operation failed: " + (value.stderr.decode(errors="replace") if binary else value.stderr).strip()[:1500])
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/core.py", line 20, in require
+    raise Rejected(message)
+core.Rejected: Git operation failed: fatal: update_ref failed for ref 'refs/heads/main': cannot lock ref 'HEAD': Unable to create '/tmp/company-acceptance-tj2unkep/company/.git/HEAD.lock': File exists.
+
+Another git process seems to be running in this repository, e.g.
+an editor opened by 'git commit'. Please make sure all processes
+are terminated then try again. If it still fails, a git process
+may have crashed in this repository earlier:
+remove the file manually to continue.
+
+----------------------------------------------------------------------
+Ran 8 tests in 168.346s
+
+FAILED (errors=2)

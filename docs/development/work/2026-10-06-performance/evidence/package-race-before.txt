@@ -1,0 +1,14 @@
+test_bundle_rechecks_actual_exported_refs_after_source_race (checks.test_history.History.test_bundle_rechecks_actual_exported_refs_after_source_race) ... FAIL
+
+======================================================================
+FAIL: test_bundle_rechecks_actual_exported_refs_after_source_race (checks.test_history.History.test_bundle_rechecks_actual_exported_refs_after_source_race)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_history.py", line 140, in test_bundle_rechecks_actual_exported_refs_after_source_race
+    with self.assertRaisesRegex(Rejected,'non-template history'):
+AssertionError: Rejected not raised
+
+----------------------------------------------------------------------
+Ran 1 test in 0.421s
+
+FAILED (failures=1)

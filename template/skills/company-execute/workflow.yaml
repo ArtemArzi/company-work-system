@@ -9,18 +9,25 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: One verified result bound to accepted criterion, exact inputs and required review
+output: One verified result bound to accepted criterion, exact inputs and required
+  review
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: execute-result
   operation: execute
-  instruction: Подготовить artifact, critical и обязательный review для уже принятой active задачи. Один вызов
-    execute проверяет их и сохраняет результат. Не вызывать execute второй раз для проверки собственного receipt.
+  instruction: Подготовить artifact, critical и обязательный review для уже принятой
+    active задачи. Один вызов execute проверяет их и сохраняет результат. Не вызывать
+    execute второй раз для проверки собственного receipt.
   depends_on:
   - read-context
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/operations.py

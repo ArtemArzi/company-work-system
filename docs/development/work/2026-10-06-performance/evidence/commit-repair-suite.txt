@@ -1,0 +1,21 @@
+test_author_new_skill_pair_and_safe_projections_use_common_commit (checks.test_history.GuardedDelivery.test_author_new_skill_pair_and_safe_projections_use_common_commit) ... ok
+test_compare_and_swap_preserves_external_new_head (checks.test_history.GuardedDelivery.test_compare_and_swap_preserves_external_new_head) ... ok
+test_concurrent_policy_change_before_index_blocks (checks.test_history.GuardedDelivery.test_concurrent_policy_change_before_index_blocks) ... ok
+test_config_drift_after_scratch_commit_blocks_publication (checks.test_history.GuardedDelivery.test_config_drift_after_scratch_commit_blocks_publication) ... ok
+test_external_delivery_requires_explicit_policy_before_network (checks.test_history.GuardedDelivery.test_external_delivery_requires_explicit_policy_before_network) ... ok
+test_foreign_staged_work_is_preserved (checks.test_history.GuardedDelivery.test_foreign_staged_work_is_preserved) ... ok
+test_head_race_does_not_attach_own_result_to_new_parent (checks.test_history.GuardedDelivery.test_head_race_does_not_attach_own_result_to_new_parent) ... ok
+test_index_race_before_actual_staging_preserves_foreign_bytes (checks.test_history.GuardedDelivery.test_index_race_before_actual_staging_preserves_foreign_bytes) ... ok
+test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup (checks.test_history.GuardedDelivery.test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup) ... ok
+test_interrupted_index_install_preserves_published_commit_and_old_index (checks.test_history.GuardedDelivery.test_interrupted_index_install_preserves_published_commit_and_old_index) ... ok
+test_late_foreign_staging_cannot_enter_checked_commit (checks.test_history.GuardedDelivery.test_late_foreign_staging_cannot_enter_checked_commit) ... ok
+test_native_commit_rejection_preserves_original_branch_and_index (checks.test_history.GuardedDelivery.test_native_commit_rejection_preserves_original_branch_and_index) ... ok
+test_native_hook_tree_change_rejects_before_publication (checks.test_history.GuardedDelivery.test_native_hook_tree_change_rejects_before_publication) ... ok
+test_preview_tree_uses_owned_index_and_safe_commit_passes (checks.test_history.GuardedDelivery.test_preview_tree_uses_owned_index_and_safe_commit_passes) ... ok
+test_rejection_preserves_working_file_and_index (checks.test_history.GuardedDelivery.test_rejection_preserves_working_file_and_index) ... ok
+test_split_sparse_and_relative_hooks_fail_closed (checks.test_history.GuardedDelivery.test_split_sparse_and_relative_hooks_fail_closed) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 305.679s
+
+OK

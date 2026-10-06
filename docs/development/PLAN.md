@@ -88,19 +88,19 @@ Patch1.1.3: bounded исправление6design-hook замечаний HTML, 
 
 ## Следующий этап: скорость и хуки
 
-Поручение 06.10.2026: оптимизировать проверки истории Git и слишком широкие привязки методов; подготовить стандарт и встроенные полезные hooks. Работа только в главном продукте. Принятые P0–P8 и 1.1.5 не переоткрываются; частные правила/данные Work не становятся шаблоном. Реализация разрешена владельцем 06.10.2026; Task Delivery implement/native, по этапам. A1 уточнение готовится к независимой приёмке; runtime код и активация hooks ещё не выполнены.
+Поручение 06.10.2026: оптимизировать проверки истории Git и слишком широкие привязки методов; подготовить стандарт и встроенные полезные hooks. Работа только в главном продукте. Принятые P0–P8 и 1.1.5 не переоткрываются; частные правила/данные Work не становятся шаблоном. Реализация разрешена владельцем 06.10.2026; Task Delivery implement/native, по этапам. A1 уточнение принято независимо; runtime реализация A2/A3/H1/H2 проходит проверки. Native hooks текущего host/Work не активируются.
 
 Два владельца деталей: [A: скорость и зависимости](work/2026-10-06-performance/task.md), [H: hooks и авторство](work/2026-10-06-hooks/task.md). Они содержат основания, contracts, проверки, ошибки и точный handoff. Независимый whole-plan review обязателен: новая общая проверка экспортируемой истории касается данных/полномочий, selective bindings меняют пригодность evidence, hooks затрагивают исполнение и обновление двух сред. Итог implementation принимает другой свежий whole-result reviewer; plan-only этап завершается при принятом плане.
 
 | Этап | Результат и проверка | Состояние |
 | --- | --- | --- |
 | A0/H0 | Исследованный путь, воспроизведение широты bindings, схема исполнения и независимая приёмка плана | Принято независимо; company-work-system-performance-hooks-plan-pass-20261006-ca6552e-7d4f9c-r1 |
-| A1 | Синтетический history baseline, выбранные policy/state contracts и целевой benchmark до оптимизации | В работе: контракт перед зависимым кодом |
-| A2 | Общий batch history guard в существующей Git delivery, сохранены все negative guards | Не начато |
-| A3 | Явная dependency closure, facets и совместимость старых task/evidence/admission; update/context/rollback | Не начато |
-| H1 | Канонический стандарт/manifest, fixed dispatcher; company-author и карты | Не начато |
-| H2 | Шесть сценариев, оба тонких native adapters, preview/merge и CLI fallback | Не начато; интеграция зависит от A2/A3 |
-| V | Before/after, known-bad, оба профиля, copy/adapt/delivery/resume/update/recovery и независимая приёмка всего | Не начато |
-| R | Номер функционального выпуска, README/release запись, product commit/push и изолированный пакет; кандидат компаний | Не начато; установленный Work отдельно |
+| A1 | Синтетический history baseline, выбранные policy/state contracts и целевой benchmark до оптимизации | Принято A1 PASS; synthetic baseline сохранён |
+| A2 | Общий batch history guard в существующей Git delivery, сохранены все negative guards | Принято: общий guard, actual bundle и commit/CAS/locks negatives PASS |
+| A3 | Явная dependency closure, facets и совместимость старых task/evidence/admission; update/context/rollback | Принято: selected/legacy/admission/update;55→18pins |
+| H1 | Канонический стандарт/manifest, fixed dispatcher; company-author и карты | Стандарт/manifest/карты и positive proposal path проверены |
+| H2 | Шесть сценариев, оба тонких native adapters, preview/merge и CLI fallback | Принято37/37 Python/protocol; native trust/events unverified |
+| V | Before/after, known-bad, оба профиля, copy/adapt/delivery/resume/update/recovery и независимая приёмка всего | 132/132 PASS; source_unchanged; whole-result r2 PASS |
+| R | Номер функционального выпуска, README/release запись, product commit/push и изолированный пакет; кандидат компаний | 1.2.0 принят; scoped commit/push/isolated bundle в работе, Work отдельно |
 
 Существенные новые policy/state решения из A1 проверять существующим plan reviewer до зависимого кода, не запускать новую цепочку приёмки для каждой мелкой правки. Полный suite требуется после runtime изменений перед функциональным выпуском; сейчас проверяются документы/ссылки/воспроизведение. Не повышать версию по документационному плану. Native trust/OAuth/live отсутствие доступа остаются явными блокировками своих частей, а не причиной устанавливать весь комплект или объявлять локальные fixtures native успехом.

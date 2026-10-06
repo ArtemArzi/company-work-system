@@ -10,25 +10,33 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: Grounded read-only answer OR a separately accepted verified Result; graph is derived, not a state owner
+output: Grounded read-only answer OR a separately accepted verified Result; graph
+  is derived, not a state owner
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: find-grounded-knowledge
   operation: knowledge
-  instruction: 'Это выбор агентом реальной команды: search query для локальных источников/производного графа
-    либо kb-read source-id для включённой и разрешённой KB. Вернуть ответ с основанием; недоступная KB не означает
-    доступный источник.'
+  instruction: 'Это выбор агентом реальной команды: search query для локальных источников/производного
+    графа либо kb-read source-id для включённой и разрешённой KB. Вернуть ответ с
+    основанием; недоступная KB не означает доступный источник.'
   depends_on:
   - read-context
 - id: execute-saved-answer
   operation: execute
-  instruction: 'Только для отдельно принятой задачи сохранения: подготовить Result с источниками/critical и
-    выполнить один execute. Обычный поиск/ответ заканчивается предыдущим шагом.'
+  instruction: 'Только для отдельно принятой задачи сохранения: подготовить Result
+    с источниками/critical и выполнить один execute. Обычный поиск/ответ заканчивается
+    предыдущим шагом.'
   depends_on:
   - find-grounded-knowledge
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/knowledge.py
+- standards/runtime.md

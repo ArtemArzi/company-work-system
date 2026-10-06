@@ -1,0 +1,14 @@
+{
+  "verdict": "reject",
+  "receipt": "company-work-system-result-reject-20261006-6ffe7f6-rc1",
+  "candidate": "uncommitted1.2.0 before repairs",
+  "reviewer": "/root/performance_hooks_result_acceptance",
+  "findings": [
+    "late foreign real-index bytes enter ordinary commit",
+    "projection permission can revoke before write",
+    "one-file benchmark missing and accepted bound exceeded",
+    "positive sanitized hook proposal unsupported",
+    "full suite pending"
+  ],
+  "state": "historical rejected candidate; fixes/evidence in owning task, final receipt pending"
+}

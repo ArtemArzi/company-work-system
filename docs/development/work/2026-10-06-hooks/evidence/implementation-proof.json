@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "at": "2026-10-06T11:52:10.989466+00:00",
+  "accepted_amendment": "company-work-system-hooks-proof-plan-pass-20261006-6ffe7f6-93b1",
+  "command": "PYTHONPATH=checks python3 -m unittest -v test_hooks",
+  "purpose": "shared-code/protocol, persistence/migration and actual after-write bytes",
+  "exit_code": 0,
+  "expected_exit_codes": [
+    0
+  ],
+  "matches_expectation": true,
+  "tests": 35,
+  "runner_seconds": 7.59,
+  "source_sha256": {
+    "template/scripts/hooks.py": "633cd8ff38bff472e4c621a88ab7ba0c939455db5191f0e6ae8578d8fb293257",
+    "template/hooks/manifest.yaml": "e7d87c5443f9f9b9f1a0f83f488322c808e3f04bbf21d649de81e9a4d3c47e2f",
+    "template/hooks/README.md": "b84f084513f6ca3834f94dba16b0a533d8b3d8ad10ddc0eba4c0e40cfbf47d59",
+    "template/standards/hook-authoring.md": "d0b1a87accee926ce66289684549ec55b08ac6781e4828bfa6c1b48a69526a3a",
+    "template/adapters/codex/README.md": "9aa01383ccf5137ba24bb6c5db65bcfa0e7ff506a7754b6b880e113c6a4ad0be",
+    "template/adapters/codex/profile.yaml": "16795c0179f0daf92c5cd780ec33461d5fbbe87e19f1f12900d501f699150d6c",
+    "template/adapters/claude/README.md": "1ab2c2df196cbc056e121cd444c4599995b24a9813ec7cf54ad67c558aa46056",
+    "template/adapters/claude/profile.yaml": "893bca4c2895ea0de5cfd7d7704bc79933fd9a897d19fbabaf33a387594eafa5",
+    "checks/test_hooks.py": "f1de59e18d1ecb95778b77973e1f7ab37a2ea11e44683bf98df8885240f94c81"
+  },
+  "proof": {
+    "canonical": ".system/hooks-project-<harness>.json",
+    "legacy": ".system/cache/hooks-project-<harness>.json",
+    "migration": "only absent new proof + valid old schema + exact actual owned groups",
+    "new_precedence": "never reads legacy when new proof exists",
+    "interruption": "settings without matching proof => conflict on repeat; unknown namespace never adopted",
+    "continuation": ".system/cache/hooks-continuation.json remains ignored"
+  },
+  "behavior_fix": "PostToolUse always checks actual disk through shared validator instead of proposed payload",
+  "native": "common-code tested; native-unverified; current product/Work/host not activated",
+  "remaining": [
+    "root clone/update/rollback/backup/restore integration tests",
+    "root full suite and independent whole-result acceptance",
+    "actual available native host event/matcher/trust proof; Claude access remains open"
+  ]
+}

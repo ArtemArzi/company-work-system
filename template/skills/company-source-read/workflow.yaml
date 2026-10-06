@@ -10,24 +10,33 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: Validated read envelope OR a separately accepted derived Result; reading does not require a new task
+output: Validated read envelope OR a separately accepted derived Result; reading does
+  not require a new task
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: read-allowed-source
   operation: source-read
-  instruction: Прочитать только настроенный source ID через узкий read-only connector; проверить envelope/account/company/scope/completeness.
-    Вернуть envelope, не передавать его напрямую в execute.
+  instruction: Прочитать только настроенный source ID через узкий read-only connector;
+    проверить envelope/account/company/scope/completeness. Вернуть envelope, не передавать
+    его напрямую в execute.
   depends_on:
   - read-context
 - id: execute-derived-result
   operation: execute
-  instruction: 'Только если принята отдельная задача результата: подготовить Result из разрешённого envelope
-    с provenance/critical и выполнить один execute. Простое чтение заканчивается предыдущим шагом.'
+  instruction: 'Только если принята отдельная задача результата: подготовить Result
+    из разрешённого envelope с provenance/critical и выполнить один execute. Простое
+    чтение заканчивается предыдущим шагом.'
   depends_on:
   - read-allowed-source
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/connectors.py
+- standards/data-access.md

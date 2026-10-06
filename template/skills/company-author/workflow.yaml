@@ -10,25 +10,35 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: Checked method/skill change plus its accepted Result; native discovery remains separately evidenced
+output: Checked method/skill change plus its accepted Result; native discovery remains
+  separately evidenced
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: prepare-method
   operation: author
-  instruction: Это работа агента, а не одноимённая команда CLI. Найти/reuse существующее; изменить канонический
-    метод и SKILL/YAML в пределах поручения. Проверить metadata/ссылки/правильный и плохой сценарии по skill-authoring.
-    Затем подготовить ожидаемый Result принятой задачи.
+  instruction: Это работа агента, а не одноимённая команда CLI. Найти/reuse существующее;
+    изменить канонический метод и SKILL/YAML в пределах поручения. Проверить metadata/ссылки/правильный
+    и плохой сценарии по skill-authoring. Затем подготовить ожидаемый Result принятой
+    задачи.
   depends_on:
   - read-context
 - id: execute-authoring-result
   operation: execute
-  instruction: Один execute ожидаемого Result, critical и обязательного review; сам recipe или вывод validator
-    не заменяет Result.
+  instruction: Один execute ожидаемого Result, critical и обязательного review; сам
+    recipe или вывод validator не заменяет Result.
   depends_on:
   - prepare-method
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/hooks.py
+- hooks/manifest.yaml
+- standards/hook-authoring.md
+- standards/skill-authoring.md

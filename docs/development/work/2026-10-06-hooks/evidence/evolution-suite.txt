@@ -1,0 +1,6 @@
+test_company_proofs_survive_delivery_update_rollback_restore (checks.test_evolution_hooks.Evolution.test_company_proofs_survive_delivery_update_rollback_restore) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 37.436s
+
+OK

@@ -2,7 +2,7 @@
 from __future__ import annotations
 import datetime as dt
 from pathlib import Path
-from core import changed_bindings, config, digest, event, ident, load, lock, method_bindings, now, object_hash, path, require, task_file, tasks, write
+from core import changed_bindings, config, config_snapshot, digest, event, ident, load, lock, method_bindings, now, object_hash, path, require, task_file, tasks, write
 import validation
 
 
@@ -13,13 +13,13 @@ def context(root, task_id=None):
         t = load(file)
         if task_id and t["id"] != task_id:
             continue
-        result["tasks"].append({"path": str(file.relative_to(root)), "id": t["id"], "status": t["status"], "revision": t["revision"], "next_action": t["next_action"], "blocker": t.get("blocker"), "changed_dependencies": changed_bindings(root, t["bindings"])})
+        result["tasks"].append({"path": str(file.relative_to(root)), "id": t["id"], "status": t["status"], "revision": t["revision"], "next_action": t["next_action"], "blocker": t.get("blocker"), "changed_dependencies": changed_bindings(root, t["bindings"], t.get("binding_scope"))})
     if task_id:
         require(result["tasks"], "task not found")
     return result
 
 
-def intake(root, task_id, request, owner, acceptance, confirmed=False, unknowns=None, inputs=None, independent_required=False):
+def intake(root, task_id, request, owner, acceptance, confirmed=False, unknowns=None, inputs=None, independent_required=False, skill=None, harness=None, source_ids=None):
     with lock(root):
         cfg = config(root, True)
         file = task_file(root, task_id)
@@ -29,9 +29,12 @@ def intake(root, task_id, request, owner, acceptance, confirmed=False, unknowns=
             require(old["request"] == request and old["acceptance"] == acceptance and old["owner"] == owner, "task ID conflict; both requests must be preserved")
             return old
         inputs = inputs or []
-        bindings = method_bindings(root, inputs)
+        import dependencies
+        bindings, scope = dependencies.capture(root, inputs, acceptance, skill, harness, source_ids)
         unknowns = unknowns or []
         t = {"schema_version": 1, "id": task_id, "company_id": cfg["id"], "owner": owner, "request": request, "acceptance": acceptance, "acceptance_hash": object_hash(acceptance), "inputs": inputs, "bindings": bindings, "confirmed": confirmed, "unknowns": unknowns, "status": "active" if confirmed and not unknowns else "waiting", "blocker": None if confirmed and not unknowns else "Confirm request/resolve unknowns with owner", "next_action": "Execute accepted operation" if confirmed and not unknowns else "Obtain missing decision", "revision": 0, "history": [], "errors": [], "output": None, "critical": None, "evidence": None, "independent_required": independent_required, "independent_review": None, "delivery": {"status": "local"}, "application": {"status": "unknown"}, "effect": {"status": "unknown"}}
+        if scope:
+            t["binding_scope"] = scope
         event(t, "intake", {"confirmed": confirmed, "unknowns": unknowns})
         validation.task(root, t)
         write(file, t)
@@ -47,16 +50,27 @@ def decide(root, task_id, revision, action, reason, actor):
         require(t["revision"] == revision, "stale task revision")
         require(action in {"confirm", "cancel", "resume"}, "unknown decision")
         require(t["status"] != "cancelled" or action == "cancel", "cancelled task is terminal")
-        previous_verification = {"evidence": t.get("evidence"), "critical": t.get("critical"), "output": t.get("output")} if action == "resume" and t.get("evidence") else None
+        previous_verification = {"evidence": t.get("evidence"), "critical": t.get("critical"), "output": t.get("output"), "bindings": t["bindings"], "binding_scope": t.get("binding_scope")} if action == "resume" and t.get("evidence") else None
         if action == "cancel":
             t.update(status="cancelled", next_action="None", blocker=None)
         else:
             if action == "resume":
                 # Explicit version reconciliation; old evidence remains in history.
-                t["bindings"] = method_bindings(root, t["inputs"])
+                previous = {"bindings": t["bindings"], "binding_scope": t.get("binding_scope")}
+                if t.get("binding_scope"):
+                    import dependencies
+                    selection = t["binding_scope"]["selection"]
+                    t["bindings"], t["binding_scope"] = dependencies.capture(root, t["inputs"], t["acceptance"], selection["skill"], selection["harness"], selection["source_ids"])
+                    if t["binding_scope"] is None:
+                        t.pop("binding_scope")
+                else:
+                    # Old/undeclared tasks stay conservative without implicit narrowing.
+                    t["bindings"] = method_bindings(root, t["inputs"])
                 t["evidence"] = None
             t.update(status="active", confirmed=True, unknowns=[], blocker=None, next_action="Execute accepted operation")
         detail = {"actor": actor, "reason": reason}
+        if action == "resume":
+            detail["previous_dependencies"] = previous
         if previous_verification:
             detail["previous_verification"] = previous_verification
         event(t, action, detail)
@@ -70,7 +84,7 @@ def execute(root, task_id, artifact, critical, independent_review=None):
         file = task_file(root, task_id)
         t = load(file)
         require(t["confirmed"] and not t["unknowns"] and t["status"] not in {"waiting", "cancelled"}, "unconfirmed/cancelled request")
-        changes = changed_bindings(root, t["bindings"])
+        changes = changed_bindings(root, t["bindings"], t.get("binding_scope"))
         if changes:
             t.update(status="blocked", blocker="Pinned methods/inputs changed: " + ", ".join(changes), next_action="Owner reconciles exact versions; resume")
             event(t, "version-block", changes)
@@ -87,7 +101,11 @@ def execute(root, task_id, artifact, critical, independent_review=None):
                     recent.append(history)
             require(len(recent) < 2 or any(e.get("candidate_hash") != candidate_hash for e in t["errors"][-2:]), "same candidate failed twice; new evidence or owner reconciliation required")
             require(t["acceptance_hash"] == object_hash(t["acceptance"]), "original acceptance changed")
-            admission = validation.source_admission(root, artifact) if artifact.get("kind") == "metrics" else None
+            snapshot = config_snapshot(root)
+            admission = validation.source_admission(root, artifact, snapshot) if artifact.get("kind") == "metrics" else None
+            if admission and t.get("binding_scope"):
+                import dependencies
+                dependencies.admission_contract(t["binding_scope"], admission)
             validation.result(root, artifact, t["acceptance"], admission)
             require(isinstance(critical, dict) and critical.get("request_alignment") and critical.get("counterexample") and isinstance(critical.get("limitations"), list) and critical.get("references"), "critical pass needs evidence and counterexample")
             for ref in critical["references"]:
@@ -97,6 +115,11 @@ def execute(root, task_id, artifact, critical, independent_review=None):
             if t["status"] == "verified" and t.get("output") and load(path(root, t["output"]["path"])) == artifact:
                 validation.task(root, t)
                 return t
+            require(config_snapshot(root)[1] == snapshot[1], "config changed during result verification")
+            require(not changed_bindings(root, t["bindings"], t.get("binding_scope")), "dependencies changed during result verification")
+            if t.get("binding_scope"):
+                # Refresh conservative whole-file compatibility pins only on new evidence.
+                t["bindings"] = {**t["bindings"], "company/config.yaml": snapshot[1], "release.yaml": digest(path(root, "release.yaml"))}
             relative = f"work/{t['id']}/result-{t['revision'] + 1}.json"
             write(path(root, relative), artifact)
             if t.get("output"):
@@ -105,6 +128,8 @@ def execute(root, task_id, artifact, critical, independent_review=None):
             t["output"] = {"path": relative, "sha256": digest(path(root, relative))}
             t["critical"] = critical
             t["evidence"] = {"command": "python3 scripts/system.py execute", "exit_code": 0, "output": "structure, provenance and selected result contract passed; semantic assessment recorded separately", "at": now(), "bindings": t["bindings"], "acceptance_sha256": t["acceptance_hash"], "result_sha256": t["output"]["sha256"], "critical_sha256": object_hash(critical)}
+            if t.get("binding_scope"):
+                t["evidence"].update(binding_scope=t["binding_scope"], binding_scope_sha256=t["binding_scope"]["sha256"])
             if admission:
                 t["evidence"].update(at=admission["at"], source_admission=admission, source_admission_sha256=object_hash(admission))
             if independent_review:
@@ -112,6 +137,8 @@ def execute(root, task_id, artifact, critical, independent_review=None):
             t.update(status="verified", blocker=None, next_action=artifact["next_action"], delivery={"status": "pending"})
             event(t, "verified", {"output": t["output"], "semantic": "author-assessment", "application": "unknown"})
             validation.task(root, t)
+            require(config_snapshot(root)[1] == snapshot[1], "config changed before evidence persistence")
+            require(not changed_bindings(root, t["bindings"], t.get("binding_scope")), "dependencies changed before evidence persistence")
             write(file, t)
             return t
         except Exception as exc:
@@ -201,7 +228,7 @@ def tick(root):
         file = task_file(root, specification["task_id"])
         t = load(file)
         require(t["confirmed"] and t["status"] not in {"cancelled", "waiting"}, "proactive task not authorized")
-        require(not changed_bindings(root, t["bindings"]), "proactive versions changed")
+        require(not changed_bindings(root, t["bindings"], t.get("binding_scope")), "proactive versions changed")
         state = t.setdefault("automation", {"runs": 0, "fingerprint": None, "last_at": None})
         if state["runs"] >= specification["max_runs"]:
             return {"status": "limit", "notify": False}

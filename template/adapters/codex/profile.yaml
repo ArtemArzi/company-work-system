@@ -42,10 +42,10 @@ capabilities:
     fallback: same CLI
     scenario: known bad result rejected
   hooks:
-    mechanism: not enabled or claimed
-    status: 'limited: program checks tested; host/provider authority not inferred'
-    fallback: CLI/publication checks; tool authority outside hook
-    scenario: hook absence does not bypass checks
+    mechanism: canonical hooks/manifest.yaml + fixed scripts/hooks.py + project-local projection
+    status: common-code-tested; native-unverified; disabled by default
+    fallback: shared CLI hooks-check and mandatory validation/publication checks
+    scenario: six scenarios; exact ownership/fingerprint; failure never grants authority
   independence:
     mechanism: host independent agent according to policy
     status: 'limited: program checks tested; host/provider authority not inferred'
@@ -83,3 +83,13 @@ capabilities:
     scenario: local methods/data survive update/restore
 common_core: Local behavioral acceptance uses the same canonical procedures/validators
   for both projections; this is not native Claude execution
+
+hook_protocol:
+  fixture_contract: command JSON stdin; event-specific JSON stdout; schema reviewed 2026-10-06
+  observed_version: 0.160.0
+  source: https://learn.chatgpt.com/docs/hooks
+  native_status: unverified
+  activation: explicit company/config.yaml hooks.enabled; false by default
+  projection: .codex/hooks.json
+  trust: provider review of exact changed definition; never bypassed
+  ownership_proof: .system/hooks-project-codex.json; tracked company-owned derived state

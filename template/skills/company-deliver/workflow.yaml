@@ -10,19 +10,28 @@ capabilities:
 - critical
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
-output: Confirmed delivery receipt and task acknowledgment when requested; successful readback is terminal
+output: Confirmed delivery receipt and task acknowledgment when requested; successful
+  readback is terminal
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: deliver-verified-result
   operation: deliver
-  instruction: Использовать готовый проверенный результат либо принятый кандидат. При необходимости prepare
-    и commit только точных разрешённых paths по template-update/runtime. Выполнить общую deliver; readback-confirmed
-    завершает процесс. Receipt доставки не является новым Result, execute после доставки не нужен.
+  instruction: Использовать готовый проверенный результат либо принятый кандидат.
+    При необходимости prepare и commit только точных разрешённых paths по template-update/runtime.
+    Выполнить общую deliver; readback-confirmed завершает процесс. Receipt доставки
+    не является новым Result, execute после доставки не нужен.
   depends_on:
   - read-context
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/delivery.py
+- scripts/history.py
+- standards/runtime.md

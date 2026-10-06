@@ -14,14 +14,15 @@ output: Verified sourced research Result with limitations; no implicit external 
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
-    этой задачи, если он не изменился. Частота входного preflight — task-validation.
+  instruction: Прочитать владельца задачи и действующие права один раз; использовать
+    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
+    — task-validation.
   depends_on: []
 - id: prepare-research
   operation: research
-  instruction: Это подготовка агентом, а не одноимённая команда CLI. Выбрать профильный поиск, первичные источники
-    и контрпример; подготовить Result research по принятому критерию. Команды и источники — только в разрешённой
-    области.
+  instruction: Это подготовка агентом, а не одноимённая команда CLI. Выбрать профильный
+    поиск, первичные источники и контрпример; подготовить Result research по принятому
+    критерию. Команды и источники — только в разрешённой области.
   depends_on:
   - read-context
 - id: execute-research-result
@@ -29,5 +30,10 @@ steps:
   instruction: Один execute подготовленного Result, critical и обязательного review.
   depends_on:
   - prepare-research
-on_error: Record observed failure at owning task; block dependent action; preserve candidate
-stop: Missing authority/definition, changed version, cancelled task or two attempts without new evidence
+on_error: Record observed failure at owning task; block dependent action; preserve
+  candidate
+stop: Missing authority/definition, changed version, cancelled task or two attempts
+  without new evidence
+dependency_paths:
+- scripts/operations.py
+- standards/data-access.md
