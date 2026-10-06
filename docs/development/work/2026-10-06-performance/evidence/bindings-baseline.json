@@ -1,0 +1,15 @@
+{
+  "basis_commit": "ca6552ec0ca3730fe9d0ac4841245685e19380ec",
+  "scope": "clean synthetic template copy; method_bindings only, not task workflow or sync benchmark",
+  "runs": 20,
+  "binding_files": 48,
+  "total_bound_bytes": 175520,
+  "median_ms": 5.679,
+  "p95_ms": 5.859,
+  "changed_unrelated_document": "adapters/claude/README.md",
+  "reported_changed": [
+    "adapters/claude/README.md"
+  ],
+  "added_method_detected": false,
+  "interpretation": "Every task pins both harness adapters. New unbound files are not detected by changed_bindings; repository validation is separate."
+}

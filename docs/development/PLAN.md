@@ -42,6 +42,8 @@ Scope Task Delivery: только этот отдельный продукт п�
 
 ## Текущее состояние
 
+Следующий этап: [скорость и хуки](#следующий-этап-скорость-и-хуки), план принят независимо 06.10.2026. Выпущенный runtime остаётся 1.1.5; план не является новым выпуском.
+
 06.10.2026: главный продукт1.1.5 проверен и принят независимым deep reviewer:52/52PASS550.818s, receipt company-consistency-result-pass-20261006-3bb4e11-e0648404. Доставка принадлежит product origin/main; terminal SHA readback записывается локально в .local/product-delivery-1.1.5.json без отдельного повторного синка этого receipt. Публикуется только продукт. Work проверен дополнительно как installed-copy fixture, installed1.1.1 не меняется; его local подготовка не публикуется. Исторические приёмки ниже сохраняют прежнюю область.
 
 GitHub [ArtemArzi/company-work-system](https://github.com/ArtemArzi/company-work-system) первоначально создан приватным; по явному поручению владельца 06.10.2026 стал публичным. Анонимный GitHub API подтвердил HTTP200, private=false и неизменный main. Следующие коммиты сохраняются обычным push; данные компаний и release-only граница не меняются. Проверка истории и конкретный результат/readback — в существующей задаче company-template и evidence/publication.json.
@@ -82,3 +84,23 @@ Patch1.1.3: bounded исправление6design-hook замечаний HTML, 
 Уточнение п.3 по замечанию plan reviewer: свежий допуск и историческая проверка различаются. При execute сохранять в существующем task.evidence один source_admission: exact primary reference, source ID, snapshot принятой specification, её hash, config hash из pinned bindings и admission timestamp, привязанный к evidence.at. Общий source_envelope принимает explicit evaluation time. Свежий result/недоставленный результат перед доставкой проверяет возраст сейчас; delivered независимо от freshness и history при freshness=False проверяют исходный source на момент допуска по сохранённой specification, без новых provider reads и без превращения старого наблюдения в текущие данные. Проверять snapshot/hash/config-binding/result-reference/time; missing legacy admission явно требует reconciliation, а не fabricated PASS. Regression: advance time beyond max_age и изменение current config сохраняют корректную delivered/history проверку, блокируют свежий результат; обычный validate/commit после истечения возраста delivered, backup/update сохраняют historical evidence. Никаких новых журналов/форматов состояний: additive поле evidence в format1. Safety fixes incident/source-admission/cache применяются и к template, и к Work local delta; fullupgrade и metadata Work по-прежнему не выполняются.
 
 Уточнение scope от владельца: финальный результат и доставка этого audit принадлежат главному product repository. Work evidence — вспомогательная совместимость; ранее запланированная Worksync не выполняется. Подготовленные местные bytes сохраняются непубликованными, без fullupgrade/metadata переобозначения.
+
+
+## Следующий этап: скорость и хуки
+
+Поручение 06.10.2026: оптимизировать проверки истории Git и слишком широкие привязки методов; подготовить стандарт и встроенные полезные hooks. Работа только в главном продукте. Принятые P0–P8 и 1.1.5 не переоткрываются; частные правила/данные Work не становятся шаблоном. Сейчас планирование, зависимого runtime кода и активации hooks ещё нет.
+
+Два владельца деталей: [A: скорость и зависимости](work/2026-10-06-performance/task.md), [H: hooks и авторство](work/2026-10-06-hooks/task.md). Они содержат основания, contracts, проверки, ошибки и точный handoff. Независимый whole-plan review обязателен: новая общая проверка экспортируемой истории касается данных/полномочий, selective bindings меняют пригодность evidence, hooks затрагивают исполнение и обновление двух сред. Итог implementation принимает другой свежий whole-result reviewer; plan-only этап завершается при принятом плане.
+
+| Этап | Результат и проверка | Состояние |
+| --- | --- | --- |
+| A0/H0 | Исследованный путь, воспроизведение широты bindings, схема исполнения и независимая приёмка плана | Принято независимо; company-work-system-performance-hooks-plan-pass-20261006-ca6552e-7d4f9c-r1 |
+| A1 | Синтетический history baseline, выбранные policy/state contracts и целевой benchmark до оптимизации | Следующий шаг после приёмки |
+| A2 | Общий batch history guard в существующей Git delivery, сохранены все negative guards | Не начато |
+| A3 | Явная dependency closure, facets и совместимость старых task/evidence/admission; update/context/rollback | Не начато |
+| H1 | Канонический стандарт/manifest, fixed dispatcher; company-author и карты | Не начато |
+| H2 | Шесть сценариев, оба тонких native adapters, preview/merge и CLI fallback | Не начато; интеграция зависит от A2/A3 |
+| V | Before/after, known-bad, оба профиля, copy/adapt/delivery/resume/update/recovery и независимая приёмка всего | Не начато |
+| R | Номер функционального выпуска, README/release запись, product commit/push и изолированный пакет; кандидат компаний | Не начато; установленный Work отдельно |
+
+Существенные новые policy/state решения из A1 проверять существующим plan reviewer до зависимого кода, не запускать новую цепочку приёмки для каждой мелкой правки. Полный suite требуется после runtime изменений перед функциональным выпуском; сейчас проверяются документы/ссылки/воспроизведение. Не повышать версию по документационному плану. Native trust/OAuth/live отсутствие доступа остаются явными блокировками своих частей, а не причиной устанавливать весь комплект или объявлять локальные fixtures native успехом.

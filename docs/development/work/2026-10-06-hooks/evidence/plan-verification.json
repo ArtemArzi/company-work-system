@@ -1,0 +1,28 @@
+{
+  "scope": "documentation plan only; no product hook activation, host config or Work mutation",
+  "basis_version": "1.1.5",
+  "basis_commit": "ca6552ec0ca3730fe9d0ac4841245685e19380ec",
+  "local_links": {
+    "files": 4,
+    "links": 15,
+    "missing": 0
+  },
+  "diff_check": "passed",
+  "binding_reproduction": "../../2026-10-06-performance/evidence/bindings-baseline.json",
+  "provider_sources_checked": "2026-10-06",
+  "official_sources": [
+    "https://learn.chatgpt.com/docs/hooks",
+    "https://code.claude.com/docs/en/hooks",
+    "https://git-scm.com/docs/git-cat-file"
+  ],
+  "codex": {
+    "version": "0.160.0",
+    "feature_hooks": "stable true; feature presence only",
+    "product_native_hooks": "unverified; not enabled"
+  },
+  "claude": {
+    "product_native_hooks": "unverified; previous native execution blocked by OAuth; no login/trust bypass attempted"
+  },
+  "full_runtime_suite": "not run: no runtime changes",
+  "independent_plan_acceptance": "company-work-system-performance-hooks-plan-pass-20261006-ca6552e-7d4f9c-r1"
+}
