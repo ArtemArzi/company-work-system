@@ -13,9 +13,21 @@ def scope_root(root):
     return root / "template" if not (root / "company/config.yaml").exists() and (root / "template/company/config.yaml").exists() else root
 
 
+def git_environment():
+    env = dict(os.environ, GIT_OPTIONAL_LOCKS="0")
+    # Never inherit a caller's index/repository/config redirection. Auth remains.
+    selectors = {"GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE", "GIT_COMMON_DIR", "GIT_NAMESPACE", "GIT_OBJECT_DIRECTORY", "GIT_ALTERNATE_OBJECT_DIRECTORIES", "GIT_CONFIG", "GIT_CONFIG_PARAMETERS", "GIT_CONFIG_COUNT", "GIT_CONFIG_SYSTEM", "GIT_CONFIG_GLOBAL", "GIT_CONFIG_NOSYSTEM", "GIT_CEILING_DIRECTORIES", "GIT_DISCOVERY_ACROSS_FILESYSTEM"}
+    for key in list(env):
+        if key in selectors or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
+            env.pop(key)
+    return env
+
+
 def git(root, *arguments, check=True, timeout=None, noninteractive=False):
     command = ["git", "-C", str(root), *arguments]
-    environment = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"} if noninteractive else None
+    environment = git_environment()
+    if noninteractive:
+        environment.update(GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="never")
     value = subprocess.run(command, capture_output=True, text=True, timeout=timeout, env=environment)
     if check:
         require(value.returncode == 0, "Git operation failed: " + value.stderr.strip()[:1500])
@@ -47,7 +59,7 @@ def remote_allowed(root, remote):
 def prepare(root, remote, branch, destination):
     remote_allowed(root, remote)
     ident(branch)
-    destination = Path(destination)
+    destination = Path(destination).resolve()
     require(not destination.exists(), "candidate destination already exists")
     git(root, "clone", "--no-local", "--single-branch", "--branch", branch, remote, str(destination))
     identity(destination)

@@ -1,0 +1,70 @@
+{
+  "date": "2026-10-06",
+  "status": "candidate-tests-running",
+  "product_baseline": "b17a3b4310a73a3ab326edc7c7c83012b3a0a1c0",
+  "work_baseline": "8a70980b72e303a6ef88ad3893b059209acab7db",
+  "methods_review": {
+    "agent": "/root/consistency_methods",
+    "verdict": "PASS",
+    "scope": "24 skill/recipe pairs; standards/maps/bindings/thin profiles; intentional Work deltas"
+  },
+  "runtime_review": {
+    "agent": "/root/consistency_runtime",
+    "verdict": "CHANGES REQUIRED",
+    "findings": [
+      "product inherited foreign Git selectors",
+      "cancelled task revived by incident",
+      "metrics primary envelope bypass",
+      "product interrupted update loses previous baseline",
+      "relative candidate paths fail under git -C",
+      "corrupt optional graph cache blocks canonical search"
+    ]
+  },
+  "root_findings": [
+    "Work tests execute zero cases: release cache filename assumption",
+    "Work release guard rejects exact permitted guide history",
+    "stale Work product visibility and current version notes"
+  ],
+  "baseline_checks": {
+    "product": "40 tests PASS, 420.297 seconds; missing regressions explain uncovered defects",
+    "work": "0 tests, setUpClass failure; not a PASS"
+  },
+  "boundaries": [
+    "no live/native/provider/employee proof",
+    "different source accounts require accepted compatibility, no invented mapping",
+    "no Work full upgrade; installed version remains1.1.1"
+  ],
+  "plan_acceptance": {
+    "agent": "/root/consistency_repair_plan",
+    "role": "task_plan_reviewer",
+    "verdict": "PASS",
+    "receipt": "company-consistency-plan-pass-20261006-admission-history-6f2d9c",
+    "temporal_contract": "delivered regardless of freshness OR history freshness=False validates at original admission snapshot/time; pending fresh result checks now"
+  },
+  "targeted_regression": "9/9 PASS80.242s; tenth relative lifecycle regression added to fullsuite",
+  "repairs": [
+    "shared approved source specification + envelope validator; exact admission snapshot in existing task.evidence",
+    "Git selectors cleared in generic delivery, caller-relative paths resolved, interrupted update preserves previous",
+    "incident preserves terminal cancelled bytes; reconcile rejects absent metadata/partial/invalidIDs without inventing account mapping",
+    "corrupt optional cache rebuilt from checked canonical sources",
+    "Work fixture seeds exact installedref/ancestry in temporarybare; exact guide exception; route/currentversion docs corrected"
+  ],
+  "additional_review_findings": {
+    "reviewer": "/root/consistency_deep_result",
+    "items": [
+      "finish-update must gate blocked as well as active/waiting tasks",
+      "resume/supersede must retain original evidence/critical/output in existing history",
+      "rollback managed guide path with methods"
+    ],
+    "status": "code corrected; final regression pending"
+  },
+  "work_intermediate_suite": {
+    "tests": 15,
+    "seconds": 447.177,
+    "failures": 1,
+    "observed": "interrupted-update fixture returned merge conflict instead of reaching simulated commit interruption",
+    "first_false_assumption": "runtime.md unchanged from installed1.1.1; actual Work recipe delta changed runtime version2→3",
+    "repair": "choose unchanged template-update.md with exact precondition; retain separate genuine conflict tests",
+    "final_suite": "18 updated cases running"
+  }
+}

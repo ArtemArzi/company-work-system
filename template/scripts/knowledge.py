@@ -30,7 +30,13 @@ def search(root, query):
     current = build(root)
     if cfg["features"]["graph"]:
         cache = path(root, ".system/cache/graph.json")
-        if not cache.exists() or load(cache).get("fingerprint") != current["fingerprint"]:
+        cached = None
+        if cache.exists():
+            try:
+                cached = load(cache)
+            except (ValueError, UnicodeError):
+                pass  # Only optional cache corruption; canonical build errors stay explicit.
+        if cached != current:
             write(cache, current)
     hits = []
     for node in current["nodes"]:

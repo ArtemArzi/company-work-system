@@ -40,14 +40,47 @@ def recipe(root, file):
     return value
 
 
-def source_envelope(value, company, specification):
+def source_specification(specification):
+    require(isinstance(specification, dict) and specification.get("approved_by"), "source/account/scope not configured")
+    require(specification.get("type") in {"export", "http", "mcp"}, "unknown source type")
+    for field in ["account", "scope", "period", "unit", "max_age_seconds", "max_pages", "timeout_seconds"]:
+        require(specification.get(field) is not None, f"source limit/definition missing: {field}")
+    require(all(specification[field] for field in ["account", "scope", "period", "unit"]), "source identity/definition missing")
+    require(type(specification["max_pages"]) is int and specification["max_pages"] > 0, "invalid source limits")
+    require(all(type(specification[k]) in (int, float) and math.isfinite(specification[k]) and specification[k] > 0 for k in ["timeout_seconds", "max_age_seconds"]), "invalid source limits")
+    return specification
+
+
+def source_admission(root, value):
+    """Pin independent accepted definitions in existing task evidence, never infer them from data."""
+    cfg = config(root)
+    refs = value.get("sources", [])
+    require(refs, "metrics source missing")
+    primary = refs[0]
+    available = cfg.get("sources", {})
+    source_id = primary.get("source_id")
+    if source_id is None:
+        matches = [key for key, spec in available.items() if isinstance(spec, dict) and spec.get("type") == "export" and spec.get("path") and path(root, spec["path"]) == path(root, primary["path"])]
+        require(len(matches) == 1, "source admission missing or ambiguous; select an accepted source_id")
+        source_id = matches[0]
+    ident(source_id)
+    spec = source_specification(available.get(source_id))
+    fields = ["type", "approved_by", "account", "scope", "period", "unit", "max_age_seconds", "max_pages", "timeout_seconds"]
+    snapshot = {key: spec[key] for key in fields}
+    from core import now
+    return {"schema_version": 1, "source_id": source_id, "primary": {"path": primary["path"], "sha256": primary["sha256"]}, "specification": snapshot, "specification_sha256": object_hash(snapshot), "config_sha256": digest(path(root, "company/config.yaml")), "at": now()}
+
+
+def source_envelope(value, company, specification, evaluation_time=None):
     require(isinstance(value, dict) and value.get("schema_version") == 1, "source format")
     for key, expected in [("company_id", company), ("account", specification["account"]), ("scope", specification["scope"]), ("period", specification["period"]), ("unit", specification["unit"])]:
         require(value.get(key) == expected, f"wrong source {key}")
     require(value.get("complete") is True and isinstance(value.get("records"), list), "partial source")
     observed = dt.datetime.fromisoformat(value["observed_at"])
     require(observed.tzinfo is not None, "source timezone missing")
-    age = (dt.datetime.now(dt.timezone.utc) - observed).total_seconds()
+    evaluation_time = evaluation_time or dt.datetime.now(dt.timezone.utc)
+    require(evaluation_time.tzinfo is not None, "source evaluation timezone missing")
+    age = (evaluation_time - observed).total_seconds()
     require(0 <= age <= specification["max_age_seconds"], "stale/future source")
     seen = set()
     for record in value["records"]:
@@ -56,7 +89,7 @@ def source_envelope(value, company, specification):
         seen.add(record["id"])
 
 
-def result(root, value, acceptance):
+def result(root, value, acceptance, admission=None, fresh=True):
     require(isinstance(value, dict) and value.get("schema_version") == 1, "result format")
     require(value.get("company_id") == config(root)["id"], "wrong result company")
     require(value.get("kind") == acceptance["kind"], "unexpected result kind")
@@ -80,6 +113,17 @@ def result(root, value, acceptance):
         allowed_refs = {r["path"] for r in refs}
         require(all(f.get("claim") and f.get("source") in allowed_refs and f.get("level") in {"observation", "inference", "unknown"} for f in value["findings"]), "research claim without qualified source")
     if value["kind"] == "metrics":
+        admission = admission if admission is not None else source_admission(root, value)
+        require(admission.get("schema_version") == 1 and admission.get("source_id"), "source admission format")
+        require(admission.get("primary") == {"path": refs[0]["path"], "sha256": refs[0]["sha256"]}, "source admission reference changed")
+        require(not refs[0].get("source_id") or refs[0]["source_id"] == admission["source_id"], "source admission ID changed")
+        specification = source_specification(admission.get("specification"))
+        require(admission.get("specification_sha256") == object_hash(specification), "source admission specification changed")
+        admitted_at = dt.datetime.fromisoformat(admission["at"])
+        require(admitted_at.tzinfo is not None, "admission timezone missing")
+        primary = load(path(root, refs[0]["path"]))
+        source_envelope(primary, value["company_id"], specification, None if fresh else admitted_at)
+        require(primary.get("period") == value.get("period") and primary.get("unit") == value.get("unit"), "metric result differs from admitted source scope")
         require(value.get("complete") is True and value.get("period") == acceptance.get("period") and value.get("unit") == acceptance.get("unit"), "metric scope/incomplete")
         records = value.get("records")
         require(isinstance(records, list) and len(records) == acceptance["expected_count"], "metric count")
@@ -91,7 +135,7 @@ def result(root, value, acceptance):
         if "expected_total" in acceptance:
             require(value["total"] == acceptance["expected_total"], "independent expected total mismatch")
         # Source-backed values, not a self-consistent invented sum.
-        source_records = load(path(root, refs[0]["path"])).get("records")
+        source_records = primary["records"]
         require(source_records == records, "metric records differ from primary source")
     return True
 
@@ -114,8 +158,12 @@ def task(root, value, freshness=True):
         require(value.get("evidence") and value.get("critical"), "text PASS is not evidence")
         artifact = value["output"]
         require(digest(path(root, artifact["path"])) == artifact["sha256"], "output changed")
-        result(root, load(path(root, artifact["path"])), value["acceptance"])
         evidence = value["evidence"]
+        admission = evidence.get("source_admission")
+        if value["acceptance"]["kind"] == "metrics":
+            require(admission and evidence.get("source_admission_sha256") == object_hash(admission), "historical metrics source admission missing/changed; reconcile explicitly")
+            require(admission.get("config_sha256") == evidence["bindings"].get("company/config.yaml") and admission.get("at") == evidence.get("at"), "source admission not bound to accepted config/time")
+        result(root, load(path(root, artifact["path"])), value["acceptance"], admission, fresh=freshness and value["delivery"]["status"] != "delivered")
         require(evidence.get("exit_code") == 0 and evidence.get("critical_sha256") == object_hash(value["critical"]) and evidence.get("result_sha256") == artifact["sha256"], "unbound evidence")
         require(evidence.get("acceptance_sha256") == value["acceptance_hash"], "evidence criterion mismatch")
         if freshness and value["delivery"]["status"] != "delivered":
@@ -213,10 +261,12 @@ def self_test():
     from core import write
     with tempfile.TemporaryDirectory(prefix="validator-self-test-") as directory:
         root = Path(directory)
-        write(root / "company/config.yaml", {"schema_version": 1, "id": "selftest-company"})
+        from core import now
+        specification = {"type": "export", "path": "source.json", "approved_by": "synthetic-owner", "account": "synthetic", "scope": "synthetic", "period": "selftest", "unit": "selftest", "max_age_seconds": 3600, "max_pages": 1, "timeout_seconds": 1}
+        write(root / "company/config.yaml", {"schema_version": 1, "id": "selftest-company", "sources": {"synthetic-source": specification}})
         source = root / "source.json"
         records = [{"id": "one", "value": 2}, {"id": "two", "value": 3}]
-        write(source, {"records": records})
+        write(source, {"schema_version": 1, "company_id": "selftest-company", "account": "synthetic", "scope": "synthetic", "period": "selftest", "unit": "selftest", "observed_at": now(), "complete": True, "records": records})
         criterion = {"kind": "metrics", "expected_count": 2, "expected_total": 5, "period": "selftest", "unit": "selftest"}
         artifact = {"schema_version": 1, "company_id": "selftest-company", "kind": "metrics", "summary": "Self-test", "next_action": "None", "limitations": [], "sources": [{"path": "source.json", "sha256": digest(source)}], "complete": True, "period": "selftest", "unit": "selftest", "records": records, "total": 5}
         result(root, artifact, criterion)

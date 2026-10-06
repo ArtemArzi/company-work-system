@@ -47,6 +47,7 @@ def decide(root, task_id, revision, action, reason, actor):
         require(t["revision"] == revision, "stale task revision")
         require(action in {"confirm", "cancel", "resume"}, "unknown decision")
         require(t["status"] != "cancelled" or action == "cancel", "cancelled task is terminal")
+        previous_verification = {"evidence": t.get("evidence"), "critical": t.get("critical"), "output": t.get("output")} if action == "resume" and t.get("evidence") else None
         if action == "cancel":
             t.update(status="cancelled", next_action="None", blocker=None)
         else:
@@ -55,7 +56,10 @@ def decide(root, task_id, revision, action, reason, actor):
                 t["bindings"] = method_bindings(root, t["inputs"])
                 t["evidence"] = None
             t.update(status="active", confirmed=True, unknowns=[], blocker=None, next_action="Execute accepted operation")
-        event(t, action, {"actor": actor, "reason": reason})
+        detail = {"actor": actor, "reason": reason}
+        if previous_verification:
+            detail["previous_verification"] = previous_verification
+        event(t, action, detail)
         write(file, t)
         return t
 
@@ -83,7 +87,8 @@ def execute(root, task_id, artifact, critical, independent_review=None):
                     recent.append(history)
             require(len(recent) < 2 or any(e.get("candidate_hash") != candidate_hash for e in t["errors"][-2:]), "same candidate failed twice; new evidence or owner reconciliation required")
             require(t["acceptance_hash"] == object_hash(t["acceptance"]), "original acceptance changed")
-            validation.result(root, artifact, t["acceptance"])
+            admission = validation.source_admission(root, artifact) if artifact.get("kind") == "metrics" else None
+            validation.result(root, artifact, t["acceptance"], admission)
             require(isinstance(critical, dict) and critical.get("request_alignment") and critical.get("counterexample") and isinstance(critical.get("limitations"), list) and critical.get("references"), "critical pass needs evidence and counterexample")
             for ref in critical["references"]:
                 require(path(root, ref).is_file(), "critical reference missing")
@@ -95,11 +100,13 @@ def execute(root, task_id, artifact, critical, independent_review=None):
             relative = f"work/{t['id']}/result-{t['revision'] + 1}.json"
             write(path(root, relative), artifact)
             if t.get("output"):
-                event(t, "superseded-result", {"output": t["output"], "application": t["application"], "effect": t["effect"], "delivery": t["delivery"], "independent_review": t.get("independent_review")})
+                event(t, "superseded-result", {"output": t["output"], "evidence": t.get("evidence"), "critical": t.get("critical"), "application": t["application"], "effect": t["effect"], "delivery": t["delivery"], "independent_review": t.get("independent_review")})
             t.update(application={"status": "unknown"}, effect={"status": "unknown"}, independent_review=None)
             t["output"] = {"path": relative, "sha256": digest(path(root, relative))}
             t["critical"] = critical
             t["evidence"] = {"command": "python3 scripts/system.py execute", "exit_code": 0, "output": "structure, provenance and selected result contract passed; semantic assessment recorded separately", "at": now(), "bindings": t["bindings"], "acceptance_sha256": t["acceptance_hash"], "result_sha256": t["output"]["sha256"], "critical_sha256": object_hash(critical)}
+            if admission:
+                t["evidence"].update(at=admission["at"], source_admission=admission, source_admission_sha256=object_hash(admission))
             if independent_review:
                 t["independent_review"] = {**independent_review, "result_sha256": t["output"]["sha256"]}
             t.update(status="verified", blocker=None, next_action=artifact["next_action"], delivery={"status": "pending"})
@@ -164,10 +171,14 @@ def _summary(root, exclude=None):
 
 
 def reconcile(left, right):
+    for envelope in (left, right):
+        require(isinstance(envelope, dict) and envelope.get("complete") is True, "incomplete reconciliation source")
+        require(all(envelope.get(k) for k in ["company_id", "account", "scope", "period", "unit"]), "reconciliation metadata missing")
+        require(isinstance(envelope.get("records"), list) and all(isinstance(r, dict) and isinstance(r.get("id"), str) and r["id"] for r in envelope["records"]), "reconciliation record ID missing")
     a, b = {r["id"]: r for r in left["records"]}, {r["id"]: r for r in right["records"]}
     require(len(a) == len(left["records"]) and len(b) == len(right["records"]), "duplicate reconciliation ID")
     require(all(left.get(k) == right.get(k) for k in ["company_id", "scope", "period", "unit"]), "incomparable sources")
-    return {"only_left": sorted(a.keys() - b.keys()), "only_right": sorted(b.keys() - a.keys()), "different": [key for key in sorted(a.keys() & b.keys()) if a[key] != b[key]], "matched": sum(a[k] == b[k] for k in a.keys() & b.keys()), "limitations": ["A recorded error is not automatically a lost outcome"]}
+    return {"only_left": sorted(a.keys() - b.keys()), "only_right": sorted(b.keys() - a.keys()), "different": [key for key in sorted(a.keys() & b.keys()) if a[key] != b[key]], "matched": sum(a[k] == b[k] for k in a.keys() & b.keys()), "limitations": ["A recorded error is not automatically a lost outcome", "Different accounts require an accepted common record-ID/scope definition; matching alone does not prove business compatibility"]}
 
 
 def episodes(envelope, denominator):
@@ -214,6 +225,7 @@ def incident(root, task_id, observed, assumption, proposal):
         config(root, True)
         file = task_file(root, task_id)
         t = load(file)
+        require(t["status"] != "cancelled", "cancelled task is terminal; create a new confirmed request")
         require(observed and assumption and proposal, "incident evidence missing")
         t["errors"].append({"at": now(), "observed": observed, "first_false_assumption": assumption, "proposal": proposal, "status": "proposal"})
         t.update(status="blocked", blocker=observed, next_action="Evaluate existing solution; test bounded repair against original criterion")

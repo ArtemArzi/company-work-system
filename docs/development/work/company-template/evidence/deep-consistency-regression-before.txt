@@ -1,0 +1,234 @@
+test_cancelled_incident_preserves_terminal_state_and_bytes (test_consistency.Consistency.test_cancelled_incident_preserves_terminal_state_and_bytes) ... ERROR
+test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) ... 
+  test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='company_id') ... FAIL
+  test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='account') ... FAIL
+  test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='scope') ... FAIL
+  test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='period') ... FAIL
+  test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='unit') ... FAIL
+  test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='complete') ... FAIL
+  test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='observed_at') ... FAIL
+test_metrics_require_unambiguous_independent_source_admission (test_consistency.Consistency.test_metrics_require_unambiguous_independent_source_admission) ... FAIL
+test_foreign_index_is_not_used_or_modified_by_delivery (test_consistency.Consistency.test_foreign_index_is_not_used_or_modified_by_delivery) ... FAIL
+test_relative_prepare_is_relative_to_caller_not_source_checkout (test_consistency.Consistency.test_relative_prepare_is_relative_to_caller_not_source_checkout) ... ERROR
+test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) ... 
+  test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) (cache='{') ... ERROR
+  test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) (cache='[]') ... ERROR
+test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) ... 
+  test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='company_id') ... FAIL
+  test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='account') ... FAIL
+  test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='scope') ... FAIL
+  test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='period') ... FAIL
+  test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='unit') ... FAIL
+  test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='complete') ... FAIL
+test_interrupted_finish_update_preserves_original_rollback_base (test_consistency.EvolutionConsistency.test_interrupted_finish_update_preserves_original_rollback_base) ... FAIL
+test_delivered_metrics_keep_historical_admission_after_age_and_config_change (test_consistency.EvolutionConsistency.test_delivered_metrics_keep_historical_admission_after_age_and_config_change) ... FAIL
+
+======================================================================
+ERROR: test_cancelled_incident_preserves_terminal_state_and_bytes (test_consistency.Consistency.test_cancelled_incident_preserves_terminal_state_and_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 15, in test_cancelled_incident_preserves_terminal_state_and_bytes
+    operations.decide(self.root, 'test-task', 'cancel', 'test-owner')
+TypeError: decide() missing 2 required positional arguments: 'reason' and 'actor'
+
+======================================================================
+ERROR: test_relative_prepare_is_relative_to_caller_not_source_checkout (test_consistency.Consistency.test_relative_prepare_is_relative_to_caller_not_source_checkout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 64, in test_relative_prepare_is_relative_to_caller_not_source_checkout
+    prepared = delivery.prepare(self.root, str(remote), 'main', 'relative-candidate')
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/delivery.py", line 53, in prepare
+    local = Path(remote).is_absolute() and Path(remote).exists()
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/delivery.py", line 27, in identity
+    command = ["git", "-C", str(root), *arguments]
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/delivery.py", line 21, in git
+    if key in selectors or key.startswith(("GIT_CONFIG_KEY_", "GIT_CONFIG_VALUE_")):
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/core.py", line 20, in require
+    raise Rejected(message)
+core.Rejected: Git operation failed: fatal: cannot change to 'relative-candidate': No such file or directory
+
+======================================================================
+ERROR: test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) (cache='{')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 76, in test_corrupt_optional_cache_rebuilds_but_primary_errors_surface
+    self.assertEqual(len(knowledge.search(self.root, 'needle')['hits']), 1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/knowledge.py", line 33, in search
+    cached = None
+                  
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/core.py", line 45, in load
+    return json.loads(file.read_text())
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/__init__.py", line 346, in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/json/decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+               ^^^^^^^^^^^^^^^^^^^^^^
+json.decoder.JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)
+
+======================================================================
+ERROR: test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) (cache='[]')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 76, in test_corrupt_optional_cache_rebuilds_but_primary_errors_surface
+    self.assertEqual(len(knowledge.search(self.root, 'needle')['hits']), 1)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/artem/projects/work/studio/products/company-work-system/template/scripts/knowledge.py", line 33, in search
+    cached = None
+                  
+AttributeError: 'list' object has no attribute 'get'
+
+======================================================================
+FAIL: test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='company_id')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 35, in test_metrics_reject_bad_primary_metadata_despite_valid_output
+    with self.assertRaises(Rejected): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='account')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 35, in test_metrics_reject_bad_primary_metadata_despite_valid_output
+    with self.assertRaises(Rejected): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='scope')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 35, in test_metrics_reject_bad_primary_metadata_despite_valid_output
+    with self.assertRaises(Rejected): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='period')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 35, in test_metrics_reject_bad_primary_metadata_despite_valid_output
+    with self.assertRaises(Rejected): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='unit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 35, in test_metrics_reject_bad_primary_metadata_despite_valid_output
+    with self.assertRaises(Rejected): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='complete')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 35, in test_metrics_reject_bad_primary_metadata_despite_valid_output
+    with self.assertRaises(Rejected): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) (field='observed_at')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 35, in test_metrics_reject_bad_primary_metadata_despite_valid_output
+    with self.assertRaises(Rejected): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_metrics_require_unambiguous_independent_source_admission (test_consistency.Consistency.test_metrics_require_unambiguous_independent_source_admission)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 40, in test_metrics_require_unambiguous_independent_source_admission
+    with self.assertRaisesRegex(Rejected, 'source'): validation.result(self.root, artifact, criterion)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_foreign_index_is_not_used_or_modified_by_delivery (test_consistency.Consistency.test_foreign_index_is_not_used_or_modified_by_delivery)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 55, in test_foreign_index_is_not_used_or_modified_by_delivery
+    self.assertNotEqual(head, original_head); self.assertEqual(digest(alien_index), before)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 'fc519af7dcbdb75e3b896ebfcf35578640f4dd0cd35bb013a251b36fd8a40dfd' != '62d34d36ffe46e374b3a81cd8488a6f244f1bc8ef2747418fcb4a3f7908296ca'
+- fc519af7dcbdb75e3b896ebfcf35578640f4dd0cd35bb013a251b36fd8a40dfd
++ 62d34d36ffe46e374b3a81cd8488a6f244f1bc8ef2747418fcb4a3f7908296ca
+
+
+======================================================================
+FAIL: test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='company_id')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 86, in test_reconciliation_requires_complete_explicit_comparable_metadata
+    with self.assertRaises(Rejected): operations.reconcile(missing, missing)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='account')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 86, in test_reconciliation_requires_complete_explicit_comparable_metadata
+    with self.assertRaises(Rejected): operations.reconcile(missing, missing)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='scope')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 86, in test_reconciliation_requires_complete_explicit_comparable_metadata
+    with self.assertRaises(Rejected): operations.reconcile(missing, missing)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='period')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 86, in test_reconciliation_requires_complete_explicit_comparable_metadata
+    with self.assertRaises(Rejected): operations.reconcile(missing, missing)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='unit')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 86, in test_reconciliation_requires_complete_explicit_comparable_metadata
+    with self.assertRaises(Rejected): operations.reconcile(missing, missing)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) (field='complete')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 86, in test_reconciliation_requires_complete_explicit_comparable_metadata
+    with self.assertRaises(Rejected): operations.reconcile(missing, missing)
+AssertionError: Rejected not raised
+
+======================================================================
+FAIL: test_interrupted_finish_update_preserves_original_rollback_base (test_consistency.EvolutionConsistency.test_interrupted_finish_update_preserves_original_rollback_base)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 108, in test_interrupted_finish_update_preserves_original_rollback_base
+    self.assertEqual(load(candidate / '.system/base.json')['previous'], previous)
+AssertionError: '4795ee0f8d5cf851bcc2887c29640757a5310a08' != '4ccd29f319acab73e22f2f78c7e39208adfdf66a'
+- 4795ee0f8d5cf851bcc2887c29640757a5310a08
++ 4ccd29f319acab73e22f2f78c7e39208adfdf66a
+
+
+======================================================================
+FAIL: test_delivered_metrics_keep_historical_admission_after_age_and_config_change (test_consistency.EvolutionConsistency.test_delivered_metrics_keep_historical_admission_after_age_and_config_change)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/artem/projects/work/studio/products/company-work-system/checks/test_consistency.py", line 125, in test_delivered_metrics_keep_historical_admission_after_age_and_config_change
+    with self.assertRaises(Rejected): validation.result(self.root, self.artifact(), load(task_file(self.root, 'test-task'))['acceptance'])
+AssertionError: Rejected not raised
+
+----------------------------------------------------------------------
+Ran 9 tests in 81.254s
+
+FAILED (failures=17, errors=4)

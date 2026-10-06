@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import tarfile
 from core import config, digest, ident, load, lock, now, object_hash, path, require, tasks, write
-from delivery import clean, commit, git, identity, prepare, remote_allowed
+from delivery import clean, commit, git, git_environment, identity, prepare, remote_allowed
 import validation
 
 
@@ -25,7 +25,7 @@ def release_isolated(release):
 
 def create(release, destination, company_id, owner):
     release_isolated(release)
-    destination = Path(destination)
+    destination = Path(destination).resolve()
     require(not destination.exists(), "existing company destination; no overwrite")
     ident(company_id)
     require(company_id != "unconfigured" and owner.strip(), "company identity/owner required")
@@ -50,7 +50,7 @@ def update(root, release, destination):
     require(metadata.get("schema_version") == 1, "unknown template ancestry")
     release_isolated(release)
     clean(root)
-    candidate = Path(destination)
+    candidate = Path(destination).resolve()
     require(not candidate.exists(), "update candidate already exists")
     git(root, "clone", "--no-local", str(Path(root).resolve()), str(candidate))
     identity(candidate)
@@ -95,10 +95,15 @@ def finish_update(candidate, target, expected_company):
     from core import changed_bindings
     for file in tasks(candidate):
         t = load(file)
-        require(t["status"] not in {"active", "waiting"} or not changed_bindings(candidate, t["bindings"]), "active task must explicitly reconcile methods")
+        require(t["status"] not in {"active", "waiting", "blocked"} or not changed_bindings(candidate, t["bindings"]), "active task must explicitly reconcile methods")
     version = load(path(candidate, "release.yaml"))["version"]
     metadata = load(path(candidate, ".system/base.json"))
-    metadata.update(installed=target, version=version, previous=metadata["installed"])
+    if metadata["installed"] != target:
+        metadata.update(installed=target, version=version, previous=metadata["installed"])
+    else:
+        # A prior attempt may have written metadata before commit failed.
+        require(metadata.get("previous") and metadata["previous"] != target, "interrupted update lacks previous ancestry")
+        metadata["version"] = version
     write(path(candidate, ".system/base.json"), metadata)
     git(candidate, "add", "--", ".system/base.json")
     git(candidate, "commit", "-m", f"Apply verified template {version}; preserve local state")
@@ -108,7 +113,7 @@ def finish_update(candidate, target, expected_company):
 def backup(root, destination):
     clean(root)
     validation.repository(root, freshness=False)
-    destination = Path(destination)
+    destination = Path(destination).resolve()
     require(not destination.exists() and not destination.resolve().is_relative_to(Path(root).resolve()), "backup destination must be new/outside company")
     destination.mkdir(parents=True)
     git(root, "bundle", "create", str(destination / "history.bundle"), "--all")
@@ -129,7 +134,7 @@ def backup(root, destination):
 
 
 def restore(backup_path, destination):
-    backup_path, destination = Path(backup_path), Path(destination)
+    backup_path, destination = Path(backup_path).resolve(), Path(destination).resolve()
     require(not destination.exists(), "restore cannot overwrite existing company")
     manifest = load(backup_path / "manifest.json")
     require(digest(backup_path / "history.bundle") == manifest["bundle_sha256"] and digest(backup_path / "files.tar") == manifest["tar_sha256"], "backup corrupted")
@@ -150,15 +155,15 @@ def rollback(root, destination):
     clean(root)
     metadata = load(path(root, ".system/base.json"))
     require(metadata.get("previous"), "no previous installed method version")
-    candidate = Path(destination)
+    candidate = Path(destination).resolve()
     require(not candidate.exists(), "rollback candidate exists")
     git(root, "clone", "--no-local", str(Path(root).resolve()), str(candidate))
     identity(candidate)
     current, previous = metadata["installed"], metadata["previous"]
     protected = {str(p.relative_to(candidate)): digest(p) for d in ["company", "work"] for p in Path(candidate, d).rglob("*") if p.is_file()}
-    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude", "requirements.txt", check=False)
+    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude", "requirements.txt", "docs/company-system-guide.html", check=False)
     require(delta.returncode == 0, "rollback diff unavailable")
-    patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, text=True, capture_output=True)
+    patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, text=True, capture_output=True, env=git_environment())
     if patch.returncode:
         return {"status": "conflict", "candidate": str(candidate), "next_action": "Preserve local methods and resolve reverse patch"}
     require(all(path(candidate, r).is_file() and digest(path(candidate, r)) == sha for r, sha in protected.items()), "rollback touched company data")
@@ -173,7 +178,7 @@ def rollback(root, destination):
 def proposal(root, package, destination):
     """Only a deliberately authored sanitized package, never company Git history."""
     cfg = config(root, True)
-    package, destination = Path(package), Path(destination)
+    package, destination = Path(package).resolve(), Path(destination).resolve()
     approval = load(package / "approval.json")
     require(approval.get("approved_by") == cfg["owner"] and approval.get("permission") == "share-sanitized-method" and approval.get("purpose"), "proposal sharing permission missing")
     require(not destination.exists(), "proposal destination exists")
@@ -198,7 +203,7 @@ def proposal_candidate(root, package, product_root, product_remote, destination)
     """Prepare a reviewable product candidate using the common delivery route."""
     import tempfile
     import delivery
-    product_root, destination = Path(product_root), Path(destination)
+    product_root, destination = Path(product_root).resolve(), Path(destination).resolve()
     require((product_root / "template/company/config.yaml").is_file(), "target is not a template product")
     with tempfile.TemporaryDirectory(prefix="sanitized-method-") as temporary:
         sanitized = Path(temporary) / "package"

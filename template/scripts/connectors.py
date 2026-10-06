@@ -10,7 +10,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from core import config, digest, load, path, require
-from validation import source_envelope
+from validation import source_envelope, source_specification
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -70,11 +70,7 @@ class MCP:
 
 def read(root, source_id):
     cfg = config(root)
-    specification = cfg.get("sources", {}).get(source_id)
-    require(specification and specification.get("approved_by"), "source/account/scope not configured")
-    for field in ["account", "scope", "period", "unit", "max_age_seconds", "max_pages", "timeout_seconds"]:
-        require(specification.get(field) is not None, f"source limit/definition missing: {field}")
-    require(type(specification["max_pages"]) is int and specification["max_pages"] > 0 and specification["timeout_seconds"] > 0 and specification["max_age_seconds"] > 0, "invalid source limits")
+    specification = source_specification(cfg.get("sources", {}).get(source_id))
     pages, cursor, cursors, client = [], None, set(), None
     try:
         if specification["type"] == "mcp":

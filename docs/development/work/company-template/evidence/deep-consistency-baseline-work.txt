@@ -1,0 +1,16 @@
+setUpClass (test_work.Work) ... ERROR
+
+======================================================================
+ERROR: setUpClass (test_work.Work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<work-root>/checks/test_work.py", line 17, in setUpClass
+    subprocess.run(['git','clone','--no-local',str(source),str(cls.seed)],check=True,capture_output=True)
+  File "/usr/lib/python3.12/subprocess.py", line 571, in run
+    raise CalledProcessError(retcode, process.args,
+subprocess.CalledProcessError: Command '['git', 'clone', '--no-local', '<work-root>/.local/work-adaptation/release-1.1.1.git', '/tmp/work-acceptance-pl_z0tq3/seed']' returned non-zero exit status 128.
+
+----------------------------------------------------------------------
+Ran 0 tests in 0.010s
+
+FAILED (errors=1)

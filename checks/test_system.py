@@ -56,6 +56,7 @@ class Fixture(unittest.TestCase):
 
     def task(self, task_id="test-task", independent=False, confirmed=True):
         relative = self.input()
+        self.export_config()
         acceptance = {"kind": "metrics", "expected_count": 2, "expected_total": 5, "period": "2026-10-01/2026-10-05", "unit": "test-units"}
         return operations.intake(self.root, task_id, "Сверить две исходные записи и подготовить итог 5 test-units", "test-owner", acceptance, confirmed, inputs=[relative], independent_required=independent)
 

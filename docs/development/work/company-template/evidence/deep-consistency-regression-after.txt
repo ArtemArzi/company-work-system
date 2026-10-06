@@ -1,0 +1,14 @@
+test_cancelled_incident_preserves_terminal_state_and_bytes (test_consistency.Consistency.test_cancelled_incident_preserves_terminal_state_and_bytes) ... ok
+test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) ... ok
+test_metrics_require_unambiguous_independent_source_admission (test_consistency.Consistency.test_metrics_require_unambiguous_independent_source_admission) ... ok
+test_foreign_index_is_not_used_or_modified_by_delivery (test_consistency.Consistency.test_foreign_index_is_not_used_or_modified_by_delivery) ... ok
+test_relative_prepare_is_relative_to_caller_not_source_checkout (test_consistency.Consistency.test_relative_prepare_is_relative_to_caller_not_source_checkout) ... ok
+test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) ... ok
+test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) ... ok
+test_interrupted_finish_update_preserves_original_rollback_base (test_consistency.EvolutionConsistency.test_interrupted_finish_update_preserves_original_rollback_base) ... ok
+test_delivered_metrics_keep_historical_admission_after_age_and_config_change (test_consistency.EvolutionConsistency.test_delivered_metrics_keep_historical_admission_after_age_and_config_change) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 80.242s
+
+OK
