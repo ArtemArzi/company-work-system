@@ -16,6 +16,8 @@ jobs:
         os: [ubuntu-24.04, windows-2022, macos-14]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
+    env:
+      CWS_BOOTSTRAP_NETWORK: '1'
     steps:
       - name: Require immutable candidate
         shell: pwsh
