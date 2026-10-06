@@ -1,0 +1,13 @@
+{
+  "verdict": "pass",
+  "receipt": "company-work-system-a1-pass-20261006-9182c4f-source-snapshot-r1",
+  "reviewer": "/root/performance_hooks_plan_acceptance",
+  "scope": "concrete A1 policy/dependency/admission contracts",
+  "previous_rejection": "company-work-system-a1-reject-20261006-9182c4f-source-snapshot",
+  "required_regressions": [
+    "changed source specification same ID",
+    "concurrent config before evidence",
+    "historical evidence after current config changes"
+  ],
+  "implementation_or_native_claim": false
+}
