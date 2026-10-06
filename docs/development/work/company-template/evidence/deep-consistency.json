@@ -1,6 +1,6 @@
 {
   "date": "2026-10-06",
-  "status": "candidate-tests-running",
+  "status": "accepted-main-product-delivery-pending",
   "product_baseline": "b17a3b4310a73a3ab326edc7c7c83012b3a0a1c0",
   "work_baseline": "8a70980b72e303a6ef88ad3893b059209acab7db",
   "methods_review": {
@@ -56,7 +56,7 @@
       "resume/supersede must retain original evidence/critical/output in existing history",
       "rollback managed guide path with methods"
     ],
-    "status": "code corrected; final regression pending"
+    "status": "closed; final12 regressionPASS and frozen52 suitePASS"
   },
   "work_intermediate_suite": {
     "tests": 15,
@@ -65,6 +65,74 @@
     "observed": "interrupted-update fixture returned merge conflict instead of reaching simulated commit interruption",
     "first_false_assumption": "runtime.md unchanged from installed1.1.1; actual Work recipe delta changed runtime version2→3",
     "repair": "choose unchanged template-update.md with exact precondition; retain separate genuine conflict tests",
-    "final_suite": "18 updated cases running"
+    "final_suite": "18cases:17PASS+1stagingfixtureERROR; corrected targetedcasePASS115.198s (18unique supporting checks)"
+  },
+  "delivery_scope": "main company-work-system only, clarified by user; Work local preparation not published",
+  "targeted_final": {
+    "tests": 12,
+    "verdict": "PASS",
+    "seconds": 102.484
+  },
+  "product_intermediate": {
+    "tests": 50,
+    "passed": 48,
+    "failures": 1,
+    "errors": 1,
+    "causes": [
+      "HTTP loopback socket denied by sandbox; corrected permission, isolated retryPASS",
+      "tick fixture introduced accepted source AFTER pinning monitor config; fixture order fixed, strict runtime guard unchanged, retryPASS"
+    ],
+    "final": "frozen52case final PASS550.818s"
+  },
+  "work_supporting_evidence": {
+    "full_suite_tests": 18,
+    "passed": 17,
+    "errors": 1,
+    "error": "compatible synthetic method file changed to template-update.md but staging still pointed to runtime.md",
+    "fix": "stage the same unchanged-base synthetic method, exact precondition retained",
+    "targeted_revalidation": "1/1 PASS115.198s",
+    "unique_cases_covered": 18,
+    "boundary": "supporting installed-copy compatibility; not a clean full-suite PASS and not full Work upgrade"
+  },
+  "release": {
+    "version": "1.1.5",
+    "source_code_commit": "3bb4e11",
+    "sha": "e0648404b1a9e0979f7bdd34aebb34642cd79fb0",
+    "bundle_sha256": "96d763a3f57a7e226d95f87cee5821e4aacf8dfa79cd7633a45402f1c7d75a90",
+    "company_memory": "development documents excluded by release_isolated; Work fixture contents not exported"
+  },
+  "product_final_suite": {
+    "tests": 52,
+    "seconds": 550.818,
+    "verdict": "PASS",
+    "candidate": "frozen template code from3bb4e11; corrected synthetic fixtures only outside release",
+    "log": "deep-consistency-product-final.txt"
+  },
+  "validators": {
+    "product": "21entities/12skills/0tasksPASS",
+    "work_supporting": "23entities/12skills/0tasksPASS",
+    "independently_repeated_by": "/root/consistency_deep_result"
+  },
+  "remaining_boundaries": [
+    "real external accounts/providers and full native agent/hook workflows not verified",
+    "unknown company business rules/budgets/definitions stay unset",
+    "Work update/rollback test isolated; rollback conflict kept and backup restored; no actual full Work update",
+    "history scanner optimization and broad method-pinning refinements not measured or implemented here",
+    "Work local safety preparation retained uncommitted; no Worksync under clarified product-only delivery"
+  ],
+  "independent_result": {
+    "reviewer": "/root/consistency_deep_result",
+    "role": "deep_reviewer",
+    "read_only": true,
+    "verdict": "PASS",
+    "receipt": "company-consistency-result-pass-20261006-3bb4e11-e0648404",
+    "scope": "main product1.1.5 only; Work is interoperability support, no publication/fullupgrade",
+    "source_code_commit": "3bb4e11",
+    "release": "e0648404b1a9e0979f7bdd34aebb34642cd79fb0",
+    "material_unclosed_findings": []
+  },
+  "delivery": {
+    "scope": "main product origin/main only",
+    "status": "pending"
   }
 }

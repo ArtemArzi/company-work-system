@@ -56,7 +56,8 @@ class Fixture(unittest.TestCase):
 
     def task(self, task_id="test-task", independent=False, confirmed=True):
         relative = self.input()
-        self.export_config()
+        if "test-data" not in config(self.root).get("sources", {}):
+            self.export_config()
         acceptance = {"kind": "metrics", "expected_count": 2, "expected_total": 5, "period": "2026-10-01/2026-10-05", "unit": "test-units"}
         return operations.intake(self.root, task_id, "Сверить две исходные записи и подготовить итог 5 test-units", "test-owner", acceptance, confirmed, inputs=[relative], independent_required=independent)
 
@@ -278,6 +279,7 @@ class SourcesAndBackground(Fixture):
 
     def test_one_shot_ticks_change_only_limits_off_and_recovery(self):
         self.assertFalse(operations.tick(self.root)["notify"])
+        self.export_config()  # Accepted sources precede pinning the monitor's methods/config.
         cfg = config(self.root); cfg["features"]["proactive"] = True; cfg["proactive"] = {"authorization": "accepted test-only ticks", "task_id": "monitor-task", "max_runs": 3, "interval_seconds": 1}; write(self.root / "company/config.yaml", cfg)
         operations.intake(self.root, "monitor-task", "Synthetic monitor without external actions", "test-owner", {"kind": "action-summary"}, True)
         self.task()

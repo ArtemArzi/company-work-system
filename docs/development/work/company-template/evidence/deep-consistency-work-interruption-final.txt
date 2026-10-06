@@ -1,0 +1,6 @@
+test_finish_update_resumes_after_metadata_written_before_commit (test_work.Work.test_finish_update_resumes_after_metadata_written_before_commit) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 115.198s
+
+OK

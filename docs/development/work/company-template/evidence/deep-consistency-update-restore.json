@@ -1,0 +1,40 @@
+{
+  "status": "verified-candidate",
+  "release_sha": "e0648404b1a9e0979f7bdd34aebb34642cd79fb0",
+  "installed_before": "a5456039c0c9a310dbe57931f89f5e6a26d9c5ed",
+  "source_head": "b58e3002a491de79d0e41fef2922bf5b054fdd54",
+  "files": [
+    "README.md",
+    "scripts/delivery.py",
+    "scripts/lifecycle.py",
+    "skills/company-summary/SKILL.md"
+  ],
+  "issues": [],
+  "company_work_preserved": true,
+  "boundary": "isolated selected Work fixture; no root upgrade/metadata mutation or provider access",
+  "resolved_conflicts": [
+    "README.md",
+    "scripts/delivery.py",
+    "scripts/lifecycle.py",
+    "skills/company-summary/SKILL.md"
+  ],
+  "candidate_head": "b675dbaf9412593e15d1ec3f35969d38c781353e",
+  "fresh_session_validate": {
+    "checked": true,
+    "entities": 23,
+    "skills": 12,
+    "tasks": 0
+  },
+  "rollback_status": "conflict",
+  "rollback_company_work_preserved": true,
+  "restore_status": "restored-and-verified",
+  "restore_exact_tracked_files": true,
+  "restore_fresh_session_validate": {
+    "checked": true,
+    "entities": 23,
+    "skills": 12,
+    "tasks": 0
+  },
+  "rollback_conflict": "preserved candidate; no automatic loss of local adapters/decisions; recovery by verified backup",
+  "root_installed_version": "1.1.1"
+}

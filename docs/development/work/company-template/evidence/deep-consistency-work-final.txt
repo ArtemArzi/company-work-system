@@ -1,0 +1,36 @@
+test_backup_restore_and_update_preserve_local_binding (test_work.Work.test_backup_restore_and_update_preserve_local_binding) ... ok
+test_cancelled_incident_and_corrupt_cache_preserve_contracts (test_work.Work.test_cancelled_incident_and_corrupt_cache_preserve_contracts) ... ok
+test_deleted_secret_in_history_and_foreign_ancestry (test_work.Work.test_deleted_secret_in_history_and_foreign_ancestry) ... ok
+test_empty_bootstrap_repeat_and_dirty_worktree (test_work.Work.test_empty_bootstrap_repeat_and_dirty_worktree) ... ok
+test_export_classes_symlink_and_renamed_credential (test_work.Work.test_export_classes_symlink_and_renamed_credential) ... ok
+test_finish_update_resumes_after_metadata_written_before_commit (test_work.Work.test_finish_update_resumes_after_metadata_written_before_commit) ... ERROR
+test_foreign_staged_and_index_concurrency (test_work.Work.test_foreign_staged_and_index_concurrency) ... ok
+test_git_environment_and_website_index_unchanged (test_work.Work.test_git_environment_and_website_index_unchanged) ... ok
+test_metric_admission_and_historical_snapshot_in_work_profile (test_work.Work.test_metric_admission_and_historical_snapshot_in_work_profile) ... ok
+test_network_failure_and_lost_push_readback (test_work.Work.test_network_failure_and_lost_push_readback) ... ok
+test_private_identity_lookup_timeout_is_bounded (test_work.Work.test_private_identity_lookup_timeout_is_bounded) ... ok
+test_release_guide_bridge_does_not_allow_development_history (test_work.Work.test_release_guide_bridge_does_not_allow_development_history) ... ok
+test_stale_concurrent_result_preserves_both_candidates (test_work.Work.test_stale_concurrent_result_preserves_both_candidates) ... ok
+test_strict_candidate_preflight_ff_and_new_validator (test_work.Work.test_strict_candidate_preflight_ff_and_new_validator) ... ok
+test_task_cycle_error_repair_summary_new_session_and_features_off (test_work.Work.test_task_cycle_error_repair_summary_new_session_and_features_off) ... ok
+test_validator_and_legacy_scope_strict_new_scope (test_work.Work.test_validator_and_legacy_scope_strict_new_scope) ... ok
+test_work_preflight_ahead_offline_timeout_and_concurrent_index (test_work.Work.test_work_preflight_ahead_offline_timeout_and_concurrent_index) ... ok
+test_work_preflight_dirty_current_and_all_pending_guards (test_work.Work.test_work_preflight_dirty_current_and_all_pending_guards) ... ok
+
+======================================================================
+ERROR: test_finish_update_resumes_after_metadata_written_before_commit (test_work.Work.test_finish_update_resumes_after_metadata_written_before_commit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<workspace>/checks/test_work.py", line 232, in test_finish_update_resumes_after_metadata_written_before_commit
+    delivery.git(author,'add','--','standards/runtime.md');delivery.git(author,'commit','-m','Compatible synthetic update');delivery.git(author,'push',str(release),'main')
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<workspace>/scripts/delivery.py", line 65, in git
+    require(False, "Git operation failed: " + safe.strip()[:1500])
+  File "<workspace>/scripts/core.py", line 20, in require
+    raise Rejected(message)
+core.Rejected: Git operation failed: 
+
+----------------------------------------------------------------------
+Ran 18 tests in 422.349s
+
+FAILED (errors=1)
