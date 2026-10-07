@@ -1,0 +1,15 @@
+{
+  "result": {
+    "status": "verified-candidate",
+    "candidate": "/home/artem/projects/work/studio/products/company-work-system/.local/eol-old-update-proof/candidate",
+    "target": "32c2a4abadf9b954da0a82f21f9b4f937ab10259",
+    "company_base": "24a5f19fc8a73baf4c01d8e3a4e74c48390780a6",
+    "sha256": "e4343145ac101a9e8f5c56e8fc759df89a33d797",
+    "delivery": "pending"
+  },
+  "original_hex": "4f726967696e616c20627573696e6573732062797465730a",
+  "candidate_hex": "4f726967696e616c20627573696e6573732062797465730d0a",
+  "original_unchanged": true,
+  "same_bytes": false,
+  "candidate_git_status": "M company/README.md\n M company/config.yaml\n M company/finance/README.md\n M company/management/README.md\n M company/marketing/README.md\n M company/operations/README.md\n M company/people/README.md\n M company/procurement/README.md\n M company/projects/README.md\n M company/projects/notes.md\n M company/sales/README.md\n M company/sources/README.md\n M company/sources/design-basis/source.yaml\n M docs/company-system-guide.html"
+}

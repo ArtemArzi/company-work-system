@@ -1,0 +1,6 @@
+test_native_powershell_owned_process_forwards_utf8_and_exit_without_python (checks.test_bootstrap.BootstrapTests.test_native_powershell_owned_process_forwards_utf8_and_exit_without_python) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 4.503s
+
+OK

@@ -37,6 +37,24 @@ def required_scenarios(manifest, task):
         raise RuntimeError('Missing historical task/settings/proof/raw source in backup')
 
 
+def prepared_cli(root):
+    """Exercise the managed interpreter with the actual company CLI, no stub."""
+    entry = (['powershell.exe', '-NoProfile', '-File', str(root / 'scripts/run.ps1')]
+             if os.name == 'nt' else ['/bin/sh', str(root / 'scripts/run.sh')])
+    results = {}
+    for action in ['setup', 'bootstrap-status', 'doctor', 'context']:
+        process = subprocess.run(entry + [action], capture_output=True, timeout=360)
+        if process.returncode:
+            raise RuntimeError(f'Prepared real CLI {action} failed: {process.stderr.decode("utf-8", errors="replace")[-1500:]}')
+        results[action] = json.loads(process.stdout)
+    if results['doctor']['status'] != 'ready' or results['context']['company_id'] != 'test-company':
+        raise RuntimeError('Prepared real CLI did not read adapted company')
+    if Path(results['doctor']['interpreter']).resolve() != Path(results['setup']['python']).resolve():
+        raise RuntimeError('Real CLI used a different interpreter')
+    print(json.dumps({'prepared_real_cli':'pass', 'os':sys.platform, 'actions':list(results),
+                     'interpreter':results['doctor']['interpreter']}))
+
+
 def old_cli(code, root, *args):
     process = subprocess.run([sys.executable, str(code / 'scripts/system.py'), '--root', str(root), *args],
                              capture_output=True, encoding='utf-8', timeout=120)
@@ -56,7 +74,7 @@ def old_code(destination):
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         data = delivery.git(PRODUCT, 'cat-file', 'blob', oid, binary=True)
-        if mode == '120000': target.symlink_to(data.decode(), target_is_directory=True)
+        if mode == '120000' and os.name != 'nt': target.symlink_to(data.decode(), target_is_directory=True)
         else: target.write_bytes(data)
     if load(destination / 'release.yaml')['version'] != '1.2.0':
         raise RuntimeError('Legacy release identity differs')
@@ -74,6 +92,8 @@ def produce(destination, legacy=False):
         if hooks.project(fixture.root, 'codex', apply=True, enabled=True)['status'] != 'projected':
             raise RuntimeError('Synthetic hook projection did not apply')
         fixture.seed()
+        if os.environ.get('CWS_BOOTSTRAP_NETWORK') == '1':
+            prepared_cli(fixture.root)
         lifecycle.backup(fixture.root, destination / 'current')
         required_scenarios(destination / 'current/manifest.json', 'test-task')
         if legacy:

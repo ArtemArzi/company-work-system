@@ -1,0 +1,13 @@
+{
+  "result": {
+    "status": "verified-candidate",
+    "candidate": "/home/artem/projects/work/studio/products/company-work-system/.local/eol-old-update-proof/candidate-fixed",
+    "target": "32c2a4abadf9b954da0a82f21f9b4f937ab10259",
+    "company_base": "24a5f19fc8a73baf4c01d8e3a4e74c48390780a6",
+    "sha256": "08f179560dfdfd19989bb7622c78bce073428f23",
+    "delivery": "pending"
+  },
+  "same_bytes": true,
+  "candidate_git_status": "",
+  "candidate_autocrlf": "false"
+}

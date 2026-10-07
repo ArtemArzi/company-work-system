@@ -1,6 +1,7 @@
 """Bootstrap negatives plus an explicit optional real managed-Python installation."""
 from __future__ import annotations
 import hashlib
+import base64
 import importlib.util
 import json
 import os
@@ -47,6 +48,50 @@ class BootstrapTests(unittest.TestCase):
         command = (['powershell.exe', '-NoProfile', '-File', str(self.root / 'scripts/run.ps1')]
                    if os.name == 'nt' else ['/bin/sh', str(self.root / 'scripts/run.sh')])
         return subprocess.run(command + args, env=env, capture_output=True, timeout=360)
+
+    @unittest.skipUnless(shutil.which('powershell.exe'), 'native Windows PowerShell unavailable')
+    def test_native_powershell_owned_process_forwards_utf8_and_exit_without_python(self):
+        # Read the exact production function; use native PowerShell/cmd only.
+        # This also runs from WSL where Windows has no installed Python.
+        shell = shutil.which('powershell.exe')
+        source = (self.root / 'scripts/run.ps1').read_text(encoding='utf-8')
+        functions = source.split('\ntry {\n', 1)[0]
+        prefix = '$ProgressPreference="SilentlyContinue"\n' + functions + '\n$root=$env:SystemRoot; $runtime=$root + "\\unused-runtime"\n'
+        def native(script):
+            encoded = base64.b64encode(script.encode('utf-16le')).decode('ascii')
+            return subprocess.run([shell, '-NoProfile', '-EncodedCommand', encoded],
+                                  capture_output=True, timeout=10)
+        raw_stdout = '{"status":"ready","text":"готово"}\n'.encode('utf-8')
+        raw_stderr = 'проверка stderr\n'.encode('utf-8')
+        child = ('$out=[Convert]::FromBase64String("' + base64.b64encode(raw_stdout).decode() + '");'
+                 '$err=[Convert]::FromBase64String("' + base64.b64encode(raw_stderr).decode() + '");'
+                 '$o=[Console]::OpenStandardOutput();$o.Write($out,0,$out.Length);$o.Flush();'
+                 '$e=[Console]::OpenStandardError();$e.Write($err,0,$err.Length);$e.Flush();exit 7')
+        child64 = base64.b64encode(child.encode('utf-16le')).decode()
+        script = prefix + (f'$code=OwnedProcess ($env:SystemRoot + "\\System32\\WindowsPowerShell\\v1.0\\powershell.exe") '
+                           f'@("-NoProfile","-EncodedCommand","{child64}") 5 $false;exit $code')
+        result = native(script)
+        self.assertEqual(result.returncode, 7, result.stderr)
+        self.assertEqual(result.stdout, raw_stdout)
+        self.assertEqual(result.stderr, raw_stderr)
+        # The uv-find mode must still return a captured path, without emitting it twice.
+        script = prefix + ('$path=OwnedProcess ($env:SystemRoot + "\\System32\\cmd.exe") '
+                           '@("/d","/c","echo C:\\managed-python\\python.exe") 5 $true;'
+                           '[Console]::Write($path)')
+        result = native(script)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout, b'C:\\managed-python\\python.exe')
+        self.assertEqual(result.stderr, b'')
+        # Process and stream completion share the same deadline.
+        child64 = base64.b64encode('Start-Sleep -Seconds 6'.encode('utf-16le')).decode()
+        script = prefix + ('try { [void](OwnedProcess ($env:SystemRoot + "\\System32\\WindowsPowerShell\\v1.0\\powershell.exe") '
+                           f'@("-NoProfile","-EncodedCommand","{child64}") 1 $false); exit 0 }} '
+                           'catch { [Console]::Error.WriteLine($_.Exception.Message); exit 2 }')
+        started = time.monotonic()
+        result = native(script)
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn(b'timed out', result.stderr)
+        self.assertLess(time.monotonic() - started, 4)
 
     def test_manifest_pinned_single_source(self):
         data = bootstrap.manifest(self.root)

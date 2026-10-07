@@ -5,6 +5,8 @@ owner: product-maintainer
 ---
 # Форматы и подготовленные команды
 
+CLI вызывается через launcher выбранной [среды](../adapters/README.md). Примеры `python3 scripts/system.py <операция> ...` обозначают тот же CLI: в подготовленном локальном окружении заменить этот префикс на `sh scripts/run.sh` (POSIX) либо `& ./scripts/run.ps1` (PowerShell), сохранив операцию и аргументы. Глобальный python3, активация .venv и изменение PATH не требуются. Перед первой операцией агент выполняет setup, если окружение отсутствует; обычные команды сами зависимости не устанавливают.
+
 Для компании origin должен указывать на её общий операционный Git, а не release-only основу продукта. External URL допускается только по permissions.external_delivery/remotes; нового права preflight не выдаёт. При отсутствии общего remote сначала адаптация владельцем. Новая компания из create сохраняет release provenance отдельно; источник обновлений не является общей очередью сотрудников. Product adapter `python3 scripts/product.py preflight` использует ту же функцию для явно разрешённого репозитория продукта, без переноса этого права в компании.
 
 Для сохраняемой action-summary: intake задачи сводки → `summary --task id` → сохранить JSON-кандидат → execute → validate → общий commit/deliver. Sources результата указывают на неизменяемый snapshot в work/id/inputs с наблюдёнными revisions/hashes исходных задач; текущие task.json не являются источником исторического результата. Без --task команда только показывает текущее состояние. Подмена snapshot отвергается общим hash-validator.

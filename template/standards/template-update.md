@@ -13,6 +13,8 @@ Update готовится отдельно с общим предком; merge n
 
 Rollback — обратный кандидат управляемых методов, сохраняющий поздние задачи/настройки; не обещает отменить внешние данные. Backup/restore в новую папку с проверкой hashes; существующую папку не затирать. В общий продукт возвращается заново подготовленная разрешённая методика/чистый воспроизводимый пример по явному allowlist и approval с hashes. Не экспортировать историю/сырые файлы компании, даже удалённые secrets из истории. Предложение отдельно от принятого выпуска.
 
+Update/rollback закрепляют исходный HEAD и точные tracked bytes company/work/native settings/proof до clone. У нового кандидата локально выставляется core.autocrlf=false; исходный и host Git config сохраняются. Полный состав и hashes сверяются до и после изменения методов. Если прежние working bytes отличаются от Git blob, сохранить обе копии и запросить reconciliation владельца; не нормализовать данные, не stage их автоматически и не пересчитывать старые receipts. Отказ phase=clone возникает до merge: finish-update к такому кандидату неприменим, после согласования нужен новый кандидат.
+
 Хуки optional и default off. Их manifest/code являются частью общих методов,
 а hooks.enabled/disabled, .system/hooks-project-<harness>.json и native settings
 принадлежат компании. Update/rollback сохраняют эти settings/proof; они не

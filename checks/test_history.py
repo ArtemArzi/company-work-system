@@ -333,7 +333,7 @@ class GuardedDelivery(fixtures.Fixture):
         # Fixture has no HEAD: the private per-worktree initial ref must not leak.
         delivery.git(self.root,'init','-b','main');delivery.identity(self.root)
         paths=[p for p in delivery.git(self.root,'ls-files','--others','--exclude-standard','-z').split('\x00') if p]
-        projections=[str(p.relative_to(self.root)) for h in ['.agents','.claude'] for p in (self.root/h/'skills').iterdir() if p.is_symlink()]
+        projections=[p.relative_to(self.root).as_posix() for h in ['.agents','.claude'] for p in (self.root/h/'skills').iterdir() if p.is_symlink()]
         paths=sorted(set(paths+projections))
         initial=delivery.commit(self.root,paths,'Initial checked company')
         self.assertEqual(delivery.git(self.root,'write-tree'),delivery.git(self.root,'rev-parse',initial+'^{tree}'))

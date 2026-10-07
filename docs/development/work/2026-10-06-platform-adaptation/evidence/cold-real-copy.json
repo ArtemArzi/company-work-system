@@ -1,0 +1,179 @@
+{
+  "candidate": "c494b27cd7a92816bfec96448de59c2968175081",
+  "no_python_in_path": true,
+  "commands": [
+    {
+      "args": [
+        "setup"
+      ],
+      "exit": 0,
+      "result": {
+        "status": "ready",
+        "python": "/home/artem/projects/work/studio/products/company-work-system/.local/platform-candidate-c494-copy/.venv/bin/python",
+        "managed_python": "/home/artem/projects/work/studio/products/company-work-system/.local/platform-candidate-c494-copy/.local/runtime/python/cpython-3.12.15-linux-x86_64-gnu",
+        "python_version": [
+          3,
+          12,
+          15
+        ],
+        "pyyaml": "6.0.1",
+        "git": "git version 2.43.0",
+        "changed": true
+      }
+    },
+    {
+      "args": [
+        "setup"
+      ],
+      "exit": 0,
+      "result": {
+        "status": "ready",
+        "python": "/home/artem/projects/work/studio/products/company-work-system/.local/platform-candidate-c494-copy/.venv/bin/python",
+        "managed_python": "/home/artem/projects/work/studio/products/company-work-system/.local/platform-candidate-c494-copy/.local/runtime/python/cpython-3.12.15-linux-x86_64-gnu",
+        "python_version": [
+          3,
+          12,
+          15
+        ],
+        "pyyaml": "6.0.1",
+        "git": "git version 2.43.0",
+        "changed": false
+      }
+    },
+    {
+      "args": [
+        "doctor"
+      ],
+      "exit": 0,
+      "result": {
+        "status": "ready",
+        "root": "/home/artem/projects/work/studio/products/company-work-system/.local/platform-candidate-c494-copy",
+        "platform": "wsl2",
+        "python": "3.12.15",
+        "interpreter": "/home/artem/projects/work/studio/products/company-work-system/.local/platform-candidate-c494-copy/.venv/bin/python",
+        "git": "git version 2.43.0",
+        "pyyaml": "6.0.1",
+        "projections": {
+          ".agents/skills/company-deliver": "symlink",
+          ".claude/skills/company-deliver": "symlink",
+          ".agents/skills/company-marketing": "symlink",
+          ".claude/skills/company-marketing": "symlink",
+          ".agents/skills/company-incident": "symlink",
+          ".claude/skills/company-incident": "symlink",
+          ".agents/skills/company-knowledge": "symlink",
+          ".claude/skills/company-knowledge": "symlink",
+          ".agents/skills/company-context": "symlink",
+          ".claude/skills/company-context": "symlink",
+          ".agents/skills/company-intake": "symlink",
+          ".claude/skills/company-intake": "symlink",
+          ".agents/skills/company-summary": "symlink",
+          ".claude/skills/company-summary": "symlink",
+          ".agents/skills/company-research": "symlink",
+          ".claude/skills/company-research": "symlink",
+          ".agents/skills/company-source-read": "symlink",
+          ".claude/skills/company-source-read": "symlink",
+          ".agents/skills/company-execute": "symlink",
+          ".claude/skills/company-execute": "symlink",
+          ".agents/skills/company-author": "symlink",
+          ".claude/skills/company-author": "symlink",
+          ".agents/skills/company-episodes": "symlink",
+          ".claude/skills/company-episodes": "symlink"
+        },
+        "git_attributes": {
+          "company/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/config.yaml": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/finance/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/projects/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/management/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/sales/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/operations/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/sources/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/sources/design-basis/source.yaml": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/marketing/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/procurement/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          "company/people/README.md": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          },
+          ".system/base.json": {
+            "text": "unset",
+            "eol": "unspecified",
+            "filter": "unset"
+          }
+        },
+        "blockers": [],
+        "next_action": "Read AGENTS.md and company map; shared preflight before independent work",
+        "boundary": "Read-only local prerequisites; no sync, installation, provider login, native discovery/hooks or business proof",
+        "durability": "file and parent-directory fsync",
+        "shared_checkout": "Do not write one checkout from Windows and WSL simultaneously; separate clones share Git"
+      }
+    },
+    {
+      "args": [
+        "context"
+      ],
+      "exit": 0,
+      "result": {
+        "company_id": "platform-proof",
+        "release": {
+          "schema_version": 1,
+          "version": "1.3.0",
+          "state_format": 1,
+          "workflow_format": 1,
+          "python": ">=3.12",
+          "git": ">=2.43"
+        },
+        "map": "company/README.md",
+        "active_standards": {},
+        "native_memory": "not-used",
+        "tasks": []
+      }
+    }
+  ],
+  "host_files_unchanged": true
+}

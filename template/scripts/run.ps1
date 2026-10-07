@@ -27,8 +27,12 @@ function OwnedProcess([string]$File, [string[]]$Values, [int]$Seconds = 240, [bo
     $info.WorkingDirectory = $root
     $info.UseShellExecute = $false
     $info.CreateNoWindow = $true
-    $info.RedirectStandardOutput = $Capture
-    $info.RedirectStandardError = $Capture
+    # A windowless native child does not reliably inherit a redirected parent
+    # console. Always own its pipes; forward bytes explicitly for common CLI.
+    $info.RedirectStandardOutput = $true
+    $info.RedirectStandardError = $true
+    $info.StandardOutputEncoding = New-Object Text.UTF8Encoding($false)
+    $info.StandardErrorEncoding = New-Object Text.UTF8Encoding($false)
     foreach ($key in @($info.EnvironmentVariables.Keys)) {
         if ($key -match '^(UV_|PYTHON|PIP_)' -or $key -in @('VIRTUAL_ENV','CONDA_PREFIX','CONDA_DEFAULT_ENV','__PYVENV_LAUNCHER__')) { $info.EnvironmentVariables.Remove($key) }
     }
@@ -43,19 +47,50 @@ function OwnedProcess([string]$File, [string[]]$Values, [int]$Seconds = 240, [bo
     $info.EnvironmentVariables['PYTHONDONTWRITEBYTECODE'] = '1'
     $process = New-Object Diagnostics.Process
     $process.StartInfo = $info
+    $watch = [Diagnostics.Stopwatch]::StartNew()
+    $deadline = $Seconds * 1000
     try {
         [void]$process.Start()
-        if ($Capture) { $outTask = $process.StandardOutput.ReadToEndAsync(); $errTask = $process.StandardError.ReadToEndAsync() }
-        if (-not $process.WaitForExit($Seconds * 1000)) { $process.Kill(); $process.WaitForExit(); Blocked 'runtime command timed out' }
+        if ($Capture) {
+            $outTask = $process.StandardOutput.ReadToEndAsync()
+            $errTask = $process.StandardError.ReadToEndAsync()
+        } else {
+            # Copy both streams concurrently before waiting to avoid full-pipe
+            # deadlocks and preserve JSON/UTF-8 bytes without PowerShell encoding.
+            $stdout = [Console]::OpenStandardOutput()
+            $stderr = [Console]::OpenStandardError()
+            $outTask = $process.StandardOutput.BaseStream.CopyToAsync($stdout)
+            $errTask = $process.StandardError.BaseStream.CopyToAsync($stderr)
+        }
+        $remaining = [Math]::Max(1, $deadline - [int]$watch.ElapsedMilliseconds)
+        if (-not $process.WaitForExit($remaining)) {
+            $process.Kill()
+            if (-not $process.WaitForExit(2000)) { Blocked 'runtime child did not exit after termination' }
+            Blocked 'runtime command timed out'
+        }
         $code = $process.ExitCode
+        foreach ($task in @($outTask, $errTask)) {
+            $remaining = [Math]::Max(1, $deadline - [int]$watch.ElapsedMilliseconds)
+            if (-not $task.Wait($remaining)) { Blocked 'runtime output forwarding timed out' }
+        }
         if ($Capture) {
             $output = $outTask.Result; $errorText = $errTask.Result
             if ($code -ne 0) { Blocked "runtime command exit ${code}: $errorText" }
-            if ($errorText) { [Console]::Error.Write($errorText) }
+            if ($errorText) {
+                $bytes = [Text.Encoding]::UTF8.GetBytes($errorText)
+                $errorStream = [Console]::OpenStandardError()
+                $errorStream.Write($bytes, 0, $bytes.Length); $errorStream.Flush()
+            }
             return $output.Trim()
         }
+        $stdout.Flush(); $stderr.Flush()
         return $code
-    } finally { $process.Dispose() }
+    } finally {
+        if ($process.StartInfo.RedirectStandardOutput) {
+            try { $process.StandardOutput.Dispose(); $process.StandardError.Dispose() } catch { }
+        }
+        $process.Dispose()
+    }
 }
 try {
     if ($env:OS -ne 'Windows_NT') { Blocked 'this entry supports native Windows; POSIX uses scripts/run.sh' }

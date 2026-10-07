@@ -1,0 +1,7 @@
+test_relative_company_update_backup_restore_and_rollback (test_consistency.EvolutionConsistency.test_relative_company_update_backup_restore_and_rollback) ... ok
+test_company_proofs_survive_delivery_update_rollback_restore (test_evolution_hooks.Evolution.test_company_proofs_survive_delivery_update_rollback_restore) ... ok
+
+----------------------------------------------------------------------
+Ran 2 tests in 49.001s
+
+OK
