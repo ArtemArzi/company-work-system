@@ -248,7 +248,7 @@ def setup(root: Path) -> dict:
                 # Explicit setup may repair missing dependencies in an already owned venv.
                 state['status'] = 'preparing'
                 write_json(runtime / 'environment.json', state)
-        python = run(root, [str(uv), '--no-config', 'python', 'find', '--offline',
+        python = run(root, [str(uv), '--no-config', 'python', 'find', '--offline', '--system',
                             '--managed-python', '--no-project', '--no-python-downloads',
                             str(data['PYTHON_REQUEST'])], timeout=30)
         try:

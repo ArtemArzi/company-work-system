@@ -157,7 +157,7 @@ try {
         if (-not (Get-Command git -CommandType Application -ErrorAction SilentlyContinue)) { Blocked 'Git 2.43+ required; agent should use native OS installer within existing rights: https://git-scm.com/downloads' }
         [void](OwnedProcess "$runtime\uv.exe" @('--no-config','python','install',$lock['PYTHON_REQUEST'][0],'--install-dir',"$runtime\python",'--no-bin','--no-registry'))
     }
-    $python = OwnedProcess "$runtime\uv.exe" @('--no-config','python','find','--offline','--managed-python','--no-project','--no-python-downloads',$lock['PYTHON_REQUEST'][0]) 30
+    $python = OwnedProcess "$runtime\uv.exe" @('--no-config','python','find','--offline','--system','--managed-python','--no-project','--no-python-downloads',$lock['PYTHON_REQUEST'][0]) 30
     if (-not $python.StartsWith("$runtime\python\", [StringComparison]::OrdinalIgnoreCase)) { Blocked 'managed Python points outside the project runtime' }
     $code = OwnedProcess $python (@('-I', "$root\scripts\bootstrap.py") + $arguments) 300 $false
     exit $code

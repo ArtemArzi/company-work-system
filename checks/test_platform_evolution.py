@@ -13,6 +13,14 @@ import product
 
 class EvolutionBytes(Fixture):
     def legacy_company(self):
+        # The positive case deliberately begins with working bytes equal to Git.
+        # Windows system autocrlf must not silently define this test precondition.
+        home = self.base / 'initial-home'; home.mkdir()
+        (home / '.gitconfig').write_bytes(b'[core]\n autocrlf = false\n')
+        with patch.dict(os.environ, {'HOME': str(home), 'USERPROFILE': str(home)}):
+            return self._legacy_company()
+
+    def _legacy_company(self):
         p = self.base / 'old-product'; p.mkdir()
         old_code(p / 'template')
         delivery.git(p, 'init', '-b', 'main'); delivery.identity(p); delivery.git(p, 'add', '.')
@@ -42,6 +50,9 @@ class EvolutionBytes(Fixture):
     def test_actual_old_upgrade_and_rollback_keep_source_bytes_under_global_autocrlf(self):
         company, release = self.legacy_company()
         expected = lifecycle._protected_snapshot(company)
+        for relative, sha in expected.items():
+            blob = delivery.git(company, "show", "HEAD:" + relative, binary=True)
+            self.assertEqual((company / relative).read_bytes(), blob, relative)
         home = self.base / 'fake-home'; home.mkdir()
         cfg = home / '.gitconfig'; cfg.write_bytes(b'[core]\n autocrlf = true\n')
         before = cfg.read_bytes()

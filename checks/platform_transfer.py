@@ -42,11 +42,14 @@ def prepared_cli(root):
     entry = (['powershell.exe', '-NoProfile', '-File', str(root / 'scripts/run.ps1')]
              if os.name == 'nt' else ['/bin/sh', str(root / 'scripts/run.sh')])
     results = {}
-    for action in ['setup', 'bootstrap-status', 'doctor', 'context']:
-        process = subprocess.run(entry + [action], capture_output=True, timeout=360)
+    for action in ['setup', 'setup', 'bootstrap-status', 'doctor', 'context']:
+        process = subprocess.run(entry + [action], cwd=root, capture_output=True, timeout=360)
         if process.returncode:
             raise RuntimeError(f'Prepared real CLI {action} failed: {process.stderr.decode("utf-8", errors="replace")[-1500:]}')
-        results[action] = json.loads(process.stdout)
+        value = json.loads(process.stdout)
+        if action == "setup" and action in results and value.get("changed") is not False:
+            raise RuntimeError("Repeated setup changed an already prepared company")
+        results[action] = value
     if results['doctor']['status'] != 'ready' or results['context']['company_id'] != 'test-company':
         raise RuntimeError('Prepared real CLI did not read adapted company')
     if Path(results['doctor']['interpreter']).resolve() != Path(results['setup']['python']).resolve():

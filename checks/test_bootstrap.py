@@ -47,7 +47,7 @@ class BootstrapTests(unittest.TestCase):
     def wrapper(self, args, env=None):
         command = (['powershell.exe', '-NoProfile', '-File', str(self.root / 'scripts/run.ps1')]
                    if os.name == 'nt' else ['/bin/sh', str(self.root / 'scripts/run.sh')])
-        return subprocess.run(command + args, env=env, capture_output=True, timeout=360)
+        return subprocess.run(command + args, cwd=self.root, env=env, capture_output=True, timeout=360)
 
     @unittest.skipUnless(shutil.which('powershell.exe'), 'native Windows PowerShell unavailable')
     def test_native_powershell_owned_process_forwards_utf8_and_exit_without_python(self):
@@ -388,23 +388,59 @@ class BootstrapTests(unittest.TestCase):
         self.assertTrue(ready['managed_python'].startswith(str(self.root / '.local/runtime/python')))
         self.assertEqual(ready['python_version'][:2], [3, 12])
         self.assertEqual(ready['pyyaml'], '6.0.1')
+        # uv --no-project still discovers cwd/.venv. Reproduce that old selection
+        # and prove --system selects our managed base while the strict guard stays.
+        uv = self.root / '.local/runtime' / ('uv.exe' if os.name == 'nt' else 'uv')
+        find = [str(uv), '--no-config', 'python', 'find', '--offline', '--managed-python',
+                '--no-project', '--no-python-downloads', '3.12.15']
+        legacy = subprocess.run(find, cwd=self.root, env=bootstrap.environment(self.root),
+                                capture_output=True, timeout=30)
+        self.assertEqual(legacy.returncode, 0, legacy.stderr)
+        self.assertEqual(Path(legacy.stdout.decode('utf-8').strip()), bootstrap.interpreter(self.root))
+        selected = subprocess.run(find + ['--system'], cwd=self.root,
+                                  env=bootstrap.environment(self.root), capture_output=True, timeout=30)
+        self.assertEqual(selected.returncode, 0, selected.stderr)
+        self.assertTrue(Path(selected.stdout.decode('utf-8').strip()).is_relative_to(self.root / '.local/runtime/python'))
         state = self.root / '.local/runtime/environment.json'
         original = state.read_bytes(); original_mtime = state.stat().st_mtime_ns
-        repeated = self.wrapper(['setup'], env)
+        # Block HTTPS in these owned children only, then prove the block against
+        # the real package index. No host proxy/profile/network settings change.
+        offline = dict(env, HTTPS_PROXY='http://127.0.0.1:1', HTTP_PROXY='http://127.0.0.1:1',
+                       ALL_PROXY='http://127.0.0.1:1', https_proxy='http://127.0.0.1:1',
+                       http_proxy='http://127.0.0.1:1', all_proxy='http://127.0.0.1:1',
+                       NO_PROXY='', no_proxy='')
+        curl = shutil.which('curl', path=offline['PATH'])
+        self.assertIsNotNone(curl)
+        blocked_network = subprocess.run([curl, '--disable', '--fail', '--silent', '--show-error',
+                                          '--connect-timeout', '1', '--max-time', '2',
+                                          'https://pypi.org/simple'], cwd=self.root, env=offline,
+                                         capture_output=True, timeout=5)
+        self.assertNotEqual(blocked_network.returncode, 0)
+        stable_paths = [uv, uv.parent / bootstrap.manifest(self.root)[
+            ('windows' if os.name == 'nt' else 'macos' if sys.platform == 'darwin' else 'linux') + '-' +
+            ('aarch64' if bootstrap.platform.machine().lower() in ('aarch64', 'arm64') else 'x86_64')][0],
+            Path(ready['managed_python']) / ('python.exe' if os.name == 'nt' else 'bin/python3.12')]
+        runtime_before = {str(path): (bootstrap.digest(path), path.stat().st_mtime_ns) for path in stable_paths}
+        repeated = self.wrapper(['setup'], offline)
         self.assertEqual(repeated.returncode, 0, repeated.stderr.decode('utf-8', errors='replace'))
         self.assertFalse(json.loads(repeated.stdout)['changed'])
         self.assertEqual(state.read_bytes(), original)
         self.assertEqual(state.stat().st_mtime_ns, original_mtime)
-        status = self.wrapper(['bootstrap-status'], env)
+        status = self.wrapper(['bootstrap-status'], offline)
         self.assertEqual(status.returncode, 0, status.stderr.decode('utf-8', errors='replace'))
-        routed = self.wrapper(['context'], env)
+        routed = self.wrapper(['context'], offline)
         self.assertEqual(routed.returncode, 0, routed.stderr.decode('utf-8', errors='replace'))
         self.assertEqual(json.loads(routed.stdout), ['--root', str(self.root), 'context'])
+        doctor = self.wrapper(['doctor'], offline)
+        self.assertEqual(doctor.returncode, 0, doctor.stderr.decode('utf-8', errors='replace'))
+        self.assertEqual(json.loads(doctor.stdout), ['--root', str(self.root), 'doctor'])
+        self.assertEqual({str(path): (bootstrap.digest(path), path.stat().st_mtime_ns) for path in stable_paths}, runtime_before)
         after = {p.relative_to(home).as_posix(): p.read_bytes() for p in home.rglob('*') if p.is_file()}
         self.assertEqual(after, before)
         print(json.dumps({'bootstrap_network': 'pass', 'platform': sys.platform, 'setup_exit': result.returncode,
                           'repeat_exit': repeated.returncode, 'status_exit': status.returncode,
-                          'managed_python': ready['managed_python'], 'host_files_unchanged': True}))
+                          'managed_python': ready['managed_python'], 'host_files_unchanged': True,
+                          'offline_reuse': True, 'blocked_index_probe_exit': blocked_network.returncode}))
 
 
 if __name__ == '__main__':

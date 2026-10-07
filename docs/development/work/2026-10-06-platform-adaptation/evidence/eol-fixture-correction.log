@@ -1,0 +1,8 @@
+test_actual_old_upgrade_and_rollback_keep_source_bytes_under_global_autocrlf (test_platform_evolution.EvolutionBytes.test_actual_old_upgrade_and_rollback_keep_source_bytes_under_global_autocrlf) ... ok
+test_legacy_working_native_proof_different_from_git_blocks_before_merge (test_platform_evolution.EvolutionBytes.test_legacy_working_native_proof_different_from_git_blocks_before_merge) ... ok
+test_source_head_race_preserves_both_states_and_blocks_before_merge (test_platform_evolution.EvolutionBytes.test_source_head_race_preserves_both_states_and_blocks_before_merge) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 4.481s
+
+OK

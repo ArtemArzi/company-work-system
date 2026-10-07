@@ -103,7 +103,7 @@ if "$setup"; then
     command -v git >/dev/null 2>&1 || blocked 'Git 2.43+ required; agent should use native OS installer within existing rights: https://git-scm.com/downloads'
     bounded "$runtime/uv" --no-config python install "$(value PYTHON_REQUEST)" --install-dir "$runtime/python" --no-bin --no-registry
 fi
-bounded "$runtime/uv" --no-config python find --offline --managed-python --no-project --no-python-downloads "$(value PYTHON_REQUEST)" > "$temp/python"
+bounded "$runtime/uv" --no-config python find --offline --system --managed-python --no-project --no-python-downloads "$(value PYTHON_REQUEST)" > "$temp/python"
 python=$(cat "$temp/python")
 case "$python" in "$runtime/python/"*) ;; *) blocked 'managed Python points outside the project runtime' ;; esac
 [ -x "$python" ] || blocked 'managed Python missing; run explicit setup'

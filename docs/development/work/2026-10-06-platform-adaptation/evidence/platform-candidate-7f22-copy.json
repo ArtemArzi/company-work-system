@@ -1,0 +1,12 @@
+{
+  "path": "/home/artem/projects/work/studio/products/company-work-system/.local/platform-candidate-7f22-company",
+  "base": "6101abda09ccbc1d685f79c67df8d56dddd2cbfc",
+  "company": "platform-proof",
+  "validation": {
+    "checked": true,
+    "entities": 22,
+    "skills": 12,
+    "tasks": 0
+  },
+  "development_excluded": true
+}
