@@ -1,0 +1,49 @@
+Recorded excerpts from completed verification calls. No rerun for this record.
+
+Source correction: --system added only to uv python find in bootstrap.py,
+run.sh and run.ps1, retaining --managed-python, --offline and exact owned-path
+checks. Fixture launchers now run with cwd set to the company root.
+Primary reference: https://docs.astral.sh/uv/reference/cli/#uv-python-find
+Observed false assumption: --no-project also disables cwd/.venv discovery.
+The actual pinned uv0.12.23 test asserted legacy find selected .venv/bin/python;
+adding --system selected .local/runtime/python instead.
+
+Command:
+python3 -m unittest discover -s checks -p test_bootstrap.py -v
+Environment: ordinary deterministic run, CWS_BOOTSTRAP_NETWORK not enabled.
+Recorded result:
+----------------------------------------------------------------------
+Ran 18 tests in 6.695s
+
+OK (skipped=1)
+Network setup skipped; native Windows PowerShell stream-forwarding probe passed.
+
+Command:
+CWS_BOOTSTRAP_NETWORK=1 python3 -m unittest checks.test_bootstrap.BootstrapTests.test_real_setup_without_path_python_host_preserved -v
+Recorded result:
+test_real_setup_without_path_python_host_preserved (checks.test_bootstrap.BootstrapTests.test_real_setup_without_path_python_host_preserved) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 15.594s
+
+OK
+{"bootstrap_network": "pass", "platform": "linux", "setup_exit": 0, "repeat_exit": 0, "status_exit": 0, "managed_python": "/tmp/cws-bootstrap-wvpgzwd7/company with spaces/.local/runtime/python/cpython-3.12.15-linux-x86_64-gnu", "host_files_unchanged": true, "offline_reuse": true, "blocked_index_probe_exit": 28}
+
+Offline boundary and assertions:
+HTTPS_PROXY/HTTP_PROXY/ALL_PROXY and their lowercase forms pointed only in
+owned children to http://127.0.0.1:1; NO_PROXY/no_proxy were empty. curl against
+https://pypi.org/simple with a two-second maximum failed with exit28. Repeated
+setup, bootstrap-status, context and doctor then returned exit0 using those
+same offline child environments, from the company cwd. UV archive/executable
+and managed Python SHA256 plus mtime remained unchanged; environment.json
+bytes/mtime and fake-home profile/config bytes remained unchanged. No host
+network, proxy, profile or registry settings were modified.
+Context/doctor here verify entry routing through the existing fixture stub;
+root-owned producer verifies the real system.py integration separately.
+The failed .local/platform-candidate-7f22-company was not modified.
+
+Frozen source SHA256:
+a4e817904a9b4f9c345c71a709a61e75eaf9ccad4d397175719285be6c954b9f  template/scripts/bootstrap.py
+f8dee6eda612de6384ba7b8b7c79d3d5a59c92895a464bd85bccd2730172edf7  template/scripts/run.sh
+114248f8b5a67d7629c7bf2e25874c2f06e2a481da4cfc9ca7a673b9c0441aa7  template/scripts/run.ps1
+8221a4e5ddaa06a8cf34f84289a411940a2ec988fb90aaa977ebe543788ff9b0  checks/test_bootstrap.py
