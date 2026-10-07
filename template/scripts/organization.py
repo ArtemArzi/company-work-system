@@ -21,6 +21,8 @@ MAX_PATHS = 128
 MAX_READ_BYTES = 1_048_576
 READABLE_SUFFIXES = {".md", ".yaml", ".yml", ".json"}
 LINKS = re.compile(r"\]\(([^)]+)\)")
+EXCLUDED_DIRECTORIES = {'.git', '.local', '.venv', '.system', '.agents',
+                        '.claude', '.codex', '__pycache__'}
 
 
 def _relative(root, file):
@@ -65,6 +67,9 @@ def _input_paths(root, values):
         raise Rejected(str(exc)) from exc
     result = []
     for relative in values:
+        require(not any(part in EXCLUDED_DIRECTORIES
+                        for part in Path(relative).parts),
+                "organization path is in an excluded directory")
         file = path(root, relative)
         require(not file.exists() or file.is_file(), "organization path must be a file")
         result.append(relative)
@@ -93,14 +98,49 @@ def _read(file):
 
 
 def _walk_values(value, target):
-    if isinstance(value, str):
-        return value == target
-    if isinstance(value, list):
-        return any(_walk_values(item, target) for item in value)
-    if isinstance(value, dict):
-        return any(key == target or _walk_values(item, target)
-                   for key, item in value.items())
+    """Find an exact path in a possibly cyclic or deeply nested decoded graph."""
+    pending, seen = [value], set()
+    while pending:
+        current = pending.pop()
+        if isinstance(current, str):
+            if current == target:
+                return True
+            continue
+        if not isinstance(current, (list, dict)):
+            continue
+        marker = id(current)
+        if marker in seen:
+            continue
+        seen.add(marker)
+        if isinstance(current, list):
+            pending.extend(current)
+        else:
+            for key, item in current.items():
+                if key == target:
+                    return True
+                pending.append(item)
     return False
+
+
+def _task_output_paths(value):
+    """Collect current and historical result artifacts explicitly owned by a task."""
+    pending, seen, result = [value], set(), set()
+    while pending:
+        current = pending.pop()
+        if not isinstance(current, (list, dict)):
+            continue
+        marker = id(current)
+        if marker in seen:
+            continue
+        seen.add(marker)
+        if isinstance(current, list):
+            pending.extend(current)
+            continue
+        output = current.get("output")
+        if isinstance(output, dict) and isinstance(output.get("path"), str):
+            result.add(output["path"])
+        pending.extend(current.values())
+    return result
 
 
 def _link_target(root, source, raw):
@@ -155,8 +195,6 @@ def _scan(root, task_id):
     documents, skipped_aliases, skipped_oversize, skipped_unreadable = {}, [], [], []
     own_snapshot = (f"work/{task_id}/inputs/organization-snapshot.json"
                     if task_id else None)
-    excluded = {'.git', '.local', '.venv', '.system', '.agents', '.claude',
-                '.codex', '__pycache__'}
     def walk_error(exc):
         try:
             failed = Path(exc.filename)
@@ -167,7 +205,7 @@ def _scan(root, task_id):
         kept = []
         for name in dirs:
             candidate = Path(directory) / name
-            if name in excluded:
+            if name in EXCLUDED_DIRECTORIES:
                 continue
             if platform.alias(candidate):
                 skipped_aliases.append(_relative(root, candidate))
@@ -195,7 +233,8 @@ def _scan(root, task_id):
             elif safe.suffix == ".json":
                 parsed = json.loads(text)
             documents[relative] = {"file": safe, "text": text, "parsed": parsed}
-        except (OSError, UnicodeError, yaml.YAMLError, json.JSONDecodeError):
+        except (OSError, UnicodeError, yaml.YAMLError, json.JSONDecodeError,
+                RecursionError):
             skipped_unreadable.append(relative)
     coverage = {
         "complete": not (skipped_aliases or skipped_oversize or skipped_unreadable),
@@ -214,11 +253,24 @@ def inspect(root, paths, task_id=None):
         ident(task_id)
     company = config(root)["id"]
     documents, coverage = _scan(root, task_id)
+    output_owners = {}
+    for source_relative, document in documents.items():
+        if (source_relative.startswith("work/") and
+                source_relative.endswith("/task.json") and
+                isinstance(document["parsed"], dict)):
+            for output in _task_output_paths(document["parsed"]):
+                output_owners.setdefault(output, set()).add(source_relative)
+    owned_outputs = set(output_owners)
+    missing_outputs = sorted(output for output in owned_outputs if output not in documents)
+    coverage["missing_owned_outputs"] = missing_outputs
+    coverage["complete"] = coverage["complete"] and not missing_outputs
     preimage_paths = {"company/config.yaml", *selected}
     items = []
     for relative in selected:
         selected_file, reason = _safe_file(root, relative)
         require(reason != "alias", "organization path uses an alias")
+        require(reason in {None, "absent"},
+                "organization selected path unavailable: " + str(reason))
         state = "file" if selected_file else "absent"
         kind, placement, destination = ("file", "unknown", None)
         broken = []
@@ -243,6 +295,8 @@ def inspect(root, paths, task_id=None):
             if current == root:
                 break
             current = current.parent
+        if nearest_map:
+            preimage_paths.add(nearest_map)
         if required_map:
             preimage_paths.add(required_map)
             map_document = documents.get(required_map)
@@ -253,7 +307,7 @@ def inspect(root, paths, task_id=None):
                         mapped = True
                         break
 
-        inbound, structured, immutable = [], [], []
+        inbound, structured, immutable_paths = [], [], set()
         for source_relative, document in documents.items():
             if source_relative == relative:
                 continue
@@ -263,12 +317,20 @@ def inspect(root, paths, task_id=None):
                 if matching:
                     inbound.append({"path": source_relative, "targets": sorted(set(matching))})
                     preimage_paths.add(source_relative)
+                    if source_relative in owned_outputs:
+                        immutable_paths.add(source_relative)
+                        immutable_paths.update(output_owners[source_relative])
+                        preimage_paths.update(output_owners[source_relative])
             if document["parsed"] is not None and _walk_values(document["parsed"], relative):
                 structured.append({"path": source_relative})
                 preimage_paths.add(source_relative)
-                if (source_relative.startswith("work/") and
-                        source_relative.endswith("/task.json")):
-                    immutable.append({"path": source_relative})
+                if (source_relative.endswith("/task.json") and
+                        source_relative.startswith("work/")) or source_relative in owned_outputs:
+                    immutable_paths.add(source_relative)
+                    if source_relative in output_owners:
+                        immutable_paths.update(output_owners[source_relative])
+                        preimage_paths.update(output_owners[source_relative])
+        immutable = [{"path": value} for value in sorted(immutable_paths)]
         action = "leave-open" if (placement in {"semantic-required", "wrong-place", "unknown"}
                                   or immutable or not coverage["complete"] or state == "absent") else "inspect-owner"
         items.append({
@@ -284,7 +346,7 @@ def inspect(root, paths, task_id=None):
             "broken_links": broken,
             "inbound_links": sorted(inbound, key=lambda value: value["path"]),
             "structured_consumers": sorted(structured, key=lambda value: value["path"]),
-            "immutable_pins": sorted(immutable, key=lambda value: value["path"]),
+            "immutable_pins": immutable,
             "recommended_action": action,
         })
     preimages = {}

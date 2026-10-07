@@ -27,7 +27,7 @@ steps:
   - read-context
 - id: choose-organization
   operation: organization
-  instruction: Выбрать keep/merge/move/link/create/leave-open. Для mutation сохранить initial snapshot единственным live-data input, сверить preimage перед каждой записью, обновить всех потребителей и получить стабильный postimage; ambiguity и historical pins сохраняют bytes.
+  instruction: Выбрать keep/merge/move/link/create/leave-open. Для mutation сохранить initial snapshot единственным live-data input, до записи рассчитать exact final hash/absent change set, сверять initial либо собственный предыдущий postimage перед каждым шагом, обновить всех потребителей, проверить changed paths по плану и untouched по initial snapshot, затем доказать стабильность postimage; ambiguity и historical pins сохраняют bytes.
   depends_on:
   - inspect-organization
 - id: execute-organization
@@ -42,4 +42,3 @@ dependency_paths:
 - scripts/validation.py
 - standards/system-evolution.md
 - standards/runtime.md
-- skills/README.md

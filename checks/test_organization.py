@@ -51,9 +51,15 @@ class Organization(Fixture):
                                    encoding="utf-8", newline="\n")
         structured = self.root / "company/projects/consumer.yaml"
         write(structured, {"source": target, "nested": {target: "kept"}})
+        cyclic = self.root / "company/operations/cyclic.yaml"
+        cyclic.write_text(
+            "shared: &shared\n  self: *shared\n  source: company/projects/old-note.md\n",
+            encoding="utf-8", newline="\n")
         pinned = self.root / "work/historical-task/task.json"
         write(pinned, {"inputs": [target], "bindings": {target: "0" * 64},
                        "history": [{"output": {"path": target, "sha256": "1" * 64}}]})
+        observational = self.root / "work/older-organization/inputs/organization-snapshot.json"
+        write(observational, {"preimages": {target: "2" * 64}})
 
         result = organization.inspect(self.root, [target], task_id="organization-task")
         item = self.item(result, target)
@@ -63,10 +69,16 @@ class Organization(Fixture):
                           "company/projects/consumer.md"])
         self.assertEqual(
             {value["path"] for value in item["structured_consumers"]},
-            {"company/projects/consumer.yaml", "work/historical-task/task.json"})
+            {"company/operations/cyclic.yaml", "company/projects/consumer.yaml",
+             "work/historical-task/task.json",
+             "work/older-organization/inputs/organization-snapshot.json"})
         self.assertEqual([value["path"] for value in item["immutable_pins"]],
                          ["work/historical-task/task.json"])
         self.assertEqual(item["recommended_action"], "leave-open")
+        deep = "leaf"
+        for _ in range(2000):
+            deep = [deep]
+        self.assertFalse(organization._walk_values(deep, target))
 
     def test_aliases_bad_paths_duplicates_and_outside_manifest_never_read(self):
         outside = self.base / "outside-secret.md"
@@ -75,6 +87,14 @@ class Organization(Fixture):
         alias.symlink_to(outside)
         note = self.root / "company/projects/note.md"
         note.write_text("Safe\n", encoding="utf-8", newline="\n")
+        for hidden in [".local/private-note.md"]:
+            file = self.root / hidden
+            file.parent.mkdir(parents=True, exist_ok=True)
+            file.write_text("private marker\n", encoding="utf-8", newline="\n")
+        (self.root / ".git").write_text("gitdir: elsewhere\n", encoding="utf-8",
+                                        newline="\n")
+        large = self.root / "company/projects/large.bin"
+        large.write_bytes(b"x" * (organization.MAX_READ_BYTES + 1))
 
         result = organization.inspect(self.root, ["company/projects/note.md"])
         self.assertFalse(result["coverage"]["complete"])
@@ -84,7 +104,9 @@ class Organization(Fixture):
 
         for values in [[], ["../outside.md"], [str(outside)],
                        ["company/projects/note.md", "company/projects/note.md"],
-                       ["company/projects/foreign.md"]]:
+                       ["company/projects/foreign.md"],
+                       [".local/private-note.md"], [".git"],
+                       ["company/projects/large.bin"]]:
             with self.subTest(values=values), self.assertRaises(Rejected):
                 organization.inspect(self.root, values)
 
@@ -99,6 +121,14 @@ class Organization(Fixture):
         after = {file.relative_to(self.root).as_posix(): digest(file)
                  for file in self.root.rglob("*") if file.is_file() and not file.is_symlink()}
         self.assertEqual(before, after)
+
+        nearest_map = self.root / "company/projects/README.md"
+        original_map = nearest_map.read_text(encoding="utf-8")
+        nearest_map.write_text(original_map + "\nConcurrent owner-map change.\n",
+                               encoding="utf-8", newline="\n")
+        with self.assertRaisesRegex(Rejected, "preimage changed"):
+            organization.compare(self.root, snapshot)
+        nearest_map.write_text(original_map, encoding="utf-8", newline="\n")
 
         note.write_text("Concurrent change\n", encoding="utf-8", newline="\n")
         with self.assertRaisesRegex(Rejected, "preimage changed"):
@@ -148,7 +178,9 @@ class Organization(Fixture):
     def test_own_snapshot_allows_verified_change_and_selected_dependencies(self):
         target = self.root / "company/projects/organized-note.md"
         target.write_text("Draft\n", encoding="utf-8", newline="\n")
-        paths = ["company/projects/organized-note.md", "company/projects/README.md"]
+        routed = self.root / "skills/organization-local-note.md"
+        paths = ["company/projects/organized-note.md", "skills/README.md",
+                 "skills/organization-local-note.md"]
         snapshot = organization.inspect(self.root, paths, task_id="organization-task")
         snapshot_file = self.root / "work/organization-task/inputs/organization-snapshot.json"
         write(snapshot_file, snapshot)
@@ -178,6 +210,8 @@ class Organization(Fixture):
         self.assertIn("scripts/organization.py", scope_paths)
         self.assertIn("company/standards/organization-rule.md", scope_paths)
         self.assertNotIn("company/projects/organized-note.md", scope_paths)
+        self.assertNotIn("skills/README.md", scope_paths)
+        self.assertNotIn("skills/organization-local-note.md", scope_paths)
 
         unrelated = self.root / "company/marketing/README.md"
         unrelated.write_text(unrelated.read_text(encoding="utf-8") + "\nUnrelated.\n",
@@ -186,22 +220,25 @@ class Organization(Fixture):
                                               task["binding_scope"]), [])
 
         target.write_text("Organized\n", encoding="utf-8", newline="\n")
-        project_map = self.root / "company/projects/README.md"
-        project_map.write_text(project_map.read_text(encoding="utf-8") +
-                               "\n[Organized note](organized-note.md)\n",
-                               encoding="utf-8", newline="\n")
+        routed.write_text("# Local organization note\n", encoding="utf-8", newline="\n")
+        skill_map = self.root / "skills/README.md"
+        skill_map.write_text(skill_map.read_text(encoding="utf-8") +
+                             "\n[Local organization note](organization-local-note.md)\n",
+                             encoding="utf-8", newline="\n")
+        self.assertEqual(dependencies.changed(self.root, task["bindings"],
+                                              task["binding_scope"]), [])
         postimage = organization.inspect(self.root, paths, task_id="organization-task")
         organization.compare(self.root, postimage)
         artifact = {
             "schema_version": 1, "company_id": "test-company", "kind": "note",
             "summary": "Synthetic note has one owner and one map route",
-            "next_action": "Recipient can use the canonical project map",
+            "next_action": "Recipient can use the updated skill map",
             "limitations": ["Synthetic local organization; native discovery unknown"],
             "sources": [{"path": snapshot_file.relative_to(self.root).as_posix(),
                          "sha256": snapshot_hash}],
         }
         critical = {
-            "request_alignment": "One note and its existing map were organized",
+            "request_alignment": "One note and the real skills map were organized",
             "counterexample": "A second status document would violate the owner rule",
             "limitations": ["Synthetic fixture"],
             "references": [snapshot_file.relative_to(self.root).as_posix()],
@@ -232,6 +269,58 @@ class Organization(Fixture):
         item = self.item(result, "company/sources/input.json")
         self.assertTrue(item["immutable_pins"])
         self.assertEqual(item["recommended_action"], "leave-open")
+
+    def test_verified_result_source_is_immutable_without_task_input_reference(self):
+        accepted = self.root / "company/projects/accepted-input.md"
+        accepted.write_text("Accepted input\n", encoding="utf-8", newline="\n")
+        source = self.root / "company/projects/result-only-source.md"
+        source.write_text("Result evidence\n", encoding="utf-8", newline="\n")
+        operations.intake(
+            self.root, "result-only-history", "Prepare one source-backed note",
+            "test-owner", {"kind": "note"}, True,
+            inputs=["company/projects/accepted-input.md"])
+        artifact = {
+            "schema_version": 1, "company_id": "test-company", "kind": "note",
+            "summary": "One source-backed note", "next_action": "Use the accepted note",
+            "limitations": ["Synthetic fixture"],
+            "sources": [{"path": "company/projects/result-only-source.md",
+                         "sha256": digest(source)}],
+        }
+        critical = {
+            "request_alignment": "The note is backed by a separate result source",
+            "counterexample": "The source is intentionally absent from task inputs",
+            "limitations": ["Synthetic fixture"],
+            "references": ["company/projects/accepted-input.md"],
+        }
+        verified = operations.execute(self.root, "result-only-history", artifact, critical)
+        validation.task(self.root, verified)
+
+        result = organization.inspect(
+            self.root, ["company/projects/result-only-source.md"],
+            task_id="organization-task")
+        item = self.item(result, "company/projects/result-only-source.md")
+        self.assertEqual(item["immutable_pins"], [
+            {"path": "work/result-only-history/result-2.json"},
+            {"path": "work/result-only-history/task.json"},
+        ])
+        self.assertEqual(item["recommended_action"], "leave-open")
+
+        snapshot = result
+        verified["output"] = None
+        write(task_file(self.root, "result-only-history"), verified)
+        with self.assertRaisesRegex(Rejected, "preimage changed"):
+            organization.compare(self.root, snapshot)
+        verified["output"] = {
+            "path": "work/result-only-history/result-999.json",
+            "sha256": "0" * 64,
+        }
+        write(task_file(self.root, "result-only-history"), verified)
+        incomplete = organization.inspect(
+            self.root, ["company/projects/result-only-source.md"],
+            task_id="organization-task")
+        self.assertFalse(incomplete["coverage"]["complete"])
+        self.assertEqual(incomplete["coverage"]["missing_owned_outputs"],
+                         ["work/result-only-history/result-999.json"])
 
 
 if __name__ == "__main__":
