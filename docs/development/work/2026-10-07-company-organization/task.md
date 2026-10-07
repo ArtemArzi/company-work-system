@@ -1,7 +1,7 @@
 # Company Organization и выпуск 1.3.1
 
-Статус: кандидат реализации 1.3.1; targeted проверки и независимый behavioural
-walkthrough пройдены, полный regression/release/result acceptance выполняются.
+Статус: проверенный release-кандидат 1.3.1; implementation, полный regression,
+behavioural walkthrough и изолированный пакет пройдены, result acceptance pending.
 Владелец результата — продукт `company-work-system`.
 Поручение владельца 07.10.2026: добавить навык Company Organization, тщательно
 продумать его поведение и выпустить продукт 1.3.1 в `origin/main`. Установленный
@@ -226,3 +226,12 @@ Critical/High/Medium. Итоговая независимая приёмка: pe
   финальный кандидат повторно прошёл 173 tests за 1181.983s, `OK (skipped=1)`.
   Единственный skip — явный opt-in real-network bootstrap; локальные Windows/WSL,
   localhost, release/update и все 7 organization cases выполнены.
+- Product commit `58dbb23a1db156daff4ecb0a1d207647e6e4a372` создан обычным
+  Git с действующими hooks. Из чистого commit собран release-only SHA
+  `1c0f6091fcfac49645dd76c2d45d99740d4cad5b` и bundle SHA-256
+  `4ce4d5d6ddba7c846736d70bed8faa38394c4c0c5f520b9f6879fe1b64e8957e`.
+  Новая синтетическая компания из переданного bundle прошла validate: 23
+  entities, 13 skills, 0 tasks; development documents отсутствуют. Реальный
+  `organization-check` в ней подтвердил canonical/mapped skill, четыре inbound
+  links, полное покрытие и read-only результат. Машиночитаемое свидетельство —
+  [release-artifact.json](evidence/release-artifact.json).
