@@ -1,9 +1,8 @@
 # Company Organization и выпуск 1.3.1
 
-Статус: проверенный release-кандидат 1.3.1; implementation, полный regression,
-два behavioural walkthrough и изолированный пакет пройдены; обновлённый пакет
-доказательств передаётся на artifact-only revalidation после предварительного
-REJECT устаревшего свидетельства.
+Статус: release-кандидат 1.3.1 принят независимым reviewer; implementation,
+полный regression, два behavioural walkthrough и изолированный пакет пройдены.
+Следующий шаг — разрешённый push в `origin/main` с точным readback.
 Владелец результата — продукт `company-work-system`.
 Поручение владельца 07.10.2026: добавить навык Company Organization, тщательно
 продумать его поведение и выпустить продукт 1.3.1 в `origin/main`. Установленный
@@ -199,8 +198,15 @@ output scope и CAS; чужие/исторические pins сохраняют
 `company-organization-plan-pass-20261007-fa850066-r3`, 0 Critical/High/Medium.
 После записи receipt текущий документ точечно перепроверен тем же plan reviewer:
 PASS `company-organization-plan-pass-20261007-cf6e1164-r4`, 0
-Critical/High/Medium. Итоговая независимая приёмка: pending; должна выполняться
-другим свежим reviewer.
+Critical/High/Medium. Итоговую независимую приёмку выполнил другой свежий
+reviewer после сборки точного release evidence.
+
+Итоговая приёмка после обновления точного artifact evidence: PASS
+`company-organization-result-pass-20261007-039928af-r2`, 0
+Critical/High/Medium/Low. Приняты product HEAD `039928af40a0d2bae64bc0e7aaa7536a77c91874`,
+implementation `43863660c2c2abd4dc39ef3f50876b18e622be9b`, release
+`7581e8dba10333068d03bfd915eb765c8a300ddc` и bundle SHA-256
+`bd49afad34dfeb93ce124a424aca18cd209063a98e66d4bf486ecadb5229e52b`.
 
 ## Реализация и текущие доказательства
 

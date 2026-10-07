@@ -65,7 +65,14 @@
     "preliminary_receipt": "company-organization-result-reject-20261007-43863660-r1",
     "source_findings": "no open Critical, High or source Medium findings",
     "rejection_reason": "tracked release evidence still described the superseded candidate",
-    "required_next_check": "artifact-only revalidation against this refreshed evidence"
+    "final_receipt": "company-organization-result-pass-20261007-039928af-r2",
+    "verdict": "passed",
+    "findings": {
+      "critical": 0,
+      "high": 0,
+      "medium": 0,
+      "low": 0
+    }
   },
   "boundaries": [
     "Work and real companies were not updated",
