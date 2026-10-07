@@ -1,0 +1,25 @@
+{
+  "path": "/home/artem/projects/work/studio/products/company-work-system/.local/company-work-system-1.3.0-verified-copy",
+  "base": "c26dbb6f7ecbb8fbe4cdf64245bc25bbc0fc70eb",
+  "company": "release-proof",
+  "validation": {
+    "checked": true,
+    "entities": 22,
+    "skills": 12,
+    "tasks": 0
+  },
+  "development_excluded": true,
+  "tree_equal": true,
+  "all_refs": {
+    "commits": 16,
+    "blobs": 220,
+    "bytes": 0,
+    "git_processes": 7,
+    "coverage_sha256": "9471ef8c08f682f3c723937f920a649efd19c0e771af461802c8e3c2e87dd4d4",
+    "policy": "release",
+    "content_checked": false,
+    "ref_tips": {
+      "refs/heads/main": "c26dbb6f7ecbb8fbe4cdf64245bc25bbc0fc70eb"
+    }
+  }
+}

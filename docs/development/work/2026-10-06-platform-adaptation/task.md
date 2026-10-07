@@ -1,6 +1,6 @@
 # Адаптация рабочих сред
 
-Состояние: исправленный runtime1872 прошёл полный CI трёх ОС и межплатформенное восстановление; WSL полный запуск завершился с одним source-time отказом (причина не подтверждена); повтор20/20 и новый настоящий CLI прошли. Финальный пакет проверен; независимая whole-result приёмка ещё выполняется. Поручение06.10: проверить и докрутить Windows+WSL, Windows безWSL, macOS. Уточнение: изменить и доставить только продукт, клиентам версия применяется позже отдельно.
+Состояние: исправленный runtime1872 прошёл полный CI трёх ОС и межплатформенное восстановление; WSL полный запуск завершился с одним source-time отказом (причина не подтверждена); повтор20/20 и новый настоящий CLI прошли. Финальный пакет проверен; независимая whole-result приёмка PASS, продукт1.3.0 опубликован в main и SHA подтверждён. Поручение06.10: проверить и докрутить Windows+WSL, Windows безWSL, macOS. Уточнение: изменить и доставить только продукт, клиентам версия применяется позже отдельно.
 
 [Исследование](research.md). Baseline7b38b92, clean product main, preflightcurrent. Work/клиент/host settings сохраняются. План и общий следующий шаг — ../../PLAN.md; этот документ владеет деталями, ошибками и evidence данного этапа.
 
@@ -122,3 +122,13 @@ Frozen7f22 WSL166tests1198.251s завершился errors1: test_wrong_arithme
 Challenge: системные UTC часы не монотонны (https://docs.python.org/3/library/time.html#time.time); скачок часов — предположение, не подтверждённая причина. Требование rejecting stale/future остаётся. Отдельно новый1872 WSLactualsetup/repeat/offlineCLI и затронутые bootstrap/legacychecks PASS; полныйWSL PASS не заявляется. Остаточная проблема: диагностировать наблюдаемый source-time отказ при повторении с сохранением времён source/evaluation/monotonic; не запускать повтор полного20min suite без новых оснований и не менять hostclock/допуск freshness автоматически.
 
 Финальный package774fd04: release6bfedd9f311b1a7526e91ed3de79265296e77ca1 (не tree), bundleSHA2567242a67c11fe8296f917320538042df7bbc4a34fa4e95bb00e5484280e644052, allrefs isolation15commits, mirrorreadback/create/adapt/validate22entities12skills/developmentexcluded/treeequal PASS. Metadata boundaries далее уточняются по WSLfailed evidence; после этого пакет пересобрать новымименем, не перезаписывать сохранённый.
+
+## Завершение разрешённой поставки 1.3.0
+
+Независимый whole-resultreviewer platform_result_acceptance (не автор и не planreviewer) PASS для acb861948a75f63befa25d8868201ba9c4e88252; receipt company-work-system-platform-result-pass-20261007-acb86194-6de729c1. Repairlist empty. Mandatory exactLinuxfull/3OSmatrix/transfer/bundle gates выполнены; дополнительный WSLfullFAILED1 остаётся явным свидетельством, не заменяет PASS. Reviewer признал20unchangedrepeats+actualcorrectedWSLCLI/targeted достаточными для ограниченной адаптации; причина исходного отказа не подтверждена.
+
+Окончательный releasec26dbb6f7ecbb8fbe4cdf64245bc25bbc0fc70eb, bundleSHA2567c26caf9142cea144dcfa5f1abaf29de540260d777ff44be64a86c931c2fcd7c: .local/company-work-system-1.3.0-verified.bundle. Независимый allrefs isolation/treeequal/mirror/create/adapt/validate PASS; evidence/company-work-system-1.3.0-verified-{release,copy}.json. Только3coverage/profile documents отличаются от testedruntime1872; исполнение/guards неизменны.
+
+Обычный gitpush origin HEAD:main доставил acb8619; gitls-remote подтвердил exactSHA acb861948a75f63befa25d8868201ba9c4e88252. Эта заключительная запись документирует уже подтверждённую functionaldelivery; актуальный внешний tip — origin/main, последующий documentation-only commit не меняет template/bundle. Work/клиенты/hostsettings не обновлялись.
+
+Следующий шаг: при отдельном поручении подготовить кандидат обновления клиента из указанного isolatedbundle с сохранением его данных/настроек/местных решений. Непроверенное: nativeCodex/Claude discovery/trust/events/accounts, Cloud, Windows10/11 и дополнительныеархитектуры; hooksdefaultoff, Windowsdirectorypowerlossdurability не обещана. Остаточная WSLverificationнеопределённость: при повторении source-time отказа сохранить source/evaluationUTC+monotonic в конкретной задаче; не допускать future/stale автоматически и не менять часы владельца. Нового самостоятельного процесса/журнала для этого не создано.
