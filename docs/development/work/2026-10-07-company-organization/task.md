@@ -1,7 +1,9 @@
 # Company Organization и выпуск 1.3.1
 
 Статус: проверенный release-кандидат 1.3.1; implementation, полный regression,
-behavioural walkthrough и изолированный пакет пройдены, result acceptance pending.
+два behavioural walkthrough и изолированный пакет пройдены; обновлённый пакет
+доказательств передаётся на artifact-only revalidation после предварительного
+REJECT устаревшего свидетельства.
 Владелец результата — продукт `company-work-system`.
 Поручение владельца 07.10.2026: добавить навык Company Organization, тщательно
 продумать его поведение и выпустить продукт 1.3.1 в `origin/main`. Установленный
@@ -209,7 +211,7 @@ Critical/High/Medium. Итоговая независимая приёмка: pe
   inbound links, structured consumers, immutable task pins, exact preimages и
   coverage. `--expect` проверяет sealed snapshot, company config, consumers,
   preimages и неизменность полной границы scan.
-- Targeted: 7/7 `test_organization` PASS; repository validate PASS
+- Targeted: 8/8 `test_organization` PASS; repository validate PASS
   (`entities=23`, `skills=13`, `tasks=0`); skill quick_validate PASS; py_compile
   и `git diff --check` PASS.
 - Независимый isolated walkthrough прошёл пять сценариев: reuse существующего
@@ -219,19 +221,24 @@ Critical/High/Medium. Итоговая независимая приёмка: pe
   alias после снимка. Первое неверное допущение: hashes наблюдавшихся consumers
   достаточны без закрепления самой границы scan. Исправление сравнивает coverage;
   прежний reproducer теперь exit 2 `organization inspection coverage changed`,
-  regression включён в targeted 7/7.
+  regression включён в targeted 8/8. Усиленный walkthrough отдельно проверил
+  заранее объявленные hashes для create/move, промежуточные preimage guards и
+  отказ при гонке в нетронутом consumer; его отчёт:
+  `/tmp/company-organization-planned-uMEjoC/report.json`.
 - Первый полный sandbox run: 170 PASS, 1 opt-in skip, два environment-only
   отказа (localhost socket запрещён и PowerShell/WSL vsock недоступен). Вне
   sandbox полный suite прошёл; после последних scanner hardening правок точный
-  финальный кандидат повторно прошёл 173 tests за 1181.983s, `OK (skipped=1)`.
+  финальный кандидат `43863660c2c2abd4dc39ef3f50876b18e622be9b`
+  повторно прошёл 174 tests за 1140.731s, `OK (skipped=1)`.
   Единственный skip — явный opt-in real-network bootstrap; локальные Windows/WSL,
-  localhost, release/update и все 7 organization cases выполнены.
-- Product commit `58dbb23a1db156daff4ecb0a1d207647e6e4a372` создан обычным
-  Git с действующими hooks. Из чистого commit собран release-only SHA
-  `1c0f6091fcfac49645dd76c2d45d99740d4cad5b` и bundle SHA-256
-  `4ce4d5d6ddba7c846736d70bed8faa38394c4c0c5f520b9f6879fe1b64e8957e`.
+  localhost, release/update и все 8 organization cases выполнены.
+- Implementation commit `43863660c2c2abd4dc39ef3f50876b18e622be9b`
+  создан обычным Git с действующими hooks. Из него собран release-only SHA
+  `7581e8dba10333068d03bfd915eb765c8a300ddc` и bundle SHA-256
+  `bd49afad34dfeb93ce124a424aca18cd209063a98e66d4bf486ecadb5229e52b`.
   Новая синтетическая компания из переданного bundle прошла validate: 23
   entities, 13 skills, 0 tasks; development documents отсутствуют. Реальный
   `organization-check` в ней подтвердил canonical/mapped skill, четыре inbound
-  links, полное покрытие и read-only результат. Машиночитаемое свидетельство —
+  links, полное покрытие и read-only результат; повтор с sealed snapshot ранее
+  подтвердил `status=unchanged`. Машиночитаемое свидетельство —
   [release-artifact.json](evidence/release-artifact.json).
