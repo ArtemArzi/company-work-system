@@ -103,7 +103,7 @@ platforms:
     native_hooks: unverified; default off
     provider_access: verify per company/session
   wsl2:
-    runtime: actual CLI/bootstrap/offline/targeted checks passed on WSL2 Ubuntu24.04 x86_64; full7f22 suite recorded separately; other versions/architectures unverified
+    runtime: actual CLI/bootstrap/offline/targeted checks passed on WSL2 Ubuntu24.04 x86_64; full7f22 suite had one source-time error; 20 unchanged repeats passed; full WSL pass unconfirmed; other versions/architectures unverified
     instructions: explicit AGENTS.md read
     native_discovery: unverified
     native_hooks: unverified; default off
