@@ -1,0 +1,240 @@
+﻿2026-10-07T03:27:13.1868973Z Current runner version: '2.337.0'
+2026-10-07T03:27:13.1893225Z ##[group]Runner Image Provisioner
+2026-10-07T03:27:13.1894266Z Hosted Compute Agent
+2026-10-07T03:27:13.1894905Z Version: 20260901.588
+2026-10-07T03:27:13.1895631Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-07T03:27:13.1896385Z Build Date: 2026-09-01T19:56:44Z
+2026-10-07T03:27:13.1897292Z Worker ID: {8949a8ba-4d55-4f44-89e4-9cbbf91f7a43}
+2026-10-07T03:27:13.1898093Z Azure Region: westus3
+2026-10-07T03:27:13.1898682Z ##[endgroup]
+2026-10-07T03:27:13.1900429Z ##[group]Operating System
+2026-10-07T03:27:13.1901137Z Ubuntu
+2026-10-07T03:27:13.1901661Z 24.04.5
+2026-10-07T03:27:13.1902248Z LTS
+2026-10-07T03:27:13.1902877Z ##[endgroup]
+2026-10-07T03:27:13.1903474Z ##[group]Runner Image
+2026-10-07T03:27:13.1904098Z Image: ubuntu-24.04
+2026-10-07T03:27:13.1904690Z Version: 20260927.320.1
+2026-10-07T03:27:13.1905995Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260927.320/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-07T03:27:13.1907864Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260927.320
+2026-10-07T03:27:13.1908853Z ##[endgroup]
+2026-10-07T03:27:13.1910001Z ##[group]GITHUB_TOKEN Permissions
+2026-10-07T03:27:13.1912121Z Contents: read
+2026-10-07T03:27:13.1912774Z Metadata: read
+2026-10-07T03:27:13.1913429Z ##[endgroup]
+2026-10-07T03:27:13.1915517Z Secret source: Actions
+2026-10-07T03:27:13.1917049Z Cache mode: write
+2026-10-07T03:27:13.1918007Z Prepare workflow directory
+2026-10-07T03:27:13.2312902Z Prepare all required actions
+2026-10-07T03:27:13.2361623Z Getting action download info
+2026-10-07T03:27:13.5491171Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-07T03:27:13.6640397Z Download action repository 'actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-07T03:27:13.7412187Z Download action repository 'actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093' (SHA:d3f86a106a0bac45b974a628896c90dbdf5c8093)
+2026-10-07T03:27:14.6648613Z Complete job name: transfer (ubuntu-24.04)
+2026-10-07T03:27:14.7601292Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-10-07T03:27:14.7603123Z with:
+2026-10-07T03:27:14.7604047Z   ref: 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:27:14.7605279Z   persist-credentials: false
+2026-10-07T03:27:14.7606294Z   fetch-depth: 0
+2026-10-07T03:27:14.7607476Z   repository: ArtemArzi/company-work-system
+2026-10-07T03:27:14.7616203Z   token: ***
+2026-10-07T03:27:14.7617250Z   ssh-strict: true
+2026-10-07T03:27:14.7618137Z   ssh-user: git
+2026-10-07T03:27:14.7618985Z   clean: true
+2026-10-07T03:27:14.7619892Z   sparse-checkout-cone-mode: true
+2026-10-07T03:27:14.7620967Z   fetch-tags: false
+2026-10-07T03:27:14.7621872Z   show-progress: true
+2026-10-07T03:27:14.7622786Z   lfs: false
+2026-10-07T03:27:14.7623630Z   submodules: false
+2026-10-07T03:27:14.7624535Z   set-safe-directory: true
+2026-10-07T03:27:14.7625603Z   allow-unsafe-pr-checkout: false
+2026-10-07T03:27:14.7627391Z ##[endgroup]
+2026-10-07T03:27:14.8641531Z Syncing repository: ArtemArzi/company-work-system
+2026-10-07T03:27:14.8646158Z ##[group]Getting Git version info
+2026-10-07T03:27:14.8649138Z Working directory is '/home/runner/work/company-work-system/company-work-system'
+2026-10-07T03:27:14.8653109Z [command]/usr/bin/git version
+2026-10-07T03:27:14.8709892Z git version 2.55.0
+2026-10-07T03:27:14.8734905Z ##[endgroup]
+2026-10-07T03:27:14.8762359Z Temporarily overriding HOME='/home/runner/work/_temp/d3b01d09-46f9-4fd7-b5a4-5c7cdd932384' before making global git config changes
+2026-10-07T03:27:14.8767669Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T03:27:14.8772262Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/company-work-system/company-work-system
+2026-10-07T03:27:14.8815498Z Deleting the contents of '/home/runner/work/company-work-system/company-work-system'
+2026-10-07T03:27:14.8826970Z ##[group]Initializing the repository
+2026-10-07T03:27:14.8831674Z [command]/usr/bin/git init /home/runner/work/company-work-system/company-work-system
+2026-10-07T03:27:14.8939165Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-07T03:27:14.8943630Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-07T03:27:14.8947175Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-07T03:27:14.8950105Z hint: call:
+2026-10-07T03:27:14.8951442Z hint:
+2026-10-07T03:27:14.8953113Z hint: 	git config --global init.defaultBranch <name>
+2026-10-07T03:27:14.8955208Z hint:
+2026-10-07T03:27:14.8957388Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-07T03:27:14.8961046Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-07T03:27:14.8963628Z hint:
+2026-10-07T03:27:14.8964986Z hint: 	git branch -m <name>
+2026-10-07T03:27:14.8968148Z hint:
+2026-10-07T03:27:14.8970351Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-07T03:27:14.8974371Z Initialized empty Git repository in /home/runner/work/company-work-system/company-work-system/.git/
+2026-10-07T03:27:14.8980734Z [command]/usr/bin/git remote add origin https://github.com/ArtemArzi/company-work-system
+2026-10-07T03:27:14.9003337Z ##[endgroup]
+2026-10-07T03:27:14.9005906Z ##[group]Disabling automatic garbage collection
+2026-10-07T03:27:14.9008405Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-07T03:27:14.9040902Z ##[endgroup]
+2026-10-07T03:27:14.9043234Z ##[group]Setting up auth
+2026-10-07T03:27:14.9047073Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T03:27:14.9082431Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-07T03:27:14.9475516Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T03:27:14.9519091Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-07T03:27:14.9749103Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T03:27:14.9787590Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-07T03:27:15.0015532Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-07T03:27:15.0056943Z ##[endgroup]
+2026-10-07T03:27:15.0058534Z ##[group]Fetching the repository
+2026-10-07T03:27:15.0067721Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-10-07T03:27:15.9703897Z From https://github.com/ArtemArzi/company-work-system
+2026-10-07T03:27:15.9705555Z  * [new branch]      codex/platform-adaptation -> origin/codex/platform-adaptation
+2026-10-07T03:27:15.9707348Z  * [new branch]      main       -> origin/main
+2026-10-07T03:27:15.9716474Z [command]/usr/bin/git rev-parse --verify --quiet 1872bf7f81e8a19855ca9573fcf353f203c2d9cf^{object}
+2026-10-07T03:27:15.9747393Z 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:27:15.9752648Z ##[endgroup]
+2026-10-07T03:27:15.9753327Z ##[group]Determining the checkout info
+2026-10-07T03:27:15.9754100Z ##[endgroup]
+2026-10-07T03:27:15.9760248Z [command]/usr/bin/git sparse-checkout disable
+2026-10-07T03:27:15.9814674Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-07T03:27:15.9853267Z ##[group]Checking out the ref
+2026-10-07T03:27:15.9857431Z [command]/usr/bin/git checkout --progress --force 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:27:16.0094707Z Note: switching to '1872bf7f81e8a19855ca9573fcf353f203c2d9cf'.
+2026-10-07T03:27:16.0095440Z 
+2026-10-07T03:27:16.0095983Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-07T03:27:16.0097311Z changes and commit them, and you can discard any commits you make in this
+2026-10-07T03:27:16.0098375Z state without impacting any branches by switching back to a branch.
+2026-10-07T03:27:16.0098945Z 
+2026-10-07T03:27:16.0099297Z If you want to create a new branch to retain commits you create, you may
+2026-10-07T03:27:16.0099898Z do so (now or later) by using -c with the switch command. Example:
+2026-10-07T03:27:16.0100211Z 
+2026-10-07T03:27:16.0100439Z   git switch -c <new-branch-name>
+2026-10-07T03:27:16.0100680Z 
+2026-10-07T03:27:16.0100828Z Or undo this operation with:
+2026-10-07T03:27:16.0101049Z 
+2026-10-07T03:27:16.0101176Z   git switch -
+2026-10-07T03:27:16.0101358Z 
+2026-10-07T03:27:16.0101625Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-07T03:27:16.0102018Z 
+2026-10-07T03:27:16.0102311Z HEAD is now at 1872bf7 fix: select owned Python base from company working directory
+2026-10-07T03:27:16.0114287Z ##[endgroup]
+2026-10-07T03:27:16.0158798Z [command]/usr/bin/git log -1 --format=%H
+2026-10-07T03:27:16.0188394Z 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:27:16.0198469Z ##[group]Removing auth
+2026-10-07T03:27:16.0202952Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T03:27:16.0237943Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-07T03:27:16.0464090Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T03:27:16.0493885Z http.https://github.com/.extraheader
+2026-10-07T03:27:16.0500885Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-07T03:27:16.0538684Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-07T03:27:16.0760880Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T03:27:16.0795836Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-07T03:27:16.1022437Z ##[endgroup]
+2026-10-07T03:27:16.1278097Z ##[group]Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+2026-10-07T03:27:16.1278657Z with:
+2026-10-07T03:27:16.1278956Z   python-version: 3.12
+2026-10-07T03:27:16.1279290Z   check-latest: false
+2026-10-07T03:27:16.1282004Z   token: ***
+2026-10-07T03:27:16.1282320Z   update-environment: true
+2026-10-07T03:27:16.1282675Z   allow-prereleases: false
+2026-10-07T03:27:16.1283010Z   freethreaded: false
+2026-10-07T03:27:16.1283386Z ##[endgroup]
+2026-10-07T03:27:16.2667998Z ##[group]Installed versions
+2026-10-07T03:27:16.2753236Z (node:2390) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T03:27:16.2754764Z Successfully set up CPython (3.12.14)
+2026-10-07T03:27:16.2755879Z ##[endgroup]
+2026-10-07T03:27:16.2774322Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T03:27:16.2956396Z ##[group]Run python -m pip install -r template/requirements.txt
+2026-10-07T03:27:16.2957777Z [36;1mpython -m pip install -r template/requirements.txt[0m
+2026-10-07T03:27:16.3282562Z shell: /usr/bin/bash -e {0}
+2026-10-07T03:27:16.3283068Z env:
+2026-10-07T03:27:16.3283520Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:16.3284200Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-07T03:27:16.3284842Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:16.3285652Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:16.3286192Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:16.3286963Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-07T03:27:16.3287439Z ##[endgroup]
+2026-10-07T03:27:17.2068951Z Collecting PyYAML==6.0.1 (from -r template/requirements.txt (line 1))
+2026-10-07T03:27:17.2564414Z   Downloading PyYAML-6.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (2.1 kB)
+2026-10-07T03:27:17.2644915Z Downloading PyYAML-6.0.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (724 kB)
+2026-10-07T03:27:17.3157079Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 725.0/725.0 kB 29.9 MB/s  0:00:00
+2026-10-07T03:27:17.3520608Z Installing collected packages: PyYAML
+2026-10-07T03:27:17.4118204Z Successfully installed PyYAML-6.0.1
+2026-10-07T03:27:17.4652979Z ##[group]Run actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+2026-10-07T03:27:17.4653481Z with:
+2026-10-07T03:27:17.4653768Z   pattern: synthetic-backup-*
+2026-10-07T03:27:17.4654085Z   path: .local/incoming
+2026-10-07T03:27:17.4654356Z   merge-multiple: false
+2026-10-07T03:27:17.4654657Z   repository: ArtemArzi/company-work-system
+2026-10-07T03:27:17.4654983Z   run-id: 37566264076
+2026-10-07T03:27:17.4655233Z env:
+2026-10-07T03:27:17.4655530Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:17.4656012Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-07T03:27:17.4656483Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:17.4657253Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:17.4657716Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:17.4658181Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-07T03:27:17.4658592Z ##[endgroup]
+2026-10-07T03:27:17.6324496Z (node:2423) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T03:27:17.6325450Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T03:27:17.8390452Z Found 3 artifact(s)
+2026-10-07T03:27:17.8391946Z Filtering artifacts by pattern 'synthetic-backup-*'
+2026-10-07T03:27:17.8413742Z Preparing to download the following artifacts:
+2026-10-07T03:27:17.8415613Z - synthetic-backup-windows-2022 (ID: 11459410227, Size: 272428, Expected Digest: sha256:050215bbcb5c6642f3c7e4dc64010c7487467da0d959e46f2acca5eda4122883)
+2026-10-07T03:27:17.8418479Z - synthetic-backup-macos-14 (ID: 11459265463, Size: 271472, Expected Digest: sha256:7dbdd786da84095909cc31360039e69541a639dbc222ae58ef01d9c876115371)
+2026-10-07T03:27:17.8420919Z - synthetic-backup-ubuntu-24.04 (ID: 11458288972, Size: 494682, Expected Digest: sha256:0c7166f442560531c91203bae57480d8932b734a7de1f19a922a0b0dad0dd1ae)
+2026-10-07T03:27:18.0490061Z Redirecting to blob download url: https://productionresultssa0.blob.core.windows.net/actions-results/48f9ebe3-8629-4a16-8eb0-c04b572000fc/workflow-job-run-9bf83390-08e5-5c2d-b80e-edc5bb73534a/artifacts/7f932c358f6c73700621cf318c4df49c11e263c4600eda791472e1a92119538f.zip
+2026-10-07T03:27:18.0491883Z Starting download of artifact to: /home/runner/work/company-work-system/company-work-system/.local/incoming/synthetic-backup-macos-14
+2026-10-07T03:27:18.1635441Z Redirecting to blob download url: https://productionresultssa0.blob.core.windows.net/actions-results/48f9ebe3-8629-4a16-8eb0-c04b572000fc/workflow-job-run-25092f67-bf45-54c4-a486-403d22842ece/artifacts/63bd141d28858e556fb841b1081e800a56ac92d4527e585472f17ade39912b12.zip
+2026-10-07T03:27:18.1638652Z Starting download of artifact to: /home/runner/work/company-work-system/company-work-system/.local/incoming/synthetic-backup-ubuntu-24.04
+2026-10-07T03:27:18.1677671Z Redirecting to blob download url: https://productionresultssa0.blob.core.windows.net/actions-results/48f9ebe3-8629-4a16-8eb0-c04b572000fc/workflow-job-run-f7345446-b55b-5355-b13c-5e14b35e58d6/artifacts/4ded5c8752ed033111c3191eefde63a5ac6c88e601de48e96f863e405b59fe4f.zip
+2026-10-07T03:27:18.1680855Z Starting download of artifact to: /home/runner/work/company-work-system/company-work-system/.local/incoming/synthetic-backup-windows-2022
+2026-10-07T03:27:18.3091904Z (node:2423) [DEP0005] DeprecationWarning: Buffer() is deprecated due to security and usability issues. Please use the Buffer.alloc(), Buffer.allocUnsafe(), or Buffer.from() methods instead.
+2026-10-07T03:27:18.5066480Z SHA256 digest of downloaded artifact is 7dbdd786da84095909cc31360039e69541a639dbc222ae58ef01d9c876115371
+2026-10-07T03:27:18.5067637Z Artifact download completed successfully.
+2026-10-07T03:27:18.6122452Z SHA256 digest of downloaded artifact is 050215bbcb5c6642f3c7e4dc64010c7487467da0d959e46f2acca5eda4122883
+2026-10-07T03:27:18.6123574Z Artifact download completed successfully.
+2026-10-07T03:27:18.6523987Z SHA256 digest of downloaded artifact is 0c7166f442560531c91203bae57480d8932b734a7de1f19a922a0b0dad0dd1ae
+2026-10-07T03:27:18.6525013Z Artifact download completed successfully.
+2026-10-07T03:27:18.6525662Z Total of 3 artifact(s) downloaded
+2026-10-07T03:27:18.6533648Z Download artifact has finished successfully
+2026-10-07T03:27:18.6708048Z ##[group]Run if ($env:CANDIDATE_SHA -notmatch '^[0-9a-f]{40}$' -or (git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { throw 'Exact candidate required' }
+2026-10-07T03:27:18.6709130Z [36;1mif ($env:CANDIDATE_SHA -notmatch '^[0-9a-f]{40}$' -or (git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { throw 'Exact candidate required' }[0m
+2026-10-07T03:27:18.6709804Z [36;1mif ('ubuntu-24.04' -eq 'ubuntu-24.04') {[0m
+2026-10-07T03:27:18.6710324Z [36;1m  python checks/platform_transfer.py verify .local/incoming .local/restored --old-reader[0m
+2026-10-07T03:27:18.6710797Z [36;1m} else {[0m
+2026-10-07T03:27:18.6711166Z [36;1m  python checks/platform_transfer.py verify .local/incoming .local/restored[0m
+2026-10-07T03:27:18.6711583Z [36;1m}[0m
+2026-10-07T03:27:18.6738091Z shell: /usr/bin/pwsh -command ". '{0}'"
+2026-10-07T03:27:18.6738410Z env:
+2026-10-07T03:27:18.6738691Z   pythonLocation: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:18.6739184Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib/pkgconfig
+2026-10-07T03:27:18.6739653Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:18.6740069Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:18.6740472Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.12.14/x64
+2026-10-07T03:27:18.6740891Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.12.14/x64/lib
+2026-10-07T03:27:18.6741292Z   CANDIDATE_SHA: 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:27:18.6741624Z ##[endgroup]
+2026-10-07T03:27:21.8685497Z {"status": "verified", "os": "linux", "proofs": [{"source": "synthetic-backup-macos-14-current", "reader": "1.3", "status": "restored-and-verified", "head": "407db27b0b4222e5ed2d3f18db4c331044cce01b"}, {"source": "synthetic-backup-macos-14-current", "reader": "original1.2-Linux", "status": "restored-and-verified"}, {"source": "synthetic-backup-ubuntu-24.04-current", "reader": "1.3", "status": "restored-and-verified", "head": "f1c2e3733952cef457adaaedf87d9ad30ce0615d"}, {"source": "synthetic-backup-ubuntu-24.04-current", "reader": "original1.2-Linux", "status": "restored-and-verified"}, {"source": "synthetic-backup-ubuntu-24.04-legacy", "reader": "1.3", "status": "restored-and-verified", "head": "e5b28bc719134e29ed293447e953f3dc22799c4d"}, {"source": "synthetic-backup-ubuntu-24.04-legacy", "reader": "original1.2-Linux", "status": "restored-and-verified"}, {"source": "synthetic-backup-windows-2022-current", "reader": "1.3", "status": "restored-and-verified", "head": "42cab03e06695fdfa9e776d9e21b723bae16d33a"}, {"source": "synthetic-backup-windows-2022-current", "reader": "original1.2-Linux", "status": "restored-and-verified"}], "boundary": "synthetic tracked bytes/history/settings; no provider or human/business proof"}
+2026-10-07T03:27:22.6471545Z Post job cleanup.
+2026-10-07T03:27:22.7685684Z (node:2718) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T03:27:22.7687291Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T03:27:22.7899018Z Post job cleanup.
+2026-10-07T03:27:22.8787019Z [command]/usr/bin/git version
+2026-10-07T03:27:22.8829623Z git version 2.55.0
+2026-10-07T03:27:22.8873408Z Temporarily overriding HOME='/home/runner/work/_temp/335aa88f-c264-49d5-b29f-b34516de9dff' before making global git config changes
+2026-10-07T03:27:22.8875014Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T03:27:22.8880206Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/company-work-system/company-work-system
+2026-10-07T03:27:22.8924650Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T03:27:22.8971894Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-07T03:27:22.9230979Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T03:27:22.9275932Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-07T03:27:22.9548494Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T03:27:22.9590557Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-07T03:27:22.9994428Z Cleaning up orphan processes
+2026-10-07T03:27:23.0267444Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093, actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

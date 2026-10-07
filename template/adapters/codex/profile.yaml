@@ -97,31 +97,31 @@ hook_protocol:
     state
 platforms:
   linux:
-    runtime: verification-pending
+    runtime: suite/bootstrap/real CLI passed on Ubuntu24.04 x86_64; CI37566264076 runtime1872bf7; other versions/architectures unverified
     instructions: explicit AGENTS.md read
     native_discovery: unverified
     native_hooks: unverified; default off
     provider_access: verify per company/session
   wsl2:
-    runtime: verification-pending
+    runtime: actual CLI/bootstrap/offline/targeted checks passed on WSL2 Ubuntu24.04 x86_64; full7f22 suite recorded separately; other versions/architectures unverified
     instructions: explicit AGENTS.md read
     native_discovery: unverified
     native_hooks: unverified; default off
     provider_access: verify per company/session
   macos:
-    runtime: verification-pending
+    runtime: suite/bootstrap/real CLI passed on macOS14 aarch64; CI37566264076 runtime1872bf7; other versions/architectures unverified
     instructions: explicit AGENTS.md read
     native_discovery: unverified
     native_hooks: unverified; default off
     provider_access: verify per company/session
   windows:
-    runtime: verification-pending
+    runtime: suite/bootstrap/real CLI passed on WindowsServer2022 x86_64; CI37566264076 runtime1872bf7; Windows10/11 and other architectures unverified
     instructions: explicit AGENTS.md read
     native_discovery: unverified
     native_hooks: unverified; default off
     provider_access: verify per company/session
   cloud:
-    runtime: verification-pending
+    runtime: unverified; no actual Codex Cloud or Claude cloud service execution
     instructions: explicit AGENTS.md read
     native_discovery: unverified
     native_hooks: command hooks unavailable under cloud orchestration; shared CLI

@@ -1,0 +1,419 @@
+﻿2026-10-07T03:20:14.8508763Z Current runner version: '2.337.0'
+2026-10-07T03:20:14.8530408Z ##[group]Runner Image Provisioner
+2026-10-07T03:20:14.8530892Z Hosted Compute Agent
+2026-10-07T03:20:14.8531200Z Version: 20260901.588
+2026-10-07T03:20:14.8531580Z Commit: f88ec8081b781fac6c440065ac7ff9e710ce3d0b
+2026-10-07T03:20:14.8532009Z Build Date: 2026-09-01T19:56:44Z
+2026-10-07T03:20:14.8532378Z Worker ID: {7d679cf6-59b9-4596-a60d-642fc5decc54}
+2026-10-07T03:20:14.8532797Z Azure Region: southcentralus
+2026-10-07T03:20:14.8533140Z ##[endgroup]
+2026-10-07T03:20:14.8533908Z ##[group]Operating System
+2026-10-07T03:20:14.8534235Z Microsoft Windows Server 2022
+2026-10-07T03:20:14.8534556Z 10.0.20348
+2026-10-07T03:20:14.8534862Z Datacenter
+2026-10-07T03:20:14.8535142Z ##[endgroup]
+2026-10-07T03:20:14.8535432Z ##[group]Runner Image
+2026-10-07T03:20:14.8535760Z Image: windows-2022
+2026-10-07T03:20:14.8536187Z Version: 20260927.320.1
+2026-10-07T03:20:14.8537130Z Included Software: https://github.com/actions/runner-images/blob/win22/20260927.320/images/windows/Windows2022-Readme.md
+2026-10-07T03:20:14.8537932Z Image Release: https://github.com/actions/runner-images/releases/tag/win22%2F20260927.320
+2026-10-07T03:20:14.8538448Z ##[endgroup]
+2026-10-07T03:20:14.8539076Z ##[group]GITHUB_TOKEN Permissions
+2026-10-07T03:20:14.8540234Z Contents: read
+2026-10-07T03:20:14.8540553Z Metadata: read
+2026-10-07T03:20:14.8540853Z ##[endgroup]
+2026-10-07T03:20:14.8542290Z Secret source: Actions
+2026-10-07T03:20:14.8542760Z Cache mode: write
+2026-10-07T03:20:14.8543172Z Prepare workflow directory
+2026-10-07T03:20:14.8792584Z Prepare all required actions
+2026-10-07T03:20:14.8838248Z Getting action download info
+2026-10-07T03:20:15.1771978Z Download action repository 'actions/checkout@11d5960a326750d5838078e36cf38b85af677262' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-07T03:20:15.2581198Z Download action repository 'actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+2026-10-07T03:20:15.3716077Z Download action repository 'actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02' (SHA:ea165f8d65b6e75b540449e92b4886f43607fa02)
+2026-10-07T03:20:15.8209082Z Complete job name: check (windows-2022)
+2026-10-07T03:20:16.1063374Z ##[group]Run if ($env:CANDIDATE_SHA -notmatch '^[0-9a-f]{40}$') { throw 'Full SHA required' }
+2026-10-07T03:20:16.1064782Z [36;1mif ($env:CANDIDATE_SHA -notmatch '^[0-9a-f]{40}$') { throw 'Full SHA required' }[0m
+2026-10-07T03:20:16.1138498Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T03:20:16.1139388Z env:
+2026-10-07T03:20:16.1139834Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:20:16.1140472Z   CANDIDATE_SHA: 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:20:16.1141146Z ##[endgroup]
+2026-10-07T03:20:16.3999226Z ##[group]Run actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+2026-10-07T03:20:16.4000126Z with:
+2026-10-07T03:20:16.4000641Z   ref: 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:20:16.4001323Z   persist-credentials: false
+2026-10-07T03:20:16.4001880Z   fetch-depth: 0
+2026-10-07T03:20:16.4002399Z   repository: ArtemArzi/company-work-system
+2026-10-07T03:20:16.4006292Z   token: ***
+2026-10-07T03:20:16.4006743Z   ssh-strict: true
+2026-10-07T03:20:16.4007210Z   ssh-user: git
+2026-10-07T03:20:16.4007652Z   clean: true
+2026-10-07T03:20:16.4008136Z   sparse-checkout-cone-mode: true
+2026-10-07T03:20:16.4008686Z   fetch-tags: false
+2026-10-07T03:20:16.4009157Z   show-progress: true
+2026-10-07T03:20:16.4009622Z   lfs: false
+2026-10-07T03:20:16.4010075Z   submodules: false
+2026-10-07T03:20:16.4010552Z   set-safe-directory: true
+2026-10-07T03:20:16.4011079Z   allow-unsafe-pr-checkout: false
+2026-10-07T03:20:16.4011601Z env:
+2026-10-07T03:20:16.4012065Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:20:16.4012577Z ##[endgroup]
+2026-10-07T03:20:17.2693175Z Syncing repository: ArtemArzi/company-work-system
+2026-10-07T03:20:17.2694720Z ##[group]Getting Git version info
+2026-10-07T03:20:17.2697815Z Working directory is 'D:\a\company-work-system\company-work-system'
+2026-10-07T03:20:17.3484183Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T03:20:17.7990848Z git version 2.55.0.windows.5
+2026-10-07T03:20:17.7997184Z ##[endgroup]
+2026-10-07T03:20:17.8001338Z Temporarily overriding HOME='D:\a\_temp\4e6b3417-0ac0-473e-a9b8-72df944dca39' before making global git config changes
+2026-10-07T03:20:17.8002792Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T03:20:17.8006570Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\company-work-system\company-work-system
+2026-10-07T03:20:17.8496028Z Deleting the contents of 'D:\a\company-work-system\company-work-system'
+2026-10-07T03:20:17.8500625Z ##[group]Initializing the repository
+2026-10-07T03:20:17.8507107Z [command]"C:\Program Files\Git\bin\git.exe" init D:\a\company-work-system\company-work-system
+2026-10-07T03:20:17.9403822Z Initialized empty Git repository in D:/a/company-work-system/company-work-system/.git/
+2026-10-07T03:20:17.9432234Z [command]"C:\Program Files\Git\bin\git.exe" remote add origin https://github.com/ArtemArzi/company-work-system
+2026-10-07T03:20:17.9896146Z ##[endgroup]
+2026-10-07T03:20:17.9896953Z ##[group]Disabling automatic garbage collection
+2026-10-07T03:20:17.9902172Z [command]"C:\Program Files\Git\bin\git.exe" config --local gc.auto 0
+2026-10-07T03:20:18.0054485Z ##[endgroup]
+2026-10-07T03:20:18.0055244Z ##[group]Setting up auth
+2026-10-07T03:20:18.0062370Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T03:20:18.0226905Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T03:20:19.3788164Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T03:20:19.3948991Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T03:20:19.7330377Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T03:20:19.7496649Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T03:20:20.0768416Z [command]"C:\Program Files\Git\bin\git.exe" config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ***"
+2026-10-07T03:20:20.0999133Z ##[endgroup]
+2026-10-07T03:20:20.0999735Z ##[group]Fetching the repository
+2026-10-07T03:20:20.1000533Z [command]"C:\Program Files\Git\bin\git.exe" -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/*
+2026-10-07T03:20:21.5233910Z From https://github.com/ArtemArzi/company-work-system
+2026-10-07T03:20:21.5234487Z  * [new branch]      codex/platform-adaptation -> origin/codex/platform-adaptation
+2026-10-07T03:20:21.5234905Z  * [new branch]      main       -> origin/main
+2026-10-07T03:20:21.5266068Z [command]"C:\Program Files\Git\bin\git.exe" rev-parse --verify --quiet 1872bf7f81e8a19855ca9573fcf353f203c2d9cf^{object}
+2026-10-07T03:20:21.5546410Z 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:20:21.5565629Z ##[endgroup]
+2026-10-07T03:20:21.5565995Z ##[group]Determining the checkout info
+2026-10-07T03:20:21.5566716Z ##[endgroup]
+2026-10-07T03:20:21.5573623Z [command]"C:\Program Files\Git\bin\git.exe" sparse-checkout disable
+2026-10-07T03:20:21.5840871Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all extensions.worktreeConfig
+2026-10-07T03:20:21.5990513Z ##[group]Checking out the ref
+2026-10-07T03:20:21.5997975Z [command]"C:\Program Files\Git\bin\git.exe" checkout --progress --force 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:20:21.6751922Z Note: switching to '1872bf7f81e8a19855ca9573fcf353f203c2d9cf'.
+2026-10-07T03:20:21.6752248Z 
+2026-10-07T03:20:21.6752443Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-10-07T03:20:21.6752864Z changes and commit them, and you can discard any commits you make in this
+2026-10-07T03:20:21.6753314Z state without impacting any branches by switching back to a branch.
+2026-10-07T03:20:21.6753564Z 
+2026-10-07T03:20:21.6753728Z If you want to create a new branch to retain commits you create, you may
+2026-10-07T03:20:21.6754125Z do so (now or later) by using -c with the switch command. Example:
+2026-10-07T03:20:21.6754376Z 
+2026-10-07T03:20:21.6754532Z   git switch -c <new-branch-name>
+2026-10-07T03:20:21.6754702Z 
+2026-10-07T03:20:21.6754800Z Or undo this operation with:
+2026-10-07T03:20:21.6754940Z 
+2026-10-07T03:20:21.6755031Z   git switch -
+2026-10-07T03:20:21.6755139Z 
+2026-10-07T03:20:21.6755320Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-10-07T03:20:21.6755625Z 
+2026-10-07T03:20:21.6756500Z HEAD is now at 1872bf7 fix: select owned Python base from company working directory
+2026-10-07T03:20:21.6861291Z ##[endgroup]
+2026-10-07T03:20:21.7159404Z [command]"C:\Program Files\Git\bin\git.exe" log -1 --format=%H
+2026-10-07T03:20:21.7285744Z 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:20:21.7313085Z ##[group]Removing auth
+2026-10-07T03:20:21.7319798Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T03:20:21.7484064Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T03:20:22.0957699Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T03:20:22.1104332Z http.https://github.com/.extraheader
+2026-10-07T03:20:22.1134728Z [command]"C:\Program Files\Git\bin\git.exe" config --local --unset-all http.https://github.com/.extraheader
+2026-10-07T03:20:22.1322112Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T03:20:22.4713373Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T03:20:22.4904700Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T03:20:22.8287580Z ##[endgroup]
+2026-10-07T03:20:22.8491577Z ##[group]Run if ((git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { throw 'Candidate changed' }
+2026-10-07T03:20:22.8491985Z [36;1mif ((git rev-parse HEAD).Trim() -ne $env:CANDIDATE_SHA) { throw 'Candidate changed' }[0m
+2026-10-07T03:20:22.8519265Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T03:20:22.8519465Z env:
+2026-10-07T03:20:22.8519584Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:20:22.8519749Z   CANDIDATE_SHA: 1872bf7f81e8a19855ca9573fcf353f203c2d9cf
+2026-10-07T03:20:22.8519926Z ##[endgroup]
+2026-10-07T03:20:23.1114037Z ##[group]Run actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+2026-10-07T03:20:23.1114355Z with:
+2026-10-07T03:20:23.1114483Z   python-version: 3.12
+2026-10-07T03:20:23.1114620Z   check-latest: false
+2026-10-07T03:20:23.1115965Z   token: ***
+2026-10-07T03:20:23.1116083Z   update-environment: true
+2026-10-07T03:20:23.1116222Z   allow-prereleases: false
+2026-10-07T03:20:23.1116351Z   freethreaded: false
+2026-10-07T03:20:23.1116469Z env:
+2026-10-07T03:20:23.1116582Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:20:23.1116879Z ##[endgroup]
+2026-10-07T03:20:23.2210704Z ##[group]Installed versions
+2026-10-07T03:20:23.2339560Z (node:1304) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T03:20:23.2340231Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T03:20:23.2341040Z Successfully set up CPython (3.12.10)
+2026-10-07T03:20:23.2341484Z ##[endgroup]
+2026-10-07T03:20:23.2539226Z ##[group]Run python -m pip install -r template/requirements.txt
+2026-10-07T03:20:23.2539567Z [36;1mpython -m pip install -r template/requirements.txt[0m
+2026-10-07T03:20:23.2568733Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T03:20:23.2568939Z env:
+2026-10-07T03:20:23.2569073Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:20:23.2569265Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:23.2569539Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+2026-10-07T03:20:23.2569811Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:23.2570044Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:23.2570278Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:23.2570468Z ##[endgroup]
+2026-10-07T03:20:28.0281605Z Collecting PyYAML==6.0.1 (from -r template/requirements.txt (line 1))
+2026-10-07T03:20:28.1774152Z   Downloading PyYAML-6.0.1-cp312-cp312-win_amd64.whl.metadata (2.1 kB)
+2026-10-07T03:20:28.2081544Z Downloading PyYAML-6.0.1-cp312-cp312-win_amd64.whl (138 kB)
+2026-10-07T03:20:28.5595414Z Installing collected packages: PyYAML
+2026-10-07T03:20:28.6435180Z Successfully installed PyYAML-6.0.1
+2026-10-07T03:20:28.7546999Z ##[group]Run python -m unittest discover -s checks -v
+2026-10-07T03:20:28.7547274Z [36;1mpython -m unittest discover -s checks -v[0m
+2026-10-07T03:20:28.7572269Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T03:20:28.7572482Z env:
+2026-10-07T03:20:28.7572606Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:20:28.7572794Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:28.7573057Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+2026-10-07T03:20:28.7573319Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:28.7573587Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:28.7573819Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:20:28.7574007Z ##[endgroup]
+2026-10-07T03:20:33.7899270Z test_cached_archive_corruption_rejected_without_execution (test_bootstrap.BootstrapTests.test_cached_archive_corruption_rejected_without_execution) ... ok
+2026-10-07T03:20:33.7900771Z test_download_failure_and_corruption_leave_no_success_marker (test_bootstrap.BootstrapTests.test_download_failure_and_corruption_leave_no_success_marker) ... skipped 'POSIX downloader fixture'
+2026-10-07T03:20:33.8216401Z test_foreign_interpreter_is_never_given_to_installer (test_bootstrap.BootstrapTests.test_foreign_interpreter_is_never_given_to_installer) ... ok
+2026-10-07T03:20:33.8302925Z test_foreign_venv_preserved (test_bootstrap.BootstrapTests.test_foreign_venv_preserved) ... ok
+2026-10-07T03:20:33.8533215Z test_install_failure_keeps_preparing_state (test_bootstrap.BootstrapTests.test_install_failure_keeps_preparing_state) ... ok
+2026-10-07T03:20:33.8833135Z test_interrupted_partial_setup_resumes_only_owned_environment (test_bootstrap.BootstrapTests.test_interrupted_partial_setup_resumes_only_owned_environment) ... ok
+2026-10-07T03:20:33.8883705Z test_manifest_pinned_single_source (test_bootstrap.BootstrapTests.test_manifest_pinned_single_source) ... ok
+2026-10-07T03:20:33.8932850Z test_missing_git_actionable_blocker (test_bootstrap.BootstrapTests.test_missing_git_actionable_blocker) ... ok
+2026-10-07T03:20:36.0823878Z test_native_powershell_owned_process_forwards_utf8_and_exit_without_python (test_bootstrap.BootstrapTests.test_native_powershell_owned_process_forwards_utf8_and_exit_without_python) ... ok
+2026-10-07T03:20:36.2972299Z test_offline_no_python_ordinary_command_never_downloads (test_bootstrap.BootstrapTests.test_offline_no_python_ordinary_command_never_downloads) ... ok
+2026-10-07T03:20:36.3090977Z test_pyvenv_config_spaces_and_foreign_base (test_bootstrap.BootstrapTests.test_pyvenv_config_spaces_and_foreign_base) ... ok
+2026-10-07T03:20:36.3431636Z test_ready_repeat_does_not_reinstall (test_bootstrap.BootstrapTests.test_ready_repeat_does_not_reinstall) ... ok
+2026-10-07T03:20:55.1786082Z test_real_setup_without_path_python_host_preserved (test_bootstrap.BootstrapTests.test_real_setup_without_path_python_host_preserved) ... ok
+2026-10-07T03:20:55.1870056Z test_redirect_environment_cleaned_without_changing_parent (test_bootstrap.BootstrapTests.test_redirect_environment_cleaned_without_changing_parent) ... ok
+2026-10-07T03:20:55.2260691Z test_relocated_and_manifest_changed_venv_rejected (test_bootstrap.BootstrapTests.test_relocated_and_manifest_changed_venv_rejected) ... ok
+2026-10-07T03:20:55.2261610Z test_symlink_venv_and_runtime_rejected (test_bootstrap.BootstrapTests.test_symlink_venv_and_runtime_rejected) ... skipped 'Windows symlink permission is not required'
+2026-10-07T03:20:55.2262718Z test_system_ancestor_alias_allowed_but_internal_alias_rejected (test_bootstrap.BootstrapTests.test_system_ancestor_alias_allowed_but_internal_alias_rejected) ... skipped 'POSIX ancestor aliases and signals'
+2026-10-07T03:20:55.2265190Z test_watchdog_kills_and_reaps_owned_child_ignoring_sigterm (test_bootstrap.BootstrapTests.test_watchdog_kills_and_reaps_owned_child_ignoring_sigterm) ... skipped 'POSIX watchdog regression'
+2026-10-07T03:20:55.3845490Z test_cancelled_incident_preserves_terminal_state_and_bytes (test_consistency.Consistency.test_cancelled_incident_preserves_terminal_state_and_bytes) ... ok
+2026-10-07T03:20:55.5632412Z test_metrics_reject_bad_primary_metadata_despite_valid_output (test_consistency.Consistency.test_metrics_reject_bad_primary_metadata_despite_valid_output) ... ok
+2026-10-07T03:20:55.6805817Z test_metrics_require_unambiguous_independent_source_admission (test_consistency.Consistency.test_metrics_require_unambiguous_independent_source_admission) ... ok
+2026-10-07T03:20:59.1667296Z test_foreign_index_is_not_used_or_modified_by_delivery (test_consistency.Consistency.test_foreign_index_is_not_used_or_modified_by_delivery) ... ok
+2026-10-07T03:21:00.7542369Z test_relative_prepare_is_relative_to_caller_not_source_checkout (test_consistency.Consistency.test_relative_prepare_is_relative_to_caller_not_source_checkout) ... ok
+2026-10-07T03:21:00.9160785Z test_corrupt_optional_cache_rebuilds_but_primary_errors_surface (test_consistency.Consistency.test_corrupt_optional_cache_rebuilds_but_primary_errors_surface) ... ok
+2026-10-07T03:21:01.3529993Z test_reconciliation_requires_complete_explicit_comparable_metadata (test_consistency.Consistency.test_reconciliation_requires_complete_explicit_comparable_metadata) ... ok
+2026-10-07T03:21:02.1447347Z test_resume_and_supersede_keep_original_verification_in_task_history (test_consistency.Consistency.test_resume_and_supersede_keep_original_verification_in_task_history) ... ok
+2026-10-07T03:21:09.6005126Z test_interrupted_finish_update_preserves_original_rollback_base (test_consistency.EvolutionConsistency.test_interrupted_finish_update_preserves_original_rollback_base) ... ok
+2026-10-07T03:21:18.9278246Z test_relative_company_update_backup_restore_and_rollback (test_consistency.EvolutionConsistency.test_relative_company_update_backup_restore_and_rollback) ... ok
+2026-10-07T03:21:26.7436250Z test_delivered_metrics_keep_historical_admission_after_age_and_config_change (test_consistency.EvolutionConsistency.test_delivered_metrics_keep_historical_admission_after_age_and_config_change) ... ok
+2026-10-07T03:21:34.8599487Z test_blocked_update_cannot_finish_without_owner_binding_reconciliation (test_consistency.EvolutionConsistency.test_blocked_update_cannot_finish_without_owner_binding_reconciliation) ... ok
+2026-10-07T03:21:35.0871908Z test_ambiguous_custom_and_undeclared_fallback (test_dependencies.Dependencies.test_ambiguous_custom_and_undeclared_fallback) ... ok
+2026-10-07T03:21:35.3116071Z test_byte_policy_and_bootstrap_drift_block_selected_and_full_tasks (test_dependencies.Dependencies.test_byte_policy_and_bootstrap_drift_block_selected_and_full_tasks) ... ok
+2026-10-07T03:21:35.5954772Z test_config_race_before_evidence_never_verified (test_dependencies.Dependencies.test_config_race_before_evidence_never_verified) ... ok
+2026-10-07T03:21:35.7801849Z test_declared_dependency_add_remove_and_kernel_change (test_dependencies.Dependencies.test_declared_dependency_add_remove_and_kernel_change) ... ok
+2026-10-07T03:21:36.2049916Z test_delivered_admission_uses_historical_specification (test_dependencies.Dependencies.test_delivered_admission_uses_historical_specification) ... ok
+2026-10-07T03:21:37.0869930Z test_explicit_harness_and_transitive_skill_selection (test_dependencies.Dependencies.test_explicit_harness_and_transitive_skill_selection) ... ok
+2026-10-07T03:21:37.3330600Z test_legacy_read_and_resume_preserve_scope_history (test_dependencies.Dependencies.test_legacy_read_and_resume_preserve_scope_history) ... ok
+2026-10-07T03:21:37.4655696Z test_scope_tampering_and_export_primary_path_rejected (test_dependencies.Dependencies.test_scope_tampering_and_export_primary_path_rejected) ... ok
+2026-10-07T03:21:37.7398774Z test_selected_source_same_id_change_and_rights_block (test_dependencies.Dependencies.test_selected_source_same_id_change_and_rights_block) ... ok
+2026-10-07T03:21:38.2590866Z test_selected_sources_harness_and_unrelated_methods (test_dependencies.Dependencies.test_selected_sources_harness_and_unrelated_methods) ... ok
+2026-10-07T03:22:12.9409539Z test_company_proofs_survive_delivery_update_rollback_restore (test_evolution_hooks.Evolution.test_company_proofs_survive_delivery_update_rollback_restore) ... ok
+2026-10-07T03:22:13.2182047Z test_hook_proposal_rejects_bad_approval_data_and_nonfixed_script (test_evolution_hooks.Evolution.test_hook_proposal_rejects_bad_approval_data_and_nonfixed_script) ... ok
+2026-10-07T03:22:19.0521173Z test_local_hook_proposal_has_exact_approval_and_reviewable_replacement (test_evolution_hooks.Evolution.test_local_hook_proposal_has_exact_approval_and_reviewable_replacement) ... ok
+2026-10-07T03:22:22.1674662Z test_author_new_skill_pair_and_safe_projections_use_common_commit (test_history.GuardedDelivery.test_author_new_skill_pair_and_safe_projections_use_common_commit) ... ok
+2026-10-07T03:22:22.2624142Z test_commit_lock_cleanup_preserves_consumed_or_replaced_foreign_locks (test_history.GuardedDelivery.test_commit_lock_cleanup_preserves_consumed_or_replaced_foreign_locks) ... ok
+2026-10-07T03:22:25.6164548Z test_compare_and_swap_preserves_external_new_head (test_history.GuardedDelivery.test_compare_and_swap_preserves_external_new_head) ... ok
+2026-10-07T03:22:27.7272992Z test_concurrent_policy_change_before_index_blocks (test_history.GuardedDelivery.test_concurrent_policy_change_before_index_blocks) ... ok
+2026-10-07T03:22:30.2111745Z test_config_drift_after_scratch_commit_blocks_publication (test_history.GuardedDelivery.test_config_drift_after_scratch_commit_blocks_publication) ... ok
+2026-10-07T03:22:31.9583696Z test_external_delivery_requires_explicit_policy_before_network (test_history.GuardedDelivery.test_external_delivery_requires_explicit_policy_before_network) ... ok
+2026-10-07T03:22:33.5152339Z test_foreign_staged_work_is_preserved (test_history.GuardedDelivery.test_foreign_staged_work_is_preserved) ... ok
+2026-10-07T03:22:35.9103648Z test_head_race_does_not_attach_own_result_to_new_parent (test_history.GuardedDelivery.test_head_race_does_not_attach_own_result_to_new_parent) ... ok
+2026-10-07T03:22:38.1696138Z test_index_race_before_actual_staging_preserves_foreign_bytes (test_history.GuardedDelivery.test_index_race_before_actual_staging_preserves_foreign_bytes) ... ok
+2026-10-07T03:22:42.7213535Z test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup (test_history.GuardedDelivery.test_initial_and_linked_worktree_commit_keep_exact_tree_after_cleanup) ... ok
+2026-10-07T03:22:45.2741695Z test_interrupted_index_install_preserves_published_commit_and_old_index (test_history.GuardedDelivery.test_interrupted_index_install_preserves_published_commit_and_old_index) ... ok
+2026-10-07T03:22:47.8085481Z test_late_foreign_staging_cannot_enter_checked_commit (test_history.GuardedDelivery.test_late_foreign_staging_cannot_enter_checked_commit) ... ok
+2026-10-07T03:22:50.8070068Z test_native_commit_rejection_preserves_original_branch_and_index (test_history.GuardedDelivery.test_native_commit_rejection_preserves_original_branch_and_index) ... ok
+2026-10-07T03:22:54.1019895Z test_native_hook_tree_change_rejects_before_publication (test_history.GuardedDelivery.test_native_hook_tree_change_rejects_before_publication) ... ok
+2026-10-07T03:22:57.6417616Z test_preview_tree_uses_owned_index_and_safe_commit_passes (test_history.GuardedDelivery.test_preview_tree_uses_owned_index_and_safe_commit_passes) ... ok
+2026-10-07T03:23:00.0572613Z test_rejection_preserves_working_file_and_index (test_history.GuardedDelivery.test_rejection_preserves_working_file_and_index) ... ok
+2026-10-07T03:23:02.9421736Z test_split_sparse_and_relative_hooks_fail_closed (test_history.GuardedDelivery.test_split_sparse_and_relative_hooks_fail_closed) ... ok
+2026-10-07T03:23:03.0130019Z test_additional_high_signal_forms_are_rejected_without_logging_values (test_history.History.test_additional_high_signal_forms_are_rejected_without_logging_values) ... ok
+2026-10-07T03:23:03.4573773Z test_all_refs_release_alias_tags_and_direct_blob (test_history.History.test_all_refs_release_alias_tags_and_direct_blob) ... ok
+2026-10-07T03:23:04.2014817Z test_baseline_exact_content_and_foreign_merge (test_history.History.test_baseline_exact_content_and_foreign_merge) ... ok
+2026-10-07T03:23:04.8346464Z test_binary_permission_does_not_skip_secret_or_text_alias (test_history.History.test_binary_permission_does_not_skip_secret_or_text_alias) ... ok
+2026-10-07T03:23:05.6800061Z test_bundle_rechecks_actual_exported_refs_after_source_race (test_history.History.test_bundle_rechecks_actual_exported_refs_after_source_race) ... ok
+2026-10-07T03:23:05.9950966Z test_git_selectors_cleared_and_rewrites_rejected (test_history.History.test_git_selectors_cleared_and_rewrites_rejected) ... ok
+2026-10-07T03:23:06.7997739Z test_large_blob_is_streamed_and_cross_chunk_marker_rejected (test_history.History.test_large_blob_is_streamed_and_cross_chunk_marker_rejected) ... ok
+2026-10-07T03:23:07.5891730Z test_noncanonical_names_modes_and_symlinks (test_history.History.test_noncanonical_names_modes_and_symlinks) ... ok
+2026-10-07T03:23:08.0242038Z test_release_forbidden_historical_alias_even_if_head_removed (test_history.History.test_release_forbidden_historical_alias_even_if_head_removed) ... ok
+2026-10-07T03:23:08.3619266Z test_secret_removed_from_head_is_still_rejected (test_history.History.test_secret_removed_from_head_is_still_rejected) ... ok
+2026-10-07T03:23:08.5802753Z test_shallow_and_alternate_store_rejected (test_history.History.test_shallow_and_alternate_store_rejected) ... ok
+2026-10-07T03:23:09.2453874Z test_shared_positive_and_same_blob_all_paths_checked (test_history.History.test_shared_positive_and_same_blob_all_paths_checked) ... ok
+2026-10-07T03:23:09.4680908Z test_truncated_reader_detects_eof (test_history.History.test_truncated_reader_detects_eof) ... ok
+2026-10-07T03:23:09.9066548Z test_wrong_baseline_and_missing_object (test_history.History.test_wrong_baseline_and_missing_object) ... ok
+2026-10-07T03:23:10.1590228Z test_add_patch_and_edit_use_shared_validator (test_hooks.Hooks.test_add_patch_and_edit_use_shared_validator) ... ok
+2026-10-07T03:23:10.5248209Z test_bad_payload_event_root_and_paths_rejected (test_hooks.Hooks.test_bad_payload_event_root_and_paths_rejected) ... ok
+2026-10-07T03:23:10.9163889Z test_code_dependency_change_invalidates_command_and_old_dispatch (test_hooks.Hooks.test_code_dependency_change_invalidates_command_and_old_dispatch) ... ok
+2026-10-07T03:23:11.0901581Z test_concurrent_cache_lock_failure_and_handler_crash_not_pass (test_hooks.Hooks.test_concurrent_cache_lock_failure_and_handler_crash_not_pass) ... ok
+2026-10-07T03:23:11.2586949Z test_concurrent_foreign_settings_edit_not_overwritten (test_hooks.Hooks.test_concurrent_foreign_settings_edit_not_overwritten) ... ok
+2026-10-07T03:23:11.5106350Z test_config_changed_after_settings_write_never_forges_proof (test_hooks.Hooks.test_config_changed_after_settings_write_never_forges_proof) ... ok
+2026-10-07T03:23:12.1753586Z test_copied_company_proof_regenerates_absolute_paths_without_trust (test_hooks.Hooks.test_copied_company_proof_regenerates_absolute_paths_without_trust) ... ok
+2026-10-07T03:23:12.3370156Z test_default_project_is_preview_without_activation_or_files (test_hooks.Hooks.test_default_project_is_preview_without_activation_or_files) ... ok
+2026-10-07T03:23:12.5042509Z test_disabled_native_and_working_common_fallback (test_hooks.Hooks.test_disabled_native_and_working_common_fallback) ... ok
+2026-10-07T03:23:12.7767163Z test_disabling_removes_exact_owned_groups_only (test_hooks.Hooks.test_disabling_removes_exact_owned_groups_only) ... ok
+2026-10-07T03:23:13.0614347Z test_interrupt_subagent_recursive_stop_never_continues (test_hooks.Hooks.test_interrupt_subagent_recursive_stop_never_continues) ... ok
+2026-10-07T03:23:13.6252261Z test_interruption_between_settings_and_proof_detectable_on_retry (test_hooks.Hooks.test_interruption_between_settings_and_proof_detectable_on_retry) ... ok
+2026-10-07T03:23:13.9846510Z test_legacy_proof_migration_exact_and_new_proof_precedence (test_hooks.Hooks.test_legacy_proof_migration_exact_and_new_proof_precedence) ... ok
+2026-10-07T03:23:14.2672652Z test_legacy_proof_mismatch_and_malformed_preserve_all_bytes (test_hooks.Hooks.test_legacy_proof_mismatch_and_malformed_preserve_all_bytes) ... ok
+2026-10-07T03:23:14.5317792Z test_malformed_native_settings_preserved_as_conflict (test_hooks.Hooks.test_malformed_native_settings_preserved_as_conflict) ... ok
+2026-10-07T03:23:14.7579615Z test_manifest_exact_six_schema_and_no_yaml_commands (test_hooks.Hooks.test_manifest_exact_six_schema_and_no_yaml_commands) ... ok
+2026-10-07T03:23:14.9119878Z test_manifest_invalid_event_and_timeout (test_hooks.Hooks.test_manifest_invalid_event_and_timeout) ... ok
+2026-10-07T03:23:15.2038348Z test_method_impact_explicit_batch_uses_declared_closure (test_hooks.Hooks.test_method_impact_explicit_batch_uses_declared_closure) ... ok
+2026-10-07T03:23:15.5670914Z test_method_impact_only_explicit_dependencies_and_publication_hint (test_hooks.Hooks.test_method_impact_only_explicit_dependencies_and_publication_hint) ... ok
+2026-10-07T03:23:16.0885293Z test_missing_receipt_unknown_namespace_and_mixed_group_conflict (test_hooks.Hooks.test_missing_receipt_unknown_namespace_and_mixed_group_conflict) ... ok
+2026-10-07T03:23:16.4296611Z test_native_invalid_json_oversize_missing_dependency_failure_not_pass (test_hooks.Hooks.test_native_invalid_json_oversize_missing_dependency_failure_not_pass) ... ok
+2026-10-07T03:23:16.5850127Z test_native_projection_apply_requires_company_permissions (test_hooks.Hooks.test_native_projection_apply_requires_company_permissions) ... ok
+2026-10-07T03:23:17.3212459Z test_native_protocol_versions_json_denial_and_advisory_both (test_hooks.Hooks.test_native_protocol_versions_json_denial_and_advisory_both) ... ok
+2026-10-07T03:23:21.5918480Z test_native_timeout_explicit_failure_without_stop_block (test_hooks.Hooks.test_native_timeout_explicit_failure_without_stop_block) ... ok
+2026-10-07T03:23:22.1516502Z test_other_settings_preserved_idempotent_and_owned_collision (test_hooks.Hooks.test_other_settings_preserved_idempotent_and_owned_collision) ... ok
+2026-10-07T03:23:22.2451531Z test_payload_normalization_independent_of_method_dependencies (test_hooks.Hooks.test_payload_normalization_independent_of_method_dependencies) ... ok
+2026-10-07T03:23:22.5128402Z test_permission_revoked_by_final_fingerprint_preserves_settings_and_proof (test_hooks.Hooks.test_permission_revoked_by_final_fingerprint_preserves_settings_and_proof) ... ok
+2026-10-07T03:23:22.7048909Z test_post_write_missing_map_advisory_and_linked_positive (test_hooks.Hooks.test_post_write_missing_map_advisory_and_linked_positive) ... ok
+2026-10-07T03:23:22.8430153Z test_post_write_reads_actual_bytes_instead_of_proposed_payload (test_hooks.Hooks.test_post_write_reads_actual_bytes_instead_of_proposed_payload) ... ok
+2026-10-07T03:23:23.1987971Z test_product_root_routes_development_and_template_paths (test_hooks.Hooks.test_product_root_routes_development_and_template_paths) ... ok
+2026-10-07T03:23:23.3840722Z test_publication_hint_recognizes_fixed_cli_without_execution (test_hooks.Hooks.test_publication_hint_recognizes_fixed_cli_without_execution) ... ok
+2026-10-07T03:23:23.6721131Z test_stop_compact_dedup_revision_no_business_writes (test_hooks.Hooks.test_stop_compact_dedup_revision_no_business_writes) ... ok
+2026-10-07T03:23:23.9995282Z test_subdirectory_absolute_quoted_projection_executes (test_hooks.Hooks.test_subdirectory_absolute_quoted_projection_executes) ... ok
+2026-10-07T03:23:24.1770637Z test_unknown_task_navigation_only_disabled_scenario (test_hooks.Hooks.test_unknown_task_navigation_only_disabled_scenario) ... ok
+2026-10-07T03:23:24.3656588Z test_untrusted_or_missing_expected_definition_never_passes (test_hooks.Hooks.test_untrusted_or_missing_expected_definition_never_passes) ... ok
+2026-10-07T03:23:25.0219808Z test_update_patch_partial_metadata_is_advisory_not_denial (test_hooks.Hooks.test_update_patch_partial_metadata_is_advisory_not_denial) ... ok
+2026-10-07T03:23:25.2778698Z test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed (test_hooks.Hooks.test_wrong_place_and_duplicate_proved_denial_ordinary_note_allowed) ... ok
+2026-10-07T03:23:27.5525813Z test_archive_link_or_duplicate_rejected_before_destination (test_platform.Platforms.test_archive_link_or_duplicate_rejected_before_destination) ... ok
+2026-10-07T03:23:31.0658440Z test_backup_preserves_raw_crlf_utf8_and_settings_without_filter (test_platform.Platforms.test_backup_preserves_raw_crlf_utf8_and_settings_without_filter) ... ok
+2026-10-07T03:23:31.3402169Z test_doctor_is_readonly_and_installed_runtime_is_not_business_memory (test_platform.Platforms.test_doctor_is_readonly_and_installed_runtime_is_not_business_memory) ... ok
+2026-10-07T03:23:31.8431435Z test_exact_placeholders_and_absence_use_canonical_explicit_read (test_platform.Platforms.test_exact_placeholders_and_absence_use_canonical_explicit_read) ... ok
+2026-10-07T03:23:31.8432283Z test_failure_after_replace_is_explicit_readback (test_platform.Platforms.test_failure_after_replace_is_explicit_readback) ... skipped 'POSIX directory fsync contract; Windows contract has its own test'
+2026-10-07T03:23:35.2948974Z test_legacy_placeholder_backup_rehydrates_safe_projection (test_platform.Platforms.test_legacy_placeholder_backup_rehydrates_safe_projection) ... ok
+2026-10-07T03:23:35.4473546Z test_portable_paths_and_case_unicode_directory_collisions (test_platform.Platforms.test_portable_paths_and_case_unicode_directory_collisions) ... ok
+2026-10-07T03:23:35.5874851Z test_process_death_releases_lock_without_deleting_it (test_platform.Platforms.test_process_death_releases_lock_without_deleting_it) ... ok
+2026-10-07T03:23:35.7611990Z test_projection_windows_has_explicit_shell_and_fingerprint (test_platform.Platforms.test_projection_windows_has_explicit_shell_and_fingerprint) ... ok
+2026-10-07T03:23:36.0878385Z test_utf8_lf_and_failure_before_replace_preserves_bytes (test_platform.Platforms.test_utf8_lf_and_failure_before_replace_preserves_bytes) ... ok
+2026-10-07T03:23:36.1968248Z test_windows_atomic_contract_does_not_open_directory (test_platform.Platforms.test_windows_atomic_contract_does_not_open_directory) ... ok
+2026-10-07T03:23:49.6413424Z test_actual_old_upgrade_and_rollback_keep_source_bytes_under_global_autocrlf (test_platform_evolution.EvolutionBytes.test_actual_old_upgrade_and_rollback_keep_source_bytes_under_global_autocrlf) ... ok
+2026-10-07T03:24:00.6112558Z test_legacy_working_native_proof_different_from_git_blocks_before_merge (test_platform_evolution.EvolutionBytes.test_legacy_working_native_proof_different_from_git_blocks_before_merge) ... ok
+2026-10-07T03:24:11.9337830Z test_source_head_race_preserves_both_states_and_blocks_before_merge (test_platform_evolution.EvolutionBytes.test_source_head_race_preserves_both_states_and_blocks_before_merge) ... ok
+2026-10-07T03:24:12.4533255Z test_each_os_and_legacy_backup_are_required (test_platform_transfer.TransferInventory.test_each_os_and_legacy_backup_are_required) ... ok
+2026-10-07T03:24:18.3768428Z test_dirty_staged_and_untracked_preserved_even_with_new_remote (test_preflight.Preflight.test_dirty_staged_and_untracked_preserved_even_with_new_remote) ... ok
+2026-10-07T03:24:25.6300636Z test_diverged_keeps_both_committed_histories (test_preflight.Preflight.test_diverged_keeps_both_committed_histories) ... ok
+2026-10-07T03:24:30.5472819Z test_fast_forward_uses_received_validator_and_blocks_invalid_version (test_preflight.Preflight.test_fast_forward_uses_received_validator_and_blocks_invalid_version) ... ok
+2026-10-07T03:24:32.9991562Z test_fetch_timeout_is_bounded_and_preserves_snapshot (test_preflight.Preflight.test_fetch_timeout_is_bounded_and_preserves_snapshot) ... ok
+2026-10-07T03:24:37.0667011Z test_ignored_local_file_cannot_be_overwritten_by_fast_forward (test_preflight.Preflight.test_ignored_local_file_cannot_be_overwritten_by_fast_forward) ... ok
+2026-10-07T03:24:39.4041108Z test_offline_reports_local_snapshot_without_freshness (test_preflight.Preflight.test_offline_reports_local_snapshot_without_freshness) ... ok
+2026-10-07T03:24:49.3562525Z test_receive_latest_and_deliver_other_employee_without_manual_sync (test_preflight.Preflight.test_receive_latest_and_deliver_other_employee_without_manual_sync) ... ok
+2026-10-07T03:24:53.8767575Z test_unfinished_git_and_detached_and_no_remote_do_not_change_head (test_preflight.Preflight.test_unfinished_git_and_detached_and_no_remote_do_not_change_head) ... ok
+2026-10-07T03:25:02.4949678Z test_wrong_company_and_unapproved_external_are_rejected (test_preflight.Preflight.test_wrong_company_and_unapproved_external_are_rejected) ... ok
+2026-10-07T03:25:06.2328435Z test_backup_restore_and_corruption_dirty_tree (test_system.GitAcceptance.test_backup_restore_and_corruption_dirty_tree) ... ok
+2026-10-07T03:25:18.2170810Z test_common_delivery_concurrent_results_stale_and_conflict (test_system.GitAcceptance.test_common_delivery_concurrent_results_stale_and_conflict) ... ok
+2026-10-07T03:25:24.4612433Z test_company_method_proposal_uses_same_product_delivery_without_data (test_system.GitAcceptance.test_company_method_proposal_uses_same_product_delivery_without_data) ... ok
+2026-10-07T03:25:43.4644177Z test_copy_update_two_companies_history_and_local_rule (test_system.GitAcceptance.test_copy_update_two_companies_history_and_local_rule) ... ok
+2026-10-07T03:26:01.6272768Z test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session (test_system.GitAcceptance.test_full_company_path_update_rollback_keeps_new_work_restore_and_fresh_session) ... ok
+2026-10-07T03:26:07.5315735Z test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes (test_system.GitAcceptance.test_ordinary_summary_snapshot_validates_delivers_and_survives_source_changes) ... ok
+2026-10-07T03:26:19.7145785Z test_portable_feature_release_updates_client_without_development_or_data_loss (test_system.GitAcceptance.test_portable_feature_release_updates_client_without_development_or_data_loss) ... ok
+2026-10-07T03:26:22.9296907Z test_proposal_rejects_noncanonical_paths_before_copy_or_candidate (test_system.GitAcceptance.test_proposal_rejects_noncanonical_paths_before_copy_or_candidate) ... ok
+2026-10-07T03:26:24.2024322Z test_release_guide_allowed_but_development_history_rejected (test_system.GitAcceptance.test_release_guide_allowed_but_development_history_rejected) ... ok
+2026-10-07T03:26:31.0400776Z test_result_delivery_ack_and_lost_push_response_readback (test_system.GitAcceptance.test_result_delivery_ack_and_lost_push_response_readback) ... ok
+2026-10-07T03:26:31.1679806Z test_sanitized_proposal_exact_permission_no_company_history (test_system.GitAcceptance.test_sanitized_proposal_exact_permission_no_company_history) ... ok
+2026-10-07T03:26:40.4244110Z test_semantic_binding_change_stops_even_text_merge_clean (test_system.GitAcceptance.test_semantic_binding_change_stops_even_text_merge_clean) ... ok
+2026-10-07T03:26:40.6893961Z test_clean_template_and_all_pairs (test_system.LocalContracts.test_clean_template_and_all_pairs) ... ok
+2026-10-07T03:26:40.8319895Z test_decimal_sum_is_exact_without_business_rounding_rule (test_system.LocalContracts.test_decimal_sum_is_exact_without_business_rounding_rule) ... ok
+2026-10-07T03:26:40.9243468Z test_episode_denominator_and_cross_source_outcome (test_system.LocalContracts.test_episode_denominator_and_cross_source_outcome) ... ok
+2026-10-07T03:26:41.8168782Z test_independence_and_observation_are_separate (test_system.LocalContracts.test_independence_and_observation_are_separate) ... ok
+2026-10-07T03:26:42.0593573Z test_lock_prevents_parallel_mutation_without_stale_lock_repair (test_system.LocalContracts.test_lock_prevents_parallel_mutation_without_stale_lock_repair) ... ok
+2026-10-07T03:26:42.1689301Z test_marketing_and_research_contracts_preserve_unknowns (test_system.LocalContracts.test_marketing_and_research_contracts_preserve_unknowns) ... ok
+2026-10-07T03:26:42.7366440Z test_new_process_reads_file_memory_and_blocks_changed_method (test_system.LocalContracts.test_new_process_reads_file_memory_and_blocks_changed_method) ... ok
+2026-10-07T03:26:43.7520381Z test_observations_bound_to_result_and_reset_with_history (test_system.LocalContracts.test_observations_bound_to_result_and_reset_with_history) ... ok
+2026-10-07T03:26:44.0657044Z test_result_rejects_known_bad_provenance_count_null_and_pass (test_system.LocalContracts.test_result_rejects_known_bad_provenance_count_null_and_pass) ... ok
+2026-10-07T03:26:44.2602912Z test_task_id_semantic_conflict_preserves_original (test_system.LocalContracts.test_task_id_semantic_conflict_preserves_original) ... ok
+2026-10-07T03:26:44.4065159Z test_unconfirmed_stale_revision_cancel_and_unknowns (test_system.LocalContracts.test_unconfirmed_stale_revision_cancel_and_unknowns) ... ok
+2026-10-07T03:26:44.9601190Z test_validator_itself_rejects_wrong_place_duplicate_link_cycle (test_system.LocalContracts.test_validator_itself_rejects_wrong_place_duplicate_link_cycle) ... ok
+2026-10-07T03:26:45.3184806Z test_workflow_disabled_missing_capability_unknown_version_and_index (test_system.LocalContracts.test_workflow_disabled_missing_capability_unknown_version_and_index) ... ok
+2026-10-07T03:26:46.0421206Z test_wrong_arithmetic_then_original_case_repairs (test_system.LocalContracts.test_wrong_arithmetic_then_original_case_repairs) ... ok
+2026-10-07T03:26:46.1950841Z test_graph_current_source_aliases_and_disabled_fallback (test_system.SourcesAndBackground.test_graph_current_source_aliases_and_disabled_fallback) ... ok
+2026-10-07T03:26:47.3474509Z test_http_pagination_429_redirect_and_limit (test_system.SourcesAndBackground.test_http_pagination_429_redirect_and_limit) ... ok
+2026-10-07T03:26:47.9980207Z test_one_shot_ticks_change_only_limits_off_and_recovery (test_system.SourcesAndBackground.test_one_shot_ticks_change_only_limits_off_and_recovery) ... ok
+2026-10-07T03:26:48.1424844Z test_real_file_export_and_wrong_company_partial_stale (test_system.SourcesAndBackground.test_real_file_export_and_wrong_company_partial_stale) ... ok
+2026-10-07T03:26:48.4989965Z test_stdio_mcp_negotiation_read_tool_and_error (test_system.SourcesAndBackground.test_stdio_mcp_negotiation_read_tool_and_error) ... ok
+2026-10-07T03:26:48.4990363Z 
+2026-10-07T03:26:48.4990577Z ----------------------------------------------------------------------
+2026-10-07T03:26:48.4991150Z Ran 166 tests in 378.983s
+2026-10-07T03:26:48.4992040Z 
+2026-10-07T03:26:48.4992102Z OK (skipped=5)
+2026-10-07T03:26:48.4993018Z {"bootstrap_network": "pass", "platform": "win32", "setup_exit": 0, "repeat_exit": 0, "status_exit": 0, "managed_python": "C:\\Users\\runneradmin\\AppData\\Local\\Temp\\cws-bootstrap-fv8zp5y4\\company with spaces\\.local\\runtime\\python\\cpython-3.12-windows-x86_64-none", "host_files_unchanged": true, "offline_reuse": true, "blocked_index_probe_exit": 28}
+2026-10-07T03:26:48.6079329Z ##[group]Run if ('windows-2022' -eq 'ubuntu-24.04') {
+2026-10-07T03:26:48.6079715Z [36;1mif ('windows-2022' -eq 'ubuntu-24.04') {[0m
+2026-10-07T03:26:48.6080008Z [36;1m  python checks/platform_transfer.py produce .local/transfer --legacy[0m
+2026-10-07T03:26:48.6080284Z [36;1m} else {[0m
+2026-10-07T03:26:48.6080492Z [36;1m  python checks/platform_transfer.py produce .local/transfer[0m
+2026-10-07T03:26:48.6080736Z [36;1m}[0m
+2026-10-07T03:26:48.6107669Z shell: C:\Program Files\PowerShell\7\pwsh.EXE -command ". '{0}'"
+2026-10-07T03:26:48.6107935Z env:
+2026-10-07T03:26:48.6108099Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:26:48.6108325Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:26:48.6108630Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+2026-10-07T03:26:48.6108927Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:26:48.6109260Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:26:48.6109530Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:26:48.6109759Z ##[endgroup]
+2026-10-07T03:27:06.0882990Z {"prepared_real_cli": "pass", "os": "win32", "actions": ["setup", "bootstrap-status", "doctor", "context"], "interpreter": "C:\\Users\\runneradmin\\AppData\\Local\\Temp\\company-acceptance-9p_3ndm8\\company\\.venv\\Scripts\\python.exe"}
+2026-10-07T03:27:06.0883667Z {"status": "produced", "os": "win32", "legacy_source": null}
+2026-10-07T03:27:06.1783710Z ##[group]Run actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+2026-10-07T03:27:06.1784082Z with:
+2026-10-07T03:27:06.1784261Z   name: synthetic-backup-windows-2022
+2026-10-07T03:27:06.1784485Z   path: .local/transfer/
+2026-10-07T03:27:06.1784704Z   include-hidden-files: true
+2026-10-07T03:27:06.1784886Z   retention-days: 7
+2026-10-07T03:27:06.1785065Z   if-no-files-found: error
+2026-10-07T03:27:06.1785240Z   compression-level: 6
+2026-10-07T03:27:06.1785408Z   overwrite: false
+2026-10-07T03:27:06.1785565Z env:
+2026-10-07T03:27:06.1785720Z   CWS_BOOTSTRAP_NETWORK: 1
+2026-10-07T03:27:06.1785945Z   pythonLocation: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:27:06.1786258Z   PKG_CONFIG_PATH: C:\hostedtoolcache\windows\Python\3.12.10\x64/lib/pkgconfig
+2026-10-07T03:27:06.1786558Z   Python_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:27:06.1786833Z   Python2_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:27:06.1787182Z   Python3_ROOT_DIR: C:\hostedtoolcache\windows\Python\3.12.10\x64
+2026-10-07T03:27:06.1787412Z ##[endgroup]
+2026-10-07T03:27:06.3057131Z (node:5392) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T03:27:06.3057805Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T03:27:06.3106789Z With the provided path, there will be 3 files uploaded
+2026-10-07T03:27:06.3110084Z Artifact name is valid!
+2026-10-07T03:27:06.3111167Z Root directory input is valid!
+2026-10-07T03:27:06.5925514Z Beginning upload of artifact content to blob storage
+2026-10-07T03:27:06.6205720Z (node:5392) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+2026-10-07T03:27:06.9199910Z Uploaded bytes 272428
+2026-10-07T03:27:06.9647773Z Finished uploading artifact content to blob storage!
+2026-10-07T03:27:06.9651443Z SHA256 digest of uploaded artifact zip is 050215bbcb5c6642f3c7e4dc64010c7487467da0d959e46f2acca5eda4122883
+2026-10-07T03:27:06.9652000Z Finalizing artifact upload
+2026-10-07T03:27:07.1888297Z Artifact synthetic-backup-windows-2022.zip successfully finalized. Artifact ID 11459410227
+2026-10-07T03:27:07.1889853Z Artifact synthetic-backup-windows-2022 has been successfully uploaded! Final size is 272428 bytes. Artifact ID is 11459410227
+2026-10-07T03:27:07.1896475Z Artifact download URL: https://github.com/ArtemArzi/company-work-system/actions/runs/37566264076/artifacts/11459410227
+2026-10-07T03:27:07.2211397Z Post job cleanup.
+2026-10-07T03:27:07.3193227Z (node:6580) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-10-07T03:27:07.3193694Z (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-10-07T03:27:07.3403350Z Post job cleanup.
+2026-10-07T03:27:07.4540215Z [command]"C:\Program Files\Git\bin\git.exe" version
+2026-10-07T03:27:07.4700128Z git version 2.55.0.windows.5
+2026-10-07T03:27:07.4737492Z Temporarily overriding HOME='D:\a\_temp\c0e5452e-6060-4ca2-b590-a44ad4b6734d' before making global git config changes
+2026-10-07T03:27:07.4738134Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-07T03:27:07.4745390Z [command]"C:\Program Files\Git\bin\git.exe" config --global --add safe.directory D:\a\company-work-system\company-work-system
+2026-10-07T03:27:07.4926259Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp core\.sshCommand
+2026-10-07T03:27:07.5099130Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :\""
+2026-10-07T03:27:07.9310716Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-07T03:27:07.9492391Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "sh -c \"git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :\""
+2026-10-07T03:27:08.2739666Z [command]"C:\Program Files\Git\bin\git.exe" config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-07T03:27:08.2915291Z [command]"C:\Program Files\Git\bin\git.exe" submodule foreach --recursive "git config --local --show-origin --name-only --get-regexp remote.origin.url"
+2026-10-07T03:27:08.7034715Z Cleaning up orphan processes
+2026-10-07T03:27:08.7395038Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@11d5960a326750d5838078e36cf38b85af677262, actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065, actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

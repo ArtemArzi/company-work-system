@@ -1,6 +1,6 @@
 # Адаптация рабочих сред
 
-Состояние: план принят независимо, реализация начата. Поручение06.10: проверить и докрутить Windows+WSL, Windows безWSL, macOS. Уточнение: изменить и доставить только продукт, клиентам версия применяется позже отдельно.
+Состояние: исправленный runtime1872 прошёл полный CI трёх ОС и межплатформенное восстановление; итоговый WSL запуск, финальный пакет и независимая whole-result приёмка ещё выполняются. Поручение06.10: проверить и докрутить Windows+WSL, Windows безWSL, macOS. Уточнение: изменить и доставить только продукт, клиентам версия применяется позже отдельно.
 
 [Исследование](research.md). Baseline7b38b92, clean product main, preflightcurrent. Work/клиент/host settings сохраняются. План и общий следующий шаг — ../../PLAN.md; этот документ владеет деталями, ошибками и evidence данного этапа.
 
@@ -43,7 +43,7 @@ CI bootstrap-only commit9f365c8a63f1a72a7be59fc06b9bd91a8201fab9 доставл�
 
 Проверки первого прохода: platform11PASS (legacy placeholders/raw CRLF/native settings/lock death/atomic errors/paths); system30PASS+1sandbox error HTTP listen запрещён — повторять полный suite с разрешённым local network. History30PASS+1failure старого diagnostic message (процесс импортировал код до исправления); порядок guards восстановлен, targeted rerun и fullsuite обязательны. Windows-invalid filename negative теперь строится как Git index object, чтобы проверять тот же плохой пример без невозможного файла ОС. Test text fixtures читаются UTF-8 явно.
 
-## Кандидат и реальная матрица
+## История первого кандидата и реальной матрицы
 
 Кандидат5db7c0d47135e4bc508034888573b6ac328c7975 сохранён в codex/platform-adaptation; общий выпуск ещё не принят и не доставлен main. Workflow networkbootstrap-only commit1c060e90685a5572ec5f0bbb4776c8af6743f18d main; targetedCIreviewPASS ...a78513c2. [Actionsrun37513945580](https://github.com/ArtemArzi/company-work-system/actions/runs/37513945580) запускает exact candidateSHA на Ubuntu24.04, Windows2022, macOS14; statuspending, native claimsнерасширять. LocalfullsuiteсразрешённымHTTPfixtures идёт; bootstrapworker actual15/15PASS36.638s включаяnoPythonPATH, повтор и unchangedfakehome.
 
@@ -106,3 +106,11 @@ CI37565260606: Windows166tests432.001s,2failures/5skips; crossOS transfer шта
 Исправленный cwd/offline bootstrap: worker actualtarget PASS15.594s; первый setup без PATHPython успешен, последующие setup/status/context/doctor проходят из cwdcompany с child-only proxy block (реальный PyPI curl отказ28). Environmentstate bytes/mtime, uvarchive/uvexec/managedPython SHA/mtime и fakehome неизменны. Context/doctor в этом fixture — routingstub; actualcompany CLI покрывается отдельным transferproducer.18 deterministicbootstrapPASS6.695s (networkskip), nativePSstdio включён. Legacyfixture3/3PASS4.481s. Whole-resultreviewer targetedsource/offline-delta PASS; финальный общий verdict пока pending. Следующий шаг: новыйexactfrozenCI с cwd/repeat realCLIproducer, затем evidencejoin/release.
 
 Исправленный frozencandidate1872bf7f81e8a19855ca9573fcf353f203c2d9cf отправлен; [четвёртая exactmatrix37566264076](https://github.com/ArtemArzi/company-work-system/actions/runs/37566264076) запущена. Offlineworker output сохранён без повторного запуска в evidence/bootstrap-cwd-offline.log. Попытка упаковки во время появления этого untracked evidence штатно rejected dirtycandidate; пакет не создан. Продолжить упаковку после сохранения evidence/coverage, без удаления незакоммиченной работы.
+
+Четвёртая матрица37566264076, runtime1872: Ubuntu24.04x64 166PASS60.993s, macOS14ARM64 166PASS123.344s (nativeWindows-only test skipped1 на каждой). ActualnoPythonPATH/offlinereuse/fakehomeunchanged и настоящий CLIproducer из cwdcompany с repeatsetup PASS. Windows/transfer ещё pending. Repairedbundle7bf8015332451b9a4188628ed5400b36b95ce418/SHA256d14286a149cf48b88af9ae8a0787f1169e3aa98e30f60d4595085bf8a14086b3 transferredmirror/create/adapt/validatePASS. Новый exactcompany реальный setup+repeat/status/doctor/context, затем тежеоперации при refusedHTTPSproxy PASS, doctorWSL2; evidence/platform-candidate-4cce-cold.json, developmentexcluded. Это настоящий CLI без fixturestub; системные настройки не менялись. WSLfull7f22 остаётся отдельным evidence от targetedисправлений1872.
+
+## Реальная матрица — PASS, 07.10
+
+Actions37566264076 полностью SUCCESS для runtime1872bf7f81e8a19855ca9573fcf353f203c2d9cf (workflowmain142d4ac). Ubuntu24.04 x86_64:166tests60.993s/skip1; macOS14 aarch64:166tests123.344s/skip1; WindowsServer2022 x86_64:166tests378.983s/skip5. Пропуски Windows:4 POSIX-only download/signal/alias/fsync сценария и symlinkprivilege; собственные Windows atomic/stdio/runtime проверки прошли, existing/danglingjunction отдельно доказаны. Native Windows Python3.12.15 setup/repeat/offline/fakehomeunchanged и настоящий company CLIproducer PASS.
+
+Все3transferjobs PASS: reader1.3 восстановил каждый3currentOSbackup+actual1.2Linuxbackup (по4proofs/ОС); original1.2Linuxreader дополнительно прочитал все4 (всего8Linuxproofs). Exact tracked data/task/history/native settings/proof/rawCRLF сохранены. Полнота inventory/missing/extra negatives не ослаблена. Это синтетические компании, не liveprovider/бизнесрезультат. Evidence/ci-fourth.json и*-fourth.log. Следующий шаг: закрыть WSLfulljoin, финальные coverage/docs+package, независимыйreviewer, затем productmain.

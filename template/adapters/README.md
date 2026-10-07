@@ -22,3 +22,9 @@ Claude Code >=2.1.277 может читать AGENTS.md непосредстве
 Первый программный проход: doctor → прочитать карту/config → один preflight → задача и её проверка → scoped commit/deliver по завершении. Частота и приёмка — [общий стандарт](../standards/task-validation.md). Форматы/операции — [runtime](../standards/runtime.md). Статусы проверок платформ приведены в двух profiles; кандидат не является готовым выпуском до приёмки.
 
 Первичные источники: [Codex Windows](https://learn.chatgpt.com/docs/windows/windows-sandbox), [WSL](https://learn.chatgpt.com/docs/windows/wsl), [Codex hooks](https://learn.chatgpt.com/docs/hooks), [Claude setup](https://code.claude.com/docs/en/setup), [Claude memory](https://code.claude.com/docs/en/memory), [Claude hooks](https://code.claude.com/docs/en/hooks), [uv Python](https://docs.astral.sh/uv/guides/install-python/).
+
+## Границы проверки версии 1.3.0
+
+Общий runtime, установка без Python, повтор без сети и настоящий CLI проверены на Ubuntu24.04 x86_64, macOS14 ARM64 и WindowsServer2022 x86_64 (Actions37566264076, runtime1872bf7). В WSL2 Ubuntu24.04 x86_64 проверены настоящий CLI, установка, offline-повтор и затронутые исправления; полный запуск7f22 учитывается отдельно в доказательствах продукта. Windows10/11, другие версии ОС/архитектуры и облачные сессии не проверены этим запуском. Закреплённый архив для архитектуры сам по себе не означает проверенную поддержку.
+
+Эти проверки относятся к общему runtime. Обнаружение навыков, trust/events хуков и права Codex/Claude требуют проверки в конкретной компании; они не подтверждаются тестом ОС.
