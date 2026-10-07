@@ -52,6 +52,7 @@ def main():
     p = sub.add_parser("proposal-candidate"); p.add_argument("package", type=Path); p.add_argument("product", type=Path); p.add_argument("remote"); p.add_argument("destination", type=Path)
     p = sub.add_parser('hooks-check'); p.add_argument('event', choices=['SessionStart','PreToolUse','PostToolUse','PreCompact','Stop','context-entry','entity-before-write','entity-after-write','method-impact','task-continuation','publication-check']); p.add_argument('--payload', type=Path); p.add_argument('--task')
     p = sub.add_parser('hooks-project'); p.add_argument('harness', choices=['codex','claude']); p.add_argument('--apply', action='store_true'); p.add_argument('--enabled', action='store_true')
+    p = sub.add_parser('organization-check'); p.add_argument('--paths-file', type=Path, required=True); p.add_argument('--task'); p.add_argument('--expect', type=Path)
     args = parser.parse_args()
     root = args.root.resolve()
     c = args.command
@@ -97,6 +98,16 @@ def main():
     elif c == 'hooks-project':
         import hooks
         result = hooks.project(root, args.harness, apply=args.apply, enabled=args.enabled)
+    elif c == 'organization-check':
+        import organization
+        selected = organization.load_manifest(root, args.paths_file, list)
+        if args.expect:
+            expected = organization.load_manifest(root, args.expect, dict)
+            require(expected.get('paths') == sorted(selected), 'paths file differs from expected snapshot')
+            require(expected.get('task_id') == args.task, 'task differs from expected snapshot')
+            result = organization.compare(root, expected)
+        else:
+            result = organization.inspect(root, selected, args.task)
     else: raise ValueError("unsupported operation")
     if c == "preflight" and result["status"] == "blocked":
         print(json.dumps(result, ensure_ascii=False, indent=2), file=sys.stderr)

@@ -1,0 +1,45 @@
+schema_version: 1
+id: company-organization
+version: 1
+owner: process-owner-selected-by-company
+standards:
+- standards/system-evolution.md
+- standards/task-validation.md
+- standards/runtime.md
+capabilities:
+- files
+- validation
+- critical
+inputs:
+- Exact changed, new, moved, deleted or disputed repository paths
+- Existing company context, nearest maps, owners and applicable permissions
+- 'For mutation only: accepted owning task and immutable organization snapshot'
+output: Read-only organization report OR verified, linked and repeatable repository change
+steps:
+- id: read-context
+  operation: context
+  instruction: Прочитать владельца, карты, права и действующую задачу один раз; использовать уже полученный preflight этой задачи, пока версия не изменилась.
+  depends_on: []
+- id: inspect-organization
+  operation: organization
+  instruction: Запустить read-only organization-check для точных путей. Разделить наблюдаемое место, ссылки, consumers, immutable pins и semantic unknowns; неполное покрытие не считать PASS.
+  depends_on:
+  - read-context
+- id: choose-organization
+  operation: organization
+  instruction: Выбрать keep/merge/move/link/create/leave-open. Для mutation сохранить initial snapshot единственным live-data input, сверить preimage перед каждой записью, обновить всех потребителей и получить стабильный postimage; ambiguity и historical pins сохраняют bytes.
+  depends_on:
+  - inspect-organization
+- id: execute-organization
+  operation: execute
+  instruction: Только для сохранённого изменения передать Result, critical и обязательный review в один execute; затем validate и общий commit/deliver. Read-only аудит этот шаг пропускает.
+  depends_on:
+  - choose-organization
+on_error: Сохранить observed failure и исходные bytes у owning task; зависимые изменения остановить
+stop: Нет права или владельца, изменился preimage, покрытие неполно, путь закреплён историей, решение неоднозначно либо две попытки не дали новых фактов
+dependency_paths:
+- scripts/organization.py
+- scripts/validation.py
+- standards/system-evolution.md
+- standards/runtime.md
+- skills/README.md

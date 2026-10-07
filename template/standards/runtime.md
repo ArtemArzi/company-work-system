@@ -1,6 +1,6 @@
 ---
 id: runtime
-version: 5
+version: 6
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
@@ -26,6 +26,7 @@ CLI вызывается через launcher выбранной [среды](../
 | Источники / сверка | `source-read source-id`, `reconcile left.json right.json`, `episodes envelope.json --denominator N` |
 | Проактивность / инцидент | `tick`, `incident id --observed text --assumption text --proposal text` |
 | Знания | `search query`, `kb-read source-id` |
+| Организация файлов | `organization-check --paths-file paths.json [--task id] [--expect snapshot.json]`: read-only место, карты, ссылки, structured consumers, immutable pins и exact pre/postimage; манифесты только внутри компании |
 | Чистая компания | `create release.git new-directory --id company-id --owner owner` |
 | Общая доставка | `prepare remote new-candidate`, `commit path... --message text`, `deliver remote --expected-base SHA [--task id]` для сохранения readback у задачи |
 | Обновление | `update release.git new-candidate`, при принятом разрешении конфликта `finish-update --target SHA --company-base SHA`; потом тот же deliver |
@@ -46,7 +47,7 @@ Sanitized-package создаётся заново вне истории комп
 
 Рецепт workflow v1: id/version/owner/standards/capabilities/inputs/output/steps/on_error/stop. Steps имеют уникальный ID, operation из фиксированного каталога либо skill существующего канонического пакета, depends_on только предыдущих шагов. instruction задаёт агенту входы и условную ветку: просмотр не требует задачи результата, execute применяется один раз к подготовленному Result принятой задачи, successful deliver/readback завершает доставку. Вложенный навык использует уже выполненный вход задачи по task-validation. YAML читает агент; программного движка/автоматического вызова CLI по operation нет. Возможности не выдаются декларацией, ограничения профиля проверяются до действия.
 
-operation описывает фазу, а не обязательно имя команды. author/research/marketing — подготовка агентом через разрешённые инструменты; таких subcommands system.py не предоставляет. knowledge выбирает реальные search или kb-read. Остальные команды и их параметры — в таблице выше. Перед execute нужен Result v1/critical/обязательный review; транспортный envelope, receipt доставки и receipt инцидента не являются Result. Сохранение и простой просмотр явно разделены в соответствующих рецептах.
+operation описывает фазу, а не обязательно имя команды. author/research/marketing — подготовка агентом через разрешённые инструменты; таких subcommands system.py не предоставляет. organization использует read-only `organization-check`, а смысловое решение и разрешённые записи выполняет агент по принятой задаче. knowledge выбирает реальные search или kb-read. Остальные команды и их параметры — в таблице выше. Перед execute нужен Result v1/critical/обязательный review; транспортный envelope, receipt доставки и receipt инцидента не являются Result. Сохранение и простой просмотр явно разделены в соответствующих рецептах.
 
 ## Точные зависимости и совместимость
 

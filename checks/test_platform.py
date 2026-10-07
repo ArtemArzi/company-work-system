@@ -84,7 +84,7 @@ class Platforms(Fixture):
             for file in (self.root / directory).iterdir():
                 if file.is_symlink(): file.unlink()
                 file.write_bytes(('../../skills/' + file.name).encode())
-        self.assertEqual(validation.repository(self.root)['skills'], 12)
+        self.assertEqual(validation.repository(self.root)['skills'], 13)
         file = self.root / '.agents/skills/company-context'
         file.unlink()
         validation.repository(self.root)

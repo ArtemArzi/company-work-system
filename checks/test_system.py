@@ -85,7 +85,7 @@ class Fixture(unittest.TestCase):
 
 class LocalContracts(Fixture):
     def test_clean_template_and_all_pairs(self):
-        self.assertEqual(validation.repository(self.root)["skills"], 12)
+        self.assertEqual(validation.repository(self.root)["skills"], 13)
         self.assertFalse((self.root / "CLAUDE.md").exists())
         for harness, directory in [("codex", ".agents"), ("claude", ".claude")]:
             profile = load(self.root / f"adapters/{harness}/profile.yaml")

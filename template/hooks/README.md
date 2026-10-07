@@ -26,3 +26,9 @@ event. `hooks-project` показывает кандидат настроек; `
 Доставка и финальный validate обязательны независимо от hooks. Случайные Bash,
 MCP writes, выключенные/untrusted hooks и native timeout не дают покрытие всех
 записей. Hook не запускает сеть, синк, агентов, LLM, full suite или расписание.
+
+Сигналы `entity-before-write`, `entity-after-write` и `method-impact` можно разобрать
+через [company-organization](../skills/company-organization/SKILL.md). Hook сам не
+запускает навык, не переносит файлы и не правит ссылки: он лишь даёт ограниченное
+наблюдение, а организация выполняется отдельной принятой задачей или read-only
+аудитом.

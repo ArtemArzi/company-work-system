@@ -9,7 +9,7 @@ import re
 from core import config, config_snapshot, digest, ident, load, object_hash, path, require, tasks, changed_bindings
 
 CAPABILITIES = {"files", "validation", "git", "source-read", "critical", "tick", "graph", "independent-review"}
-OPERATIONS = {"preflight", "context", "intake", "execute", "summary", "episodes", "research", "marketing", "source-read", "deliver", "author", "incident", "knowledge"}
+OPERATIONS = {"preflight", "context", "intake", "execute", "summary", "episodes", "research", "marketing", "source-read", "deliver", "author", "incident", "knowledge", "organization"}
 
 
 def frontmatter(file):
