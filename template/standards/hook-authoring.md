@@ -1,6 +1,6 @@
 ---
 id: hook-authoring
-version: 2
+version: 3
 owner: product-maintainer
 ---
 # Создание и изменение хуков
@@ -21,11 +21,14 @@ enabled/timeout/fallback, positive/negative. ID handler совпадает с ID
 `scripts/hooks.py` вызывается подготовленным CLI или command hook. Нормализованный
 JSON ограничен 256 KiB; stdin/stdout отдельно от task.json. Содержимое tool input
 не исполняется и не сохраняется в журнал. Обычные paths ограничены явно заданным
-root; cwd внутри подкаталога допустим. Product root узнаётся по template/config
-и docs/development/PLAN, его владельцы остаются в docs/development/work. Новое
-company business state в product не создаётся.
+root; cwd внутри подкаталога допустим. Product root узнаётся по template/config,
+AGENTS.md и scripts/product.py. Документы разработки хранятся вне публичного
+репозитория; местный путь сопровождающий задаёт в Git config cws.developmentRoot.
+Хук направляет в AGENTS и не читает внешние документы. ID задачи в сообщении
+означает выбранный запрос, а не подтверждение существования внешней карточки.
+Новое company business state в product не создаётся.
 
-Product root дополнительно имеет `.git` directory и `scripts/product.py` как
+Product root дополнительно имеет `.git` directory или worktree file и `scripts/product.py` как
 маршрут разработки. Его projection только preview; `--apply` допускается у
 адаптированной компании с действующими owner/local_work permissions.
 

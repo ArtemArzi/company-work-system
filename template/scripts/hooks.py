@@ -35,7 +35,7 @@ def roots(root):
     if (root / "company/config.yaml").is_file():
         config(root)
         return root, root, "company"
-    require((root / "template/company/config.yaml").is_file() and (root / "docs/development/PLAN.md").is_file() and (root / "AGENTS.md").is_file() and (root / "scripts/product.py").is_file() and (root / ".git").is_dir(), "unrecognized hook root; use explicit company/product root")
+    require((root / "template/company/config.yaml").is_file() and (root / "AGENTS.md").is_file() and (root / "scripts/product.py").is_file() and ((root / ".git").is_dir() or (root / ".git").is_file()), "unrecognized hook root; use explicit company/product root")
     config(root / "template")
     return root, root / "template", "product"
 
@@ -146,8 +146,9 @@ def _task(root, base, kind, task_id):
         return None
     if kind == "product":
         require(isinstance(task_id, str) and re.fullmatch(r"[a-z0-9][a-z0-9-]{1,127}", task_id), "invalid development task slug")
-        file = path(root, f"docs/development/work/{task_id}/task.md")
-        return {"path": file.relative_to(root).as_posix(), "development": True} if file.is_file() else None
+        # Private development records are outside this repository. This is a
+        # navigation hint, not a claim that the external task was inspected.
+        return {"id": task_id, "development": True}
     ident(task_id)
     file = path(base, f"work/{task_id}/task.json")
     if not file.is_file():
@@ -158,10 +159,15 @@ def _task(root, base, kind, task_id):
 
 
 def _navigation(kind, task):
-    routes = ["AGENTS.md", "docs/development/README.md", "docs/development/PLAN.md"] if kind == "product" else ["AGENTS.md", "company/config.yaml", "company/README.md"]
-    if task:
+    routes = ["AGENTS.md"] if kind == "product" else ["AGENTS.md", "company/config.yaml", "company/README.md"]
+    if task and task.get("path"):
         routes.append(task["path"])
-    return "Read " + ", ".join(routes) + "; independent task entry still requires the shared preflight."
+    message = "Read " + ", ".join(routes) + "; independent task entry still requires the shared preflight."
+    if kind == "product":
+        message += " Private development records are external; resolve cws.developmentRoot from local Git config via AGENTS.md."
+        if task:
+            message += " Development task " + task["id"] + " was requested; its external record has not been inspected by this hook."
+    return message
 
 
 def _publication_invocation(root, payload):

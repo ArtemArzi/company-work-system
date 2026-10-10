@@ -1,6 +1,0 @@
-test_wrong_arithmetic_then_original_case_repairs (test_system.LocalContracts.test_wrong_arithmetic_then_original_case_repairs) ... ok
-
-----------------------------------------------------------------------
-Ran 1 test in 0.417s
-
-OK

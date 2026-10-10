@@ -5,3 +5,8 @@ __pycache__/
 .local/
 dist/
 .venv/
+# Private development records belong outside the public product checkout.
+/docs/development/
+/development/
+/evidence/
+/factory-workspaces/
