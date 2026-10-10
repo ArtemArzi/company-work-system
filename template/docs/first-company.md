@@ -106,9 +106,13 @@ python3 scripts/system.py summary
 
 ## 5. Сохранить, доставить, продолжить
 
+Перед commit прочитать diff и перечисленные файлы; CLI принимает точные пути файлов, не каталог задачи. Проверить `task.output.path` и `candidate.sources[0].path`: сохранить этот результат и его snapshot вместе с критериями и разбором. Чужие файлы в список не добавлять.
+
 ```sh
 BASE=$(git rev-parse refs/remotes/origin/main)
-python3 scripts/system.py commit work/first-summary --message "Verify first company summary"
+RESULT=$(python3 -c "import json; print(json.load(open('work/first-summary/task.json'))['output']['path'])")
+SNAPSHOT=$(python3 -c "import json; print(json.load(open('work/first-summary/candidate.json'))['sources'][0]['path'])")
+python3 scripts/system.py commit work/first-summary/acceptance.json work/first-summary/candidate.json work/first-summary/critical.json work/first-summary/task.json "$RESULT" "$SNAPSHOT" --message "Verify first company summary"
 python3 scripts/system.py deliver /absolute/company-common.git --expected-base "$BASE" --task first-summary
 python3 scripts/system.py context --task first-summary
 ```

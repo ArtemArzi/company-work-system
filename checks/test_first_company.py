@@ -165,7 +165,8 @@ class FirstCompany(unittest.TestCase):
         cancelled = self.cli(self.root, "decide", "unknown-task", "cancel", "--revision", str(waiting["revision"]),
                              "--actor", "demo-owner", "--reason", "Finish synthetic negative case without inventing definitions")
         self.assertEqual(cancelled["unknowns"], waiting["unknowns"])
-        self.cli(self.root, "commit", "company/config.yaml", "work/unknown-task", "--message", "Keep owner unknowns")
+        self.cli(self.root, "commit", "work/unknown-task/acceptance.json", "work/unknown-task/task.json",
+                 "--message", "Keep owner unknowns")
         self.cli(self.root, "deliver", str(self.remote), "--expected-base", self.git(self.remote, "rev-parse", "main"))
         protected = self.tracked(self.root, protected=True)
         # Add a genuine descendant release, using the existing product packager.
@@ -204,7 +205,8 @@ class FirstCompany(unittest.TestCase):
         self.save_cfg(cfg)
         source_map = self.root / "company/sources/README.md"
         source_map.write_text(source_map.read_text(encoding="utf-8") + "\n[Synthetic input](input.json).\n", encoding="utf-8")
-        self.cli(self.root, "commit", "company", "--message", "Configure accepted synthetic export")
+        self.cli(self.root, "commit", "company/config.yaml", source_path, "company/sources/README.md",
+                 "--message", "Configure accepted synthetic export")
         self.cli(self.root, "source-read", "test-data")
         directory = self.root / "work/first-task"
         criterion = {"kind": "metrics", "expected_count": 2, "expected_total": 5,
@@ -245,7 +247,9 @@ class FirstCompany(unittest.TestCase):
         self.assertEqual(repeat, task)
         base = self.git(self.remote, "rev-parse", "main")
         self.cli(self.root, "validate")
-        self.cli(self.root, "commit", "work/first-task", "work/unknown-task", "--message", "Verify first task and preserve unknown permission")
+        self.cli(self.root, "commit", "work/first-task/acceptance.json", "work/first-task/candidate.json",
+                 "work/first-task/critical.json", "work/first-task/task.json", task["output"]["path"],
+                 "work/unknown-task/task.json", "--message", "Verify first task and preserve unknown permission")
         receipt = self.cli(self.root, "deliver", str(self.remote), "--expected-base", base, "--task", "first-task")
         self.assertEqual(receipt["status"], "readback-confirmed")
         task = json.loads((directory / "task.json").read_text(encoding="utf-8"))
@@ -272,8 +276,8 @@ class FirstCompany(unittest.TestCase):
         self.assertEqual(json.loads(snapshot_bytes)["entries"], summary["entries"])
         self.save(summary_dir / "candidate.json", summary)
         self.save(summary_dir / "critical.json", critical)
-        self.cli(self.root, "execute", "first-summary", "--artifact", str(summary_dir / "candidate.json"),
-                 "--critical", str(summary_dir / "critical.json"), "--expected-revision", str(owning["revision"]))
+        summary_task = self.cli(self.root, "execute", "first-summary", "--artifact", str(summary_dir / "candidate.json"),
+                                "--critical", str(summary_dir / "critical.json"), "--expected-revision", str(owning["revision"]))
         # Absence and negative outcome are evidence text, not new enum/positive success.
         for layer, evidence in (("application", "Owner checked synthetic meeting: result was not used; reason unknown"),
                                 ("effect", "Synthetic measured duration increased from 10 to 12 minutes; causality unknown")):
@@ -286,7 +290,10 @@ class FirstCompany(unittest.TestCase):
         self.assertEqual(next(e for e in current["entries"] if e["id"] == "first-task")["effect"], task["effect"])
         self.cli(self.root, "validate")
         base = self.git(self.remote, "rev-parse", "main")
-        self.cli(self.root, "commit", "work/first-task", "work/first-summary", "--message", "Record exact-result observations and summary")
+        self.cli(self.root, "commit", "work/first-task/task.json", "work/first-summary/acceptance.json",
+                 "work/first-summary/candidate.json", "work/first-summary/critical.json", "work/first-summary/task.json",
+                 summary_task["output"]["path"], summary["sources"][0]["path"],
+                 "--message", "Record exact-result observations and summary")
         self.cli(self.root, "deliver", str(self.remote), "--expected-base", base, "--task", "first-summary")
         restored = self.restore_exact(self.root)
         self.assertEqual(self.cli(restored, "context", "--task", "first-task")["tasks"][0]["output"], task["output"])
