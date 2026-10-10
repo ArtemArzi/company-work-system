@@ -72,7 +72,7 @@ class Policy:
 
 
 def release_policy():
-    return Policy('release',files=('README.md','AGENTS.md','.gitignore','.gitattributes','requirements.txt','release.yaml','docs/company-system-guide.html','.codex/hooks.json'),
+    return Policy('release',files=('README.md','AGENTS.md','.gitignore','.gitattributes','requirements.txt','release.yaml','docs/company-system-guide.html','docs/first-company.md','docs/observations.md','.codex/hooks.json'),
                   roots=('company','standards','skills','workflows','scripts','adapters','.agents','.claude','checks','hooks'),
                   scan_secrets=False,projections=True)
 
