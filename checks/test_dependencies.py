@@ -1,4 +1,5 @@
 """Dependency invalidation, historical admission and explicit reconciliation."""
+from checks.fixture_helpers import execute_with_current_tokens_for_fixture
 import copy
 from pathlib import Path
 from unittest.mock import patch
@@ -21,7 +22,7 @@ class Dependencies(fixtures.Fixture):
         self.assertIn('.gitattributes', changed_bindings(self.root, selected['bindings'], selected['binding_scope']))
         self.assertIn('.gitattributes', changed_bindings(self.root, full))
         with self.assertRaisesRegex(ValueError, 'Pinned'):
-            operations.execute(self.root, selected['id'], self.artifact(), self.critical())
+            execute_with_current_tokens_for_fixture(self.root, selected['id'], self.artifact(), self.critical())
 
     def test_selected_sources_harness_and_unrelated_methods(self):
         task = self.task()
@@ -33,18 +34,18 @@ class Dependencies(fixtures.Fixture):
         file = self.root/'adapters/claude/README.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated change\n', encoding="utf-8", newline="\n")
         file = self.root/'skills/company-marketing/SKILL.md'; file.write_text(file.read_text(encoding="utf-8")+'\nUnrelated method\n', encoding="utf-8", newline="\n")
         self.assertEqual(changed_bindings(self.root, task['bindings'], task['binding_scope']), [])
-        verified = operations.execute(self.root, task['id'], self.artifact(), self.critical())
+        verified = execute_with_current_tokens_for_fixture(self.root, task['id'], self.artifact(), self.critical())
         self.assertEqual(verified['status'], 'verified')
         self.assertEqual(verified['evidence']['source_admission']['config_sha256'], digest(self.root/'company/config.yaml'))
         evidence = copy.deepcopy(verified['evidence'])
         cfg['name'] = 'Unrelated display name'; write(self.root/'company/config.yaml', cfg)
-        self.assertEqual(operations.execute(self.root, task['id'], self.artifact(), self.critical())['evidence'], evidence)
+        self.assertEqual(execute_with_current_tokens_for_fixture(self.root, task['id'], self.artifact(), self.critical())['evidence'], evidence)
 
     def test_selected_source_same_id_change_and_rights_block(self):
         task = self.task(); cfg = config(self.root)
         cfg['sources']['test-data']['account'] = 'changed-account'; write(self.root/'company/config.yaml', cfg)
         self.assertIn('config:sources', changed_bindings(self.root, task['bindings'], task['binding_scope']))
-        with self.assertRaisesRegex(ValueError, 'Pinned'): operations.execute(self.root, task['id'], self.artifact(), self.critical())
+        with self.assertRaisesRegex(ValueError, 'Pinned'): execute_with_current_tokens_for_fixture(self.root, task['id'], self.artifact(), self.critical())
         self.assertEqual(load(task_file(self.root, task['id']))['status'], 'blocked')
         cfg['permissions']['external_delivery'] = True; write(self.root/'company/config.yaml', cfg)
         self.assertIn('config:permissions', changed_bindings(self.root, task['bindings'], task['binding_scope']))
@@ -56,13 +57,13 @@ class Dependencies(fixtures.Fixture):
             cfg = config(self.root); cfg['name'] = 'external editor'; write(self.root/'company/config.yaml', cfg)
             return result
         with patch.object(validation, 'result', side_effect=racing):
-            with self.assertRaisesRegex(Rejected, 'config changed'): operations.execute(self.root, task['id'], self.artifact(), self.critical())
+            with self.assertRaisesRegex(Rejected, 'config changed'): execute_with_current_tokens_for_fixture(self.root, task['id'], self.artifact(), self.critical())
         failed = load(task_file(self.root, task['id']))
         self.assertEqual(failed['status'], 'blocked'); self.assertIsNone(failed['evidence'])
         self.assertFalse(any(h['action'] == 'verified' for h in failed['history']))
 
     def test_delivered_admission_uses_historical_specification(self):
-        self.task(); task = operations.execute(self.root, 'test-task', self.artifact(), self.critical())
+        self.task(); task = execute_with_current_tokens_for_fixture(self.root, 'test-task', self.artifact(), self.critical())
         task['delivery'] = {'status': 'delivered', 'result_sha256': task['output']['sha256'], 'commit': 'synthetic-proof-only', 'readback': True}
         cfg = config(self.root); cfg['sources']['test-data']['account'] = 'next-account'; write(self.root/'company/config.yaml', cfg)
         self.assertTrue(validation.task(self.root, task))

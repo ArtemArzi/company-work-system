@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-source-read
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/data-access.md
@@ -15,9 +15,11 @@ output: Validated read envelope OR a separately accepted derived Result; reading
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать
-    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
-    — task-validation.
+  instruction: >-
+    Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation. При подготовке
+    намерения один раз прочитать task/context (для новой задачи использовать ответ intake/decide),
+    сохранить revision и текущий output; не подставлять новую revision в прежний кандидат.
   depends_on: []
 - id: read-allowed-source
   operation: source-read
@@ -28,9 +30,12 @@ steps:
   - read-context
 - id: execute-derived-result
   operation: execute
-  instruction: 'Только если принята отдельная задача результата: подготовить Result
-    из разрешённого envelope с provenance/critical и выполнить один execute. Простое
-    чтение заканчивается предыдущим шагом.'
+  instruction: >-
+    Только если принята отдельная задача результата: подготовить Result из разрешённого envelope с
+    provenance/critical и выполнить один execute. Простое чтение заканчивается предыдущим шагом.
+    Передать сохранённую при подготовке намерения revision через --expected-revision N. При
+    конфликте перечитать task/context, сверить новые данные с намерением и заново подготовить
+    кандидат; просто взять последнюю revision и повторить прежний кандидат запрещено.
   depends_on:
   - read-allowed-source
 on_error: Record observed failure at owning task; block dependent action; preserve

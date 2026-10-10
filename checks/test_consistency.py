@@ -1,10 +1,11 @@
 """Regressions found by cross-repository review; synthetic data only."""
+from checks.fixture_helpers import execute_with_current_tokens_for_fixture
 import copy
 import datetime as dt
 import os
 from pathlib import Path
 from unittest.mock import patch
-from test_system import Fixture, GitAcceptance
+from checks.test_system import Fixture, GitAcceptance
 from core import Rejected, config, digest, load, now, task_file, write
 import delivery, knowledge, lifecycle, operations, validation
 
@@ -18,7 +19,7 @@ class Consistency(Fixture):
             operations.incident(self.root, 'test-task', 'failure', 'assumption', 'repair')
         self.assertEqual(file.read_bytes(), before)
         with self.assertRaisesRegex(Rejected, 'cancelled'):
-            operations.execute(self.root, 'test-task', self.artifact(), self.critical())
+            execute_with_current_tokens_for_fixture(self.root, 'test-task', self.artifact(), self.critical())
 
     def test_metrics_reject_bad_primary_metadata_despite_valid_output(self):
         self.export_config(); self.input(); artifact = self.artifact()
@@ -88,16 +89,16 @@ class Consistency(Fixture):
         self.assertEqual(operations.reconcile(left, right)['matched'], 2)
 
     def test_resume_and_supersede_keep_original_verification_in_task_history(self):
-        self.task(); verified = operations.execute(self.root, 'test-task', self.artifact(), self.critical())
+        self.task(); verified = execute_with_current_tokens_for_fixture(self.root, 'test-task', self.artifact(), self.critical())
         original = copy.deepcopy(verified)
         resumed = operations.decide(self.root, 'test-task', verified['revision'], 'resume', 'Reconcile versions', 'test-owner')
         archived = resumed['history'][-1]['detail']['previous_verification']
         self.assertEqual(archived['evidence'], original['evidence'])
         self.assertEqual(archived['critical'], original['critical'])
         self.assertEqual(archived['output'], original['output'])
-        verified = operations.execute(self.root, 'test-task', self.artifact(), self.critical())
+        verified = execute_with_current_tokens_for_fixture(self.root, 'test-task', self.artifact(), self.critical())
         changed = self.artifact(); changed['summary'] = 'Second accepted presentation of the same source'
-        newer = operations.execute(self.root, 'test-task', changed, self.critical())
+        newer = execute_with_current_tokens_for_fixture(self.root, 'test-task', changed, self.critical())
         archived = [h['detail'] for h in newer['history'] if h['action'] == 'superseded-result'][-1]
         self.assertEqual(archived['evidence'], verified['evidence'])
         self.assertEqual(archived['critical'], verified['critical'])
@@ -146,7 +147,7 @@ class EvolutionConsistency(GitAcceptance):
         self.assertFalse((company / 'relative-backup').exists())
 
     def test_delivered_metrics_keep_historical_admission_after_age_and_config_change(self):
-        self.export_config(); self.task(); operations.execute(self.root, 'test-task', self.artifact(), self.critical()); self.seed()
+        self.export_config(); self.task(); execute_with_current_tokens_for_fixture(self.root, 'test-task', self.artifact(), self.critical()); self.seed()
         remote = self.base / 'common.git'; delivery.git(self.root, 'clone', '--bare', str(self.root), str(remote))
         delivery.deliver(self.root, str(remote), task_id='test-task')
         future = dt.datetime.now(dt.timezone.utc) + dt.timedelta(days=2)

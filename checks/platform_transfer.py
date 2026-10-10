@@ -11,6 +11,7 @@ import sys
 PRODUCT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PRODUCT))
 from checks.test_system import Fixture
+from checks.fixture_helpers import execute_with_current_tokens_for_fixture
 from core import config, digest, load, write
 import delivery
 import hooks
@@ -89,7 +90,7 @@ def produce(destination, legacy=False):
     destination.mkdir(parents=True, exist_ok=False)
     fixture = Fixture(); fixture.setUp()
     try:
-        fixture.task(); operations.execute(fixture.root, 'test-task', fixture.artifact(), fixture.critical())
+        fixture.task(); execute_with_current_tokens_for_fixture(fixture.root, 'test-task', fixture.artifact(), fixture.critical())
         raw = fixture.root / 'company/projects/transfer-source.md'
         raw.write_bytes(RAW)
         if hooks.project(fixture.root, 'codex', apply=True, enabled=True)['status'] != 'projected':

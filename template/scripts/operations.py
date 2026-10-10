@@ -13,7 +13,7 @@ def context(root, task_id=None):
         t = load(file)
         if task_id and t["id"] != task_id:
             continue
-        result["tasks"].append({"path": file.relative_to(root).as_posix(), "id": t["id"], "status": t["status"], "revision": t["revision"], "next_action": t["next_action"], "blocker": t.get("blocker"), "changed_dependencies": changed_bindings(root, t["bindings"], t.get("binding_scope"))})
+        result["tasks"].append({"path": file.relative_to(root).as_posix(), "id": t["id"], "status": t["status"], "revision": t["revision"], "output": t.get("output"), "next_action": t["next_action"], "blocker": t.get("blocker"), "changed_dependencies": changed_bindings(root, t["bindings"], t.get("binding_scope"))})
     if task_id:
         require(result["tasks"], "task not found")
     return result
@@ -78,11 +78,17 @@ def decide(root, task_id, revision, action, reason, actor):
         return t
 
 
-def execute(root, task_id, artifact, critical, independent_review=None):
+def _expected_revision(t, expected_revision):
+    require(type(expected_revision) is int and expected_revision >= 0, "expected_revision must be a nonnegative integer")
+    require(t["revision"] == expected_revision, "stale task revision; reread context and reconcile intent")
+
+
+def execute(root, task_id, artifact, critical, independent_review=None, *, expected_revision=None):
     with lock(root):
         config(root, True)
         file = task_file(root, task_id)
         t = load(file)
+        _expected_revision(t, expected_revision)
         require(t["confirmed"] and not t["unknowns"] and t["status"] not in {"waiting", "cancelled"}, "unconfirmed/cancelled request")
         changes = changed_bindings(root, t["bindings"], t.get("binding_scope"))
         if changes:
@@ -149,13 +155,16 @@ def execute(root, task_id, artifact, critical, independent_review=None):
             raise
 
 
-def observe(root, task_id, layer, evidence, actor):
+def observe(root, task_id, layer, evidence, actor, *, expected_revision=None, expected_result_sha256=None):
     require(layer in {"application", "effect"}, "observation layer")
     with lock(root):
         cfg = config(root, True)
         require(actor == cfg["owner"] and evidence.strip(), "observation needs owner evidence")
         file = task_file(root, task_id)
         t = load(file)
+        _expected_revision(t, expected_revision)
+        require(isinstance(expected_result_sha256, str) and len(expected_result_sha256) == 64 and all(c in "0123456789abcdef" for c in expected_result_sha256), "expected_result_sha256 must be an exact lowercase SHA-256")
+        require(t.get("output") and t["output"]["sha256"] == expected_result_sha256, "stale result hash; reread context and reconcile observation")
         require(t["status"] == "verified", "unverified output cannot establish application")
         validation.task(root, t)
         t[layer] = {"status": "observed", "evidence": evidence, "actor": actor, "at": now(), "result_sha256": t["output"]["sha256"]}
@@ -182,7 +191,7 @@ def _summary(root, exclude=None):
         if t["id"] == exclude:
             continue
         refs.append({"path": file.relative_to(root).as_posix(), "sha256": digest(file)})
-        entries.append({"id": t["id"], "owner": t["owner"], "status": t["status"], "next_action": t["next_action"], "waiting_for": t.get("blocker"), "since": t["history"][-1]["at"], "revision": t["revision"]})
+        entries.append({"id": t["id"], "owner": t["owner"], "status": t["status"], "next_action": t["next_action"], "waiting_for": t.get("blocker"), "since": t["history"][-1]["at"], "revision": t["revision"], "output": t.get("output"), "delivery": t["delivery"], "application": t["application"], "effect": t["effect"]})
     counts = {status: sum(t["status"] == status for t in entries) for status in ["draft", "active", "waiting", "blocked", "verified", "cancelled"]}
     company_id = config(root)["id"]
     if exclude:
@@ -194,7 +203,7 @@ def _summary(root, exclude=None):
         else:
             write(target, snapshot)
         refs = [{"path": relative, "sha256": digest(target)}]
-    return {"schema_version": 1, "company_id": company_id, "kind": "action-summary", "summary": "Current actions and waiting owners", "entries": entries, "counts": counts, "sources": refs or [{"path": "company/config.yaml", "sha256": digest(path(root, "company/config.yaml"))}], "limitations": ["Priorities/WIP limits and team use are not inferred", "History belongs to each task", "Snapshot reflects recorded revisions; later changes need a new summary"], "next_action": "Each listed owner can follow the referenced task"}
+    return {"schema_version": 1, "company_id": company_id, "kind": "action-summary", "summary": "Current actions and waiting owners", "entries": entries, "counts": counts, "sources": refs or [{"path": "company/config.yaml", "sha256": digest(path(root, "company/config.yaml"))}], "limitations": ["Priorities/WIP limits and team use are not inferred", "History belongs to each task", "Delivery, application and effect are independent; observed evidence does not imply a positive effect", "Snapshot reflects recorded revisions; later changes need a new summary"], "next_action": "Each listed owner can follow the referenced task"}
 
 
 def reconcile(left, right):

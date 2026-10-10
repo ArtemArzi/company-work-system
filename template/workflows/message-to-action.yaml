@@ -1,6 +1,6 @@
 schema_version: 1
 id: message-to-action
-version: 3
+version: 4
 owner: company-process-owner
 standards:
 - standards/task-validation.md
@@ -23,6 +23,7 @@ steps:
   - receive-shared-state
 - id: do-action
   skill: company-execute
+  instruction: Подготовить намерение по task/context или ответу intake/decide один раз; сохранить revision и передать --expected-revision N в execute. При конфликте перечитать состояние и сверить кандидат, не подставлять новую revision в прежнее намерение.
   depends_on:
   - accept-message
 - id: show-actions

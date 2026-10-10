@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-incident
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/task-validation.md
@@ -14,9 +14,11 @@ output: Recorded incident and explicit permitted continuation; blocked is not a 
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать
-    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
-    — task-validation.
+  instruction: >-
+    Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation. При подготовке
+    намерения один раз прочитать task/context (для новой задачи использовать ответ intake/decide),
+    сохранить revision и текущий output; не подставлять новую revision в прежний кандидат.
   depends_on: []
 - id: record-incident
   operation: incident
