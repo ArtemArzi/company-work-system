@@ -138,8 +138,26 @@ def _collisions(paths):
         raise Rejected(str(exc)) from exc
 
 
-def _render(cfg, name, spec):
+def _render_inputs(cfg, name, spec):
+    # Count literal UTF-8 and repeated formatted values without expanding them.
+    # The validated grammar lets us use exactly the renderer's placeholders.
     values = {key: _formatted(_source(cfg, item['source']), item['format']) for key, item in spec['values'].items()}
+    try:
+        sizes = {key: len(value.encode('utf-8')) for key, value in values.items()}
+        size = len(f'<!-- cws:{name}:begin -->\n\n<!-- cws:{name}:end -->'.encode('utf-8'))
+        cursor = 0
+        for match in PLACEHOLDER.finditer(spec['template']):
+            size += len(spec['template'][cursor:match.start()].encode('utf-8')) + sizes[match[1]]
+            cursor = match.end()
+        size += len(spec['template'][cursor:].encode('utf-8'))
+    except UnicodeError as exc:
+        raise Rejected('documentation template/value is not UTF-8') from exc
+    require(size <= MAX_DOCUMENT_BYTES, 'rendered documentation byte limit exceeded')
+    return values, size
+
+
+def _render(cfg, name, spec):
+    values, _ = _render_inputs(cfg, name, spec)
     body = Template(spec['template']).substitute(values)
     return f'<!-- cws:{name}:begin -->\n{body}\n<!-- cws:{name}:end -->'
 
@@ -162,6 +180,11 @@ def check_config(cfg, read_document, document_paths=None):
     require(len(active) <= MAX_DOCUMENTS, 'active Markdown inventory limit exceeded')
     _collisions(active)
     total = 0
+    expected_bytes = 0
+    for name, spec in specs.items():
+        expected_bytes += _render_inputs(cfg, name, spec)[1]
+        require(expected_bytes <= MAX_TOTAL_BYTES, 'expected documentation byte limit exceeded')
+    # Allocate expected blocks only after the entire distinct set fits the cap.
     expected = {name: _render(cfg, name, spec) for name, spec in specs.items()}
     for relative in sorted(active):
         try:
