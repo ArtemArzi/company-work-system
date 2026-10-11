@@ -24,6 +24,8 @@ def main():
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("doctor")
     sub.add_parser("validate")
+    sub.add_parser("documentation-check")
+    p = sub.add_parser("documentation-render"); p.add_argument("id")
     sub.add_parser("self-test")
     p = sub.add_parser("preflight"); p.add_argument("--remote"); p.add_argument("--branch", default="main")
     p = sub.add_parser("context"); p.add_argument("--task")
@@ -65,7 +67,14 @@ def main():
         import knowledge
     if c in {'create', 'update', 'finish-update', 'rollback', 'backup', 'restore', 'proposal', 'proposal-candidate'}:
         import lifecycle
+    if c in {'documentation-check', 'documentation-render'}:
+        import linked_documents
+    if c == 'documentation-render':
+        from core import config
+        print(linked_documents.render(config(root), args.id), end='')
+        return
     if c == "validate": result = validation.repository(root)
+    elif c == "documentation-check": result = linked_documents.check(root)
     elif c == "self-test": result = validation.self_test()
     elif c == "preflight": result = delivery.preflight(root, args.remote, args.branch)
     elif c == "context": result = operations.context(root, args.task)

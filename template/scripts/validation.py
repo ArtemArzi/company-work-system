@@ -309,6 +309,10 @@ def repository(root, freshness=True):
         except (ValueError, KeyError, TypeError, OSError, Exception) as exc:
             errors.append(f"{label}: {exc}")
     check(lambda: config(root), "company")
+    def documentation_contract():
+        import linked_documents
+        linked_documents.check(root)
+    check(documentation_contract, "documentation")
     def release_contract():
         release = load(root / "release.yaml")
         require(release.get("schema_version") == 1 and release.get("state_format") == 1 and release.get("workflow_format") == 1, "unsupported release/state/workflow version")
