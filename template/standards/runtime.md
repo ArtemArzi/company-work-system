@@ -1,6 +1,6 @@
 ---
 id: runtime
-version: 7
+version: 8
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
@@ -25,6 +25,7 @@ Python API сохраняет позиционные аргументы: `execut
 | --- | --- |
 | Проверка перед работой | `preflight [--remote allowed-url-or-local-path] [--branch main]`: ready/blocked, local/remote SHA; только safe fast-forward, exit2 при blocked |
 | Вход и проверка | `context [--task id]`, `validate`, `self-test` (изолированные known-bad примеры), `summary [--task id]` |
+| Связанные описания правил | `documentation-check`, `documentation-render id`: read-only проверка/печать блока; декларация и границы — [system-evolution](system-evolution.md#связанные-описания-принятого-правила) |
 | Принять сообщение | `intake id --request text --owner name --acceptance file.json [--confirmed] [--unknown text] [--input relative-path] [--independent-required] [--skill canonical-id] [--harness codex/claude] [--source-id accepted-id]` |
 | Решение владельца | `decide id confirm/cancel/resume --revision N --reason text --actor owner` |
 | Результат и проверка | `execute id --artifact result.json --critical critical.json --expected-revision N [--review review.json]` |
@@ -78,6 +79,13 @@ snapshot, полный выбранный source facet и точную specifica
 pre-persistence recheck ловит редактор вне общего lock. Несвязанный source или
 README другого harness не требует перевыполнения. Изменение selected метода,
 input, accepted source или rights останавливает действие.
+
+Новые scopes содержат facet `documentation`, включая пустой: только релевантные
+регистрации, исходные значения, consumers и checker. Правило релевантно, если
+consumer уже входит в выбранные пути или корень его source потребляется
+выбранным config facet. Старый scope без этого facet пересчитывается прежним
+алгоритмом и не дополняется; schemas/selection и исторические seals не меняются.
+Правки ядра по-прежнему требуют сверки текущих активных привязок.
 
 Старые задачи остаются full-bound. `decide ... resume` с owner/revision сохраняет
 прежние bindings/scope/evidence в history и явно пересчитывает выбранный метод;
