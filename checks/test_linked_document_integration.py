@@ -9,11 +9,13 @@ from unittest.mock import patch
 
 from checks import test_system as fixtures
 from checks.fixture_helpers import execute_with_current_tokens_for_fixture
-from core import Rejected, changed_bindings, config, load, task_file, write
+from core import Rejected, changed_bindings, config, digest, load, task_file, write
 import delivery
 import dependencies
 import history
 import linked_documents
+import lifecycle
+import operations
 import validation
 
 
@@ -306,3 +308,111 @@ class LinkedDocumentIntegration(fixtures.Fixture):
         self.assertEqual(load(task_file(self.root, task['id']))['evidence'], evidence)
         for relative, content in before.items():
             self.assertEqual((self.root / relative).read_bytes(), content)
+
+    def test_portable_release_two_company_rules_survive_update_rollback_and_restore(self):
+        product, release = fixtures.GitAcceptance.product_release(self)
+        initial_version = load(product / 'template/release.yaml')['version']
+        companies = []
+        source = 'company/sources/design-basis/source.yaml'
+        for name, value, consumer in [('alpha', 8, self.consumer), ('beta', 24, 'company/README.md')]:
+            root = self.base / name
+            lifecycle.create(release, root, name + '-company', 'test-owner')
+            rule_id = name + '-limit'
+            cfg = config(root)
+            cfg['definitions'][rule_id] = value
+            cfg['documentation'] = {'schema_version': 1, 'rules': {rule_id: {
+                'approved_by': 'test-owner', 'template': 'Limit ${limit}.',
+                'values': {'limit': {'source': ['definitions', rule_id], 'format': 'integer'}},
+                'consumers': [consumer]}}}
+            write(root / 'company/config.yaml', cfg)
+            document = root / consumer
+            document.write_text(document.read_text(encoding='utf-8') + '\n' + linked_documents.render(cfg, rule_id),
+                                encoding='utf-8', newline='\n')
+            delivery.commit(root, ['company/config.yaml', consumer], 'Accept independent synthetic company rule')
+            task = operations.intake(root, 'historical-note', 'Preserve a source-backed historical note', 'test-owner',
+                                     {'kind': 'note'}, True, inputs=[source], skill='company-execute')
+            artifact = {'schema_version': 1, 'company_id': name + '-company', 'kind': 'note',
+                        'summary': 'An immutable source supports the historical note',
+                        'next_action': 'Read the note and its original source', 'limitations': ['Synthetic local scenario'],
+                        'sources': [{'path': source, 'sha256': digest(root / source)}]}
+            critical = {'request_alignment': 'The note preserves the accepted original source',
+                        'counterexample': 'A current method document cannot replace historical source bytes',
+                        'limitations': [], 'references': [source]}
+            result = execute_with_current_tokens_for_fixture(root, task['id'], artifact, critical)
+            delivery.commit(root, ['work/historical-note/task.json', result['output']['path']], 'Save verified synthetic note')
+            remote = self.base / (name + '-common.git')
+            delivery.git(root, 'clone', '--bare', str(root), str(remote))
+            receipt = delivery.deliver(root, str(remote), task_id=task['id'])
+            self.assertEqual(receipt['status'], 'readback-confirmed')
+            delivered_task = load(task_file(root, task['id']))
+            self.assertEqual(delivered_task['delivery']['status'], 'delivered')
+            baseline = delivery.git(root, 'rev-parse', 'HEAD')
+            self.assertEqual(delivery.git(remote, 'rev-parse', 'HEAD'), baseline)
+            protected = {p: (root / p).read_bytes() for p in delivery.git(root, 'ls-files', '-z').split('\0')
+                         if p.startswith(('company/', 'work/'))}
+            companies.append({'name': name, 'root': root, 'remote': remote, 'base': baseline, 'value': value,
+                              'consumer': consumer, 'rule': rule_id, 'config': copy.deepcopy(config(root)),
+                              'protected': protected, 'history': copy.deepcopy(delivered_task['history'])})
+
+        # Transfer a real release-only bundle containing the shared checker.
+        runtime = product / 'template/standards/runtime.md'
+        runtime.write_text(runtime.read_text(encoding='utf-8') + '\nSynthetic linked-document release clarification.\n',
+                           encoding='utf-8', newline='\n')
+        meta = load(product / 'template/release.yaml')
+        parts = meta['version'].split('.')
+        meta['version'] = '.'.join([*parts[:2], str(int(parts[2]) + 1)])
+        write(product / 'template/release.yaml', meta)
+        delivery.git(product, 'add', 'template')
+        delivery.git(product, 'commit', '-m', 'Release synthetic linked-document clarification')
+        target = fixtures.product.release(product, release)
+        bundle = self.base / 'linked-document-release.bundle'
+        exported = fixtures.product.package(release, bundle)
+        self.assertEqual(exported['release_sha'], target)
+        self.assertEqual(exported['bundle_sha256'], digest(bundle))
+        received = self.base / 'received-linked-document-release.git'
+        delivery.git(self.base, 'clone', '--mirror', str(bundle), str(received))
+        lifecycle.release_isolated(received)
+        self.assertEqual(delivery.git(received, 'rev-parse', 'refs/heads/main'), target)
+        self.assertNotIn('PRIVATE-DEVELOPMENT', delivery.git(received, 'rev-list', '--objects', '--all'))
+        delivery.git(received, 'cat-file', '-e', target + ':scripts/linked_documents.py')
+
+        def preserved(record, root):
+            self.assertEqual(config(root), record['config'])
+            for relative, raw in record['protected'].items():
+                self.assertEqual((root / relative).read_bytes(), raw, str(root / relative))
+            self.assertEqual(load(task_file(root, 'historical-note'))['history'], record['history'])
+            validation.repository(root)
+            self.assertEqual(linked_documents.check_tree(root, delivery.git(root, 'rev-parse', 'HEAD'))['status'], 'verified')
+
+        for record in companies:
+            name = record['name']
+            candidate = self.base / (name + '-updated')
+            updated = lifecycle.update(record['root'], received, candidate)
+            self.assertEqual(updated['status'], 'verified-candidate', updated)
+            self.assertEqual(load(candidate / 'release.yaml')['version'], meta['version'])
+            preserved(record, candidate)
+            receipt = delivery.deliver(candidate, str(record['remote']), expected_base=record['base'])
+            self.assertEqual(receipt['status'], 'readback-confirmed')
+            self.assertEqual(delivery.git(record['remote'], 'rev-parse', 'HEAD'), receipt['sha256'])
+            preserved(record, record['root'])
+            rolled = self.base / (name + '-rolled')
+            rollback = lifecycle.rollback(candidate, rolled)
+            self.assertEqual(rollback['status'], 'verified-candidate', rollback)
+            self.assertEqual(load(rolled / 'release.yaml')['version'], initial_version)
+            preserved(record, rolled)
+            backup = self.base / (name + '-backup')
+            lifecycle.backup(rolled, backup)
+            restored = self.base / (name + '-restored')
+            self.assertEqual(lifecycle.restore(backup, restored)['status'], 'restored-and-verified')
+            preserved(record, restored)
+            # The other company's accepted value must fail under this company's own rule.
+            document = restored / record['consumer']
+            original = document.read_bytes()
+            wrong = 24 if record['value'] == 8 else 8
+            document.write_bytes(original.replace(('Limit ' + str(record['value']) + '.').encode(),
+                                                  ('Limit ' + str(wrong) + '.').encode()))
+            self.assertNotEqual(document.read_bytes(), original)
+            with self.assertRaisesRegex(Rejected, 'documentation'):
+                validation.repository(restored)
+            document.write_bytes(original)
+            preserved(record, restored)
