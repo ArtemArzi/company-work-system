@@ -63,10 +63,14 @@ class EvolutionBytes(Fixture):
             self.assertEqual(lifecycle._protected_snapshot(candidate), expected)
             self.assertEqual(delivery.git(candidate, 'status', '--porcelain'), '')
             self.assertEqual(delivery.git(candidate, 'config', '--local', 'core.autocrlf'), 'false')
+            for document in ['first-company.md', 'observations.md']:
+                self.assertTrue((candidate / 'docs' / document).is_file())
             rolled = self.base / 'rolled'
             result = lifecycle.rollback(candidate, rolled)
             self.assertEqual(result['status'], 'verified-candidate', result)
             self.assertEqual(lifecycle._protected_snapshot(rolled), expected)
+            for document in ['first-company.md', 'observations.md']:
+                self.assertFalse((rolled / 'docs' / document).exists())
         self.assertEqual(cfg.read_bytes(), before)
         self.assertEqual(lifecycle._protected_snapshot(company), expected)
 

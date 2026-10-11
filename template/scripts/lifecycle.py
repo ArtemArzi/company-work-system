@@ -266,7 +266,7 @@ def rollback(root, destination):
         return {'status': 'needs-reconciliation', 'phase': 'clone', 'candidate': str(candidate), 'issues': issues,
                 'next_action': 'Preserve original bytes and candidate; reconcile Git representation with the owner, then prepare a new candidate'}
     current, previous = metadata["installed"], metadata["previous"]
-    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "hooks", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude/skills", ".gitignore", "requirements.txt", ".gitattributes", "docs/company-system-guide.html", check=False, binary=True)
+    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "hooks", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude/skills", ".gitignore", "requirements.txt", ".gitattributes", "docs/company-system-guide.html", "docs/first-company.md", "docs/observations.md", check=False, binary=True)
     require(delta.returncode == 0, "rollback diff unavailable")
     # Git's binary patch is a byte protocol. Text stdin converts LF to CRLF
     # on Windows and can silently prevent an otherwise compatible rollback.
