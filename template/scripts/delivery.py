@@ -234,6 +234,8 @@ def commit(root, relative_paths, message):
     native_context = commit_context(root)
     history.working(root, relative_paths, snapshot)
     candidate_tree = history.preview_tree(root, relative_paths, old_head)
+    import linked_documents
+    linked_documents.check_tree(root, candidate_tree, prefix='template/' if scope_root(root) != root else '')
     if snapshot:
         history.scan(root, snapshot["policy"], tips=(old_head,) if old_head else (), baseline=snapshot["baseline"], trees=(candidate_tree,))
         history.unchanged(scope_root(root), snapshot)
@@ -301,6 +303,8 @@ def deliver(root, remote, branch="main", expected_base=None, task_id=None):
     snapshot = history.company_policy(scope_root(root), required=not local_remote and scope_root(root) == Path(root))
     git(root, "fetch", remote, f"refs/heads/{branch}")
     current = git(root, "rev-parse", "FETCH_HEAD")
+    import linked_documents
+    linked_documents.check_tree(root, head, prefix='template/' if scope_root(root) != Path(root) else '')
     import yaml
     config_path = "template/company/config.yaml" if scope_root(root) != Path(root) else "company/config.yaml"
     remote_company = yaml.safe_load(git(root, "show", f"FETCH_HEAD:{config_path}"))

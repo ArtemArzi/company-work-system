@@ -56,7 +56,7 @@ def selected_sources(root, cfg, inputs, source_ids, metrics):
     return matches if len(matches) == 1 else None
 
 
-def projected(root, cfg, selection):
+def projected(root, cfg, selection, include_documentation=True):
     result = closure(root, selection['skill'])
     require(result is not None, 'selected method no longer declares dependencies')
     files, operations = result
@@ -94,6 +94,11 @@ def projected(root, cfg, selection):
         files.update({'adapters/'+harness+'/profile.yaml', 'adapters/'+harness+'/README.md'})
     release = load(path(root, 'release.yaml'))
     facets['release'] = {key: release.get(key) for key in ('schema_version', 'state_format', 'workflow_format')}
+    if include_documentation:
+        import linked_documents
+        consumers, documentation = linked_documents.dependency_scope(cfg, files, facets)
+        files.update(consumers)
+        facets['documentation'] = documentation
     return sorted(files), facets
 
 
@@ -147,7 +152,8 @@ def changed(root, bindings, scope):
                    if not path(root, relative).is_file() or digest(path(root, relative)) != bindings[relative]]
     cfg, _ = config_snapshot(root)
     try:
-        files, facets = projected(root, cfg, scope['selection'])
+        files, facets = projected(root, cfg, scope['selection'],
+                                 include_documentation='documentation' in scope['facets'])
         differences.extend(sorted(set(files) ^ set(scope['paths'])))
         differences.extend('config:'+key for key in set(facets) | set(scope['facets'])
                            if facets.get(key) != scope['facets'].get(key))
