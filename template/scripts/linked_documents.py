@@ -89,7 +89,7 @@ def _formatted(value, kind):
     if kind == 'integer':
         return str(value)
     require(value > 0, 'positive bytes documentation value required')
-    for size, unit in ((1024**3, 'GiB'), (1024**2, 'MiB')):
+    for size, unit in ((1024**3, 'ГиБ'), (1024**2, 'МиБ')):
         if value % size == 0:
             return str(value // size) + ' ' + unit
     return str(value) + ' байт'

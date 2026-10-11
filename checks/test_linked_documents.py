@@ -48,11 +48,11 @@ class LinkedDocuments(unittest.TestCase):
         self.assertEqual(result['documents'], sorted(before))
         self.assertEqual(result['active_documents'], 3)
         self.assertEqual({p: self.docs[p] for p in before}, before)
-        self.assertIn('3 GiB', self.block)
+        self.assertIn('3 ГиБ', self.block)
 
     def test_distinct_companies_and_byte_units(self):
         other = config(512 * 1024**2, '.local/other')
-        self.assertIn('512 MiB', linked.render(other, 'storage-policy'))
+        self.assertIn('512 МиБ', linked.render(other, 'storage-policy'))
         self.assertIn('.local/other', linked.render(other, 'storage-policy'))
         self.assertNotEqual(self.block, linked.render(other, 'storage-policy'))
         for count in (1, 1024, 1024**2 + 1):
@@ -141,7 +141,7 @@ class LinkedDocuments(unittest.TestCase):
     def test_missing_double_reversed_malformed_and_stale_blocks(self):
         begin, end = '<!-- cws:storage-policy:begin -->', '<!-- cws:storage-policy:end -->'
         for bad in ('', self.block * 2, end + '\n' + begin, begin, end,
-                    self.block.replace('3 GiB', '2 GiB'),
+                    self.block.replace('3 ГиБ', '2 ГиБ'),
                     self.block.replace(begin, '<!--cws:storage-policy:begin-->'),
                     self.block.replace(end, '<!-- cws:storage-policy:finish -->'),
                     self.block.replace(end, '<!-- CWS:storage-policy:end -->'),
@@ -156,7 +156,10 @@ class LinkedDocuments(unittest.TestCase):
             'values': {'count': {'source': ['features', 'count'], 'format': 'integer'}},
             'consumers': ['README.md']}
         self.docs['README.md'] += linked.render(self.cfg, 'second-rule')
-        self.assertEqual(self.check()['rules'], 2)
+        report = self.check()
+        self.assertEqual(report['rules'], 2)
+        self.assertEqual(report['documents'], ['README.md', 'standards/storage.md'])
+        self.assertEqual(len(linked.rules(self.cfg)), 2)
 
     def test_orphan_copied_block_and_registration_loss(self):
         self.docs['copied.md'] = self.block
@@ -256,7 +259,7 @@ class FilesAndTrees(unittest.TestCase):
             linked.check(self.root)
 
     def test_immutable_raw_blob_rejects_repaired_workingtree(self):
-        self.write('README.md', self.block.replace('3 GiB', '1 GiB'))
+        self.write('README.md', self.block.replace('3 ГиБ', '1 ГиБ'))
         snapshot = self.seed()
         self.write('README.md', self.block)
         self.assertEqual(linked.check(self.root)['status'], 'verified')
