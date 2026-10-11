@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-context
-version: 4
+version: 5
 owner: process-owner-selected-by-company
 standards:
 - standards/runtime.md
@@ -23,8 +23,11 @@ steps:
   depends_on: []
 - id: read-context
   operation: context
-  instruction: Прочитать фактический контекст/владельца с диска; вернуть контекст.
-    Просмотр не создаёт отдельную задачу результата и не вызывает execute.
+  instruction: >-
+    Прочитать фактический контекст/владельца с диска; вернуть контекст. Просмотр не создаёт
+    отдельную задачу результата и не вызывает execute. При подготовке намерения один раз прочитать
+    task/context (для новой задачи использовать ответ intake/decide), сохранить revision и текущий
+    output; не подставлять новую revision в прежний кандидат.
   depends_on:
   - receive-shared-state
 on_error: Record observed failure at owning task; block dependent action; preserve

@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-marketing
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/task-validation.md
@@ -14,9 +14,11 @@ output: Verified marketing Result for accepted audience and purpose; delivery/us
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать
-    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
-    — task-validation.
+  instruction: >-
+    Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation. При подготовке
+    намерения один раз прочитать task/context (для новой задачи использовать ответ intake/decide),
+    сохранить revision и текущий output; не подставлять новую revision в прежний кандидат.
   depends_on: []
 - id: prepare-marketing
   operation: marketing
@@ -27,7 +29,11 @@ steps:
   - read-context
 - id: execute-marketing-result
   operation: execute
-  instruction: Один execute подготовленного Result, critical и обязательного review.
+  instruction: >-
+    Один execute подготовленного Result, critical и обязательного review. Передать сохранённую при
+    подготовке намерения revision через --expected-revision N. При конфликте перечитать
+    task/context, сверить новые данные с намерением и заново подготовить кандидат; просто взять
+    последнюю revision и повторить прежний кандидат запрещено.
   depends_on:
   - prepare-marketing
 on_error: Record observed failure at owning task; block dependent action; preserve

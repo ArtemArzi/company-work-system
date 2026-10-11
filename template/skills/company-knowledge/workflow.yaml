@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-knowledge
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/system-evolution.md
@@ -15,9 +15,11 @@ output: Grounded read-only answer OR a separately accepted verified Result; grap
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать
-    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
-    — task-validation.
+  instruction: >-
+    Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation. При подготовке
+    намерения один раз прочитать task/context (для новой задачи использовать ответ intake/decide),
+    сохранить revision и текущий output; не подставлять новую revision в прежний кандидат.
   depends_on: []
 - id: find-grounded-knowledge
   operation: knowledge
@@ -28,9 +30,12 @@ steps:
   - read-context
 - id: execute-saved-answer
   operation: execute
-  instruction: 'Только для отдельно принятой задачи сохранения: подготовить Result
-    с источниками/critical и выполнить один execute. Обычный поиск/ответ заканчивается
-    предыдущим шагом.'
+  instruction: >-
+    Только для отдельно принятой задачи сохранения: подготовить Result с источниками/critical и
+    выполнить один execute. Обычный поиск/ответ заканчивается предыдущим шагом. Передать сохранённую
+    при подготовке намерения revision через --expected-revision N. При конфликте перечитать
+    task/context, сверить новые данные с намерением и заново подготовить кандидат; просто взять
+    последнюю revision и повторить прежний кандидат запрещено.
   depends_on:
   - find-grounded-knowledge
 on_error: Record observed failure at owning task; block dependent action; preserve

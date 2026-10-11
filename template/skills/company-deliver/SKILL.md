@@ -11,4 +11,6 @@ description: Для разрешённого внутреннего резуль
 
 Успешный readback завершает доставку. Receipt не является новым Result; последующий execute для него не нужен.
 
+Доставка не подтверждает применение и эффект. Для отдельного observe сохранить revision и output.sha256 при чтении task/context для наблюдения; передать `--expected-revision N --expected-result-sha256 HEX`. При конфликте сверить свидетельство с новой версией. `observed` не означает положительный эффект. Контракт — [runtime](../../standards/runtime.md).
+
 Общий цикл и evidence — [task-validation](../../standards/task-validation.md). Неизвестное/локальное/проверенное/live/применение различать. Результат и продолжение сохраняются у work/<id>/task.json.

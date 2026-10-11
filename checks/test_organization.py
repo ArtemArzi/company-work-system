@@ -1,5 +1,6 @@
 """Read-only repository organization evidence and task-safe change contracts."""
 from __future__ import annotations
+from checks.fixture_helpers import execute_with_current_tokens_for_fixture
 import json
 import subprocess
 import sys
@@ -243,7 +244,7 @@ class Organization(Fixture):
             "limitations": ["Synthetic fixture"],
             "references": [snapshot_file.relative_to(self.root).as_posix()],
         }
-        verified = operations.execute(self.root, "organization-task", artifact, critical)
+        verified = execute_with_current_tokens_for_fixture(self.root, "organization-task", artifact, critical)
         self.assertEqual(verified["status"], "verified")
         self.assertEqual(digest(snapshot_file), snapshot_hash)
         self.assertEqual(self.item(postimage, "company/projects/organized-note.md")["state"], "file")
@@ -256,7 +257,7 @@ class Organization(Fixture):
 
     def test_verified_and_delivered_task_pins_block_reorganization(self):
         task = self.task("pinned-task")
-        verified = operations.execute(self.root, "pinned-task", self.artifact(), self.critical())
+        verified = execute_with_current_tokens_for_fixture(self.root, "pinned-task", self.artifact(), self.critical())
         verified["delivery"] = {
             "status": "delivered", "result_sha256": verified["output"]["sha256"],
             "commit": "synthetic-commit", "readback": True,
@@ -292,7 +293,7 @@ class Organization(Fixture):
             "limitations": ["Synthetic fixture"],
             "references": ["company/projects/accepted-input.md"],
         }
-        verified = operations.execute(self.root, "result-only-history", artifact, critical)
+        verified = execute_with_current_tokens_for_fixture(self.root, "result-only-history", artifact, critical)
         validation.task(self.root, verified)
 
         result = organization.inspect(

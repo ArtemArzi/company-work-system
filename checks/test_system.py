@@ -1,5 +1,6 @@
 """Behavioral acceptance on clean synthetic companies, never live client data."""
 from __future__ import annotations
+from checks.fixture_helpers import execute_with_current_tokens_for_fixture, observe_with_current_tokens_for_fixture
 import copy
 import datetime as dt
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -102,14 +103,14 @@ class LocalContracts(Fixture):
         original = self.task()
         bad = self.artifact(); bad["total"] = 6
         with self.assertRaisesRegex(Rejected, "incorrect total"):
-            operations.execute(self.root, "test-task", bad, self.critical())
+            execute_with_current_tokens_for_fixture(self.root, "test-task", bad, self.critical())
         failed = load(task_file(self.root, "test-task"))
         self.assertEqual(failed["errors"][0]["candidate_hash"], object_hash(bad))
-        good = operations.execute(self.root, "test-task", self.artifact(), self.critical())
+        good = execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical())
         self.assertEqual(good["acceptance"], original["acceptance"])
         self.assertEqual(good["status"], "verified")
         self.assertEqual(good["application"]["status"], "unknown")
-        self.assertEqual(operations.execute(self.root, "test-task", self.artifact(), self.critical())["revision"], good["revision"])
+        self.assertEqual(execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical())["revision"], good["revision"])
 
     def test_result_rejects_known_bad_provenance_count_null_and_pass(self):
         t = self.task()
@@ -120,7 +121,7 @@ class LocalContracts(Fixture):
         for records in [[{"id": "one", "value": None}, {"id": "two", "value": 5}], [{"id": "one", "value": 5}], [{"id": "one", "value": 2}, {"id": "one", "value": 3}], [{"id": "one", "value": 1}, {"id": "two", "value": 4}]]:
             candidate = self.artifact(); candidate["records"] = records
             with self.assertRaises(Rejected): validation.result(self.root, candidate, t["acceptance"])
-        with self.assertRaises(Rejected): operations.execute(self.root, "test-task", self.artifact(), {"PASS": True})
+        with self.assertRaises(Rejected): execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), {"PASS": True})
 
     def test_validator_itself_rejects_wrong_place_duplicate_link_cycle(self):
         file = self.root / "work/misplaced/SKILL.md"; file.parent.mkdir(parents=True); file.write_text((self.root / "skills/company-context/SKILL.md").read_text(encoding="utf-8"), encoding="utf-8", newline="\n")
@@ -139,7 +140,7 @@ class LocalContracts(Fixture):
     def test_unconfirmed_stale_revision_cancel_and_unknowns(self):
         t = self.task(confirmed=False)
         self.assertEqual(t["status"], "waiting")
-        with self.assertRaises(Rejected): operations.execute(self.root, "test-task", self.artifact(), self.critical())
+        with self.assertRaises(Rejected): execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical())
         with self.assertRaisesRegex(Rejected, "stale"): operations.decide(self.root, "test-task", 0, "confirm", "Confirmed exact request", "test-owner")
         t = operations.decide(self.root, "test-task", t["revision"], "cancel", "Request withdrawn", "test-owner")
         with self.assertRaises(Rejected): operations.decide(self.root, "test-task", t["revision"], "confirm", "Reopen", "test-owner")
@@ -150,19 +151,19 @@ class LocalContracts(Fixture):
         self.assertEqual(context["native_memory"], "not-used")
         self.assertEqual(context["tasks"][0]["revision"], t["revision"])
         method = self.root / "standards/task-validation.md"; method.write_text(method.read_text(encoding="utf-8") + "\nChanged method\n", encoding="utf-8", newline="\n")
-        with self.assertRaisesRegex(ValueError, "Pinned"): operations.execute(self.root, "test-task", self.artifact(), self.critical())
+        with self.assertRaisesRegex(ValueError, "Pinned"): execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical())
         t = load(task_file(self.root, "test-task"))
         operations.decide(self.root, "test-task", t["revision"], "resume", "Reviewed exact method change; same acceptance", "test-owner")
-        self.assertEqual(operations.execute(self.root, "test-task", self.artifact(), self.critical())["status"], "verified")
+        self.assertEqual(execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical())["status"], "verified")
 
     def test_independence_and_observation_are_separate(self):
         self.task(independent=True)
         review = {"reviewer": "test-owner", "verdict": "pass", "artifact_hash": object_hash(self.artifact())}
-        with self.assertRaises(Rejected): operations.execute(self.root, "test-task", self.artifact(), self.critical(), review)
+        with self.assertRaises(Rejected): execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical(), review)
         review["reviewer"] = "independent-fixture-reviewer"
-        t = operations.execute(self.root, "test-task", self.artifact(), self.critical(), review)
+        t = execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical(), review)
         self.assertEqual(t["effect"]["status"], "unknown")
-        with self.assertRaises(Rejected): operations.observe(self.root, "test-task", "application", "fictional user", "non-owner")
+        with self.assertRaises(Rejected): observe_with_current_tokens_for_fixture(self.root, "test-task", "application", "fictional user", "non-owner")
 
     def test_lock_prevents_parallel_mutation_without_stale_lock_repair(self):
         with lock(self.root):
@@ -172,14 +173,14 @@ class LocalContracts(Fixture):
 
     def test_observations_bound_to_result_and_reset_with_history(self):
         self.task()
-        first = operations.execute(self.root, "test-task", self.artifact(), self.critical())
+        first = execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical())
         for layer in ["application", "effect"]:
-            operations.observe(self.root, "test-task", layer, "Owner observed this exact local result", "test-owner")
+            observe_with_current_tokens_for_fixture(self.root, "test-task", layer, "Owner observed this exact local result", "test-owner")
         observed = load(task_file(self.root, "test-task"))
         self.assertEqual(observed["effect"]["result_sha256"], first["output"]["sha256"])
-        self.assertEqual(operations.execute(self.root, "test-task", self.artifact(), self.critical()), observed)
+        self.assertEqual(execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical()), observed)
         candidate = self.artifact(); candidate["summary"] = "Same input calculation, revised presentation"
-        updated = operations.execute(self.root, "test-task", candidate, self.critical())
+        updated = execute_with_current_tokens_for_fixture(self.root, "test-task", candidate, self.critical())
         for layer in ["application", "effect"]:
             self.assertEqual(updated[layer], {"status": "unknown"})
             stale = copy.deepcopy(updated); stale[layer] = observed[layer]
@@ -452,7 +453,7 @@ class GitAcceptance(Fixture):
         self.assertIn("one",(b/"company/projects/README.md").read_text(encoding="utf-8"));self.assertIn("two",(b/"company/projects/README.md").read_text(encoding="utf-8"))
 
     def test_result_delivery_ack_and_lost_push_response_readback(self):
-        self.task(); operations.execute(self.root,"test-task",self.artifact(),self.critical());self.seed()
+        self.task(); execute_with_current_tokens_for_fixture(self.root,"test-task",self.artifact(),self.critical());self.seed()
         remote=self.base/"common.git";delivery.git(self.root,"clone","--bare",str(self.root),str(remote))
         receipt=delivery.deliver(self.root,str(remote),task_id="test-task")
         t=load(task_file(self.root,"test-task"));self.assertEqual(t["delivery"]["status"],"delivered");self.assertTrue(t["delivery"]["readback"])
@@ -465,7 +466,7 @@ class GitAcceptance(Fixture):
         with patch.object(delivery,"git",side_effect=lost):self.assertEqual(delivery.deliver(self.root,str(remote))["status"],"readback-confirmed")
 
     def test_backup_restore_and_corruption_dirty_tree(self):
-        self.task();operations.execute(self.root,"test-task",self.artifact(),self.critical());self.seed()
+        self.task();execute_with_current_tokens_for_fixture(self.root,"test-task",self.artifact(),self.critical());self.seed()
         backup=self.base/"backup";lifecycle.backup(self.root,backup);restored=self.base/"restored";self.assertEqual(lifecycle.restore(backup,restored)["status"],"restored-and-verified")
         self.assertEqual(load(task_file(restored,"test-task")),load(task_file(self.root,"test-task")))
         with (backup/"history.bundle").open("ab") as f:f.write(b'corrupt')
@@ -505,13 +506,13 @@ class GitAcceptance(Fixture):
         artifact = self.cli("summary", "--task", "summary-task")
         self.assertEqual([entry["id"] for entry in artifact["entries"]], ["test-task"])
         critical = {"request_alignment": "Shows recorded actions, owner and exact blocker", "counterexample": "A summary referring to its own mutable task would become invalid", "limitations": ["Snapshot of recorded revisions"], "references": [artifact["sources"][0]["path"]]}
-        operations.execute(self.root, "summary-task", artifact, critical)
+        execute_with_current_tokens_for_fixture(self.root, "summary-task", artifact, critical)
         validation.repository(self.root)
         self.seed(); remote = self.base / "summary-common.git"; delivery.git(self.root, "clone", "--bare", str(self.root), str(remote))
         delivery.deliver(self.root, str(remote), task_id="summary-task")
         validation.repository(self.root)
         operations.decide(self.root, "test-task", source_task["revision"], "confirm", "Owner resolved pending request", "test-owner")
-        operations.execute(self.root, "test-task", self.artifact(), self.critical())
+        execute_with_current_tokens_for_fixture(self.root, "test-task", self.artifact(), self.critical())
         validation.repository(self.root)
         snapshot = self.root / artifact["sources"][0]["path"]
         changed = load(snapshot); changed["entries"][0]["status"] = "cancelled"; write(snapshot, changed)
@@ -526,7 +527,7 @@ class GitAcceptance(Fixture):
         operations.intake(a, "first-process", "Prepare source-backed internal note", "test-owner", {"kind": "note"}, True, inputs=[source])
         artifact = {"schema_version": 1, "company_id": "alpha-company", "kind": "note", "summary": "A single canonical source supports the internal note", "next_action": "Next participant reads this result and original source", "limitations": ["Synthetic company; no field/business effect"], "sources": [{"path": source, "sha256": digest(a/source)}]}
         critical = {"request_alignment": "The note answers the accepted request using the original source", "counterexample": "A derived graph alone would not prove source provenance", "limitations": [], "references": [source]}
-        result = operations.execute(a, "first-process", artifact, critical)
+        result = execute_with_current_tokens_for_fixture(a, "first-process", artifact, critical)
         delivery.commit(a, ["work/first-process/task.json", result["output"]["path"]], "Validated first internal process")
         remote = self.base / "alpha-common.git"; delivery.git(a, "clone", "--bare", str(a), str(remote))
         delivery.deliver(a, str(remote), task_id="first-process")

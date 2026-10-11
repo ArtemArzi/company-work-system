@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-summary
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/task-validation.md
@@ -15,23 +15,28 @@ output: Read-only observed summary OR verified action-summary artifact owned by 
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать
-    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
-    — task-validation.
+  instruction: >-
+    Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation. При подготовке
+    намерения один раз прочитать task/context (для новой задачи использовать ответ intake/decide),
+    сохранить revision и текущий output; не подставлять новую revision в прежний кандидат.
   depends_on: []
 - id: prepare-summary
   operation: summary
   instruction: 'Просмотр: summary без --task, вернуть наблюдённое состояние без execute.
     Сохранение отдельного результата: только для принятой задачи с action-summary
     критерием вызвать summary --task owning-id; immutable snapshot исключает собственную
-    задачу.'
+    задачу. Показать delivery/application/effect и output отдельно; observed не означает положительный эффект.'
   depends_on:
   - read-context
 - id: execute-saved-summary
   operation: execute
-  instruction: 'Только ветка сохранения: передать подготовленный action-summary artifact,
-    critical и обязательный review в один execute. При простом просмотре этот шаг
-    пропустить.'
+  instruction: >-
+    Только ветка сохранения: передать подготовленный action-summary artifact, critical и
+    обязательный review в один execute. При простом просмотре этот шаг пропустить. Передать
+    сохранённую при подготовке намерения revision через --expected-revision N. При конфликте
+    перечитать task/context, сверить новые данные с намерением и заново подготовить кандидат; просто
+    взять последнюю revision и повторить прежний кандидат запрещено.
   depends_on:
   - prepare-summary
 on_error: Record observed failure at owning task; block dependent action; preserve

@@ -1,4 +1,5 @@
 """Two-company delivery/update/recovery with company-owned native projection proof."""
+from checks.fixture_helpers import execute_with_current_tokens_for_fixture
 import copy
 import json
 from pathlib import Path
@@ -30,7 +31,7 @@ class Evolution(fixtures.Fixture):
         task=operations.intake(a,'scoped-process','Prepare a source-backed note','test-owner',{'kind':'note'},True,inputs=[source],skill='company-execute',harness='codex')
         artifact={'schema_version':1,'company_id':'alpha-company','kind':'note','summary':'Source-backed fixture note','next_action':'Next participant reads the source and note','limitations':['Local fixture only'],'sources':[{'path':source,'sha256':digest(a/source)}]}
         critical={'request_alignment':'Accepted note uses original source','counterexample':'A graph does not replace source bytes','limitations':[],'references':[source]}
-        result=operations.execute(a,task['id'],artifact,critical)
+        result=execute_with_current_tokens_for_fixture(a,task['id'],artifact,critical)
         delivery.commit(a,['work/scoped-process/task.json',result['output']['path']],'Verify fixture process')
         remote=self.base/'common.git';delivery.git(a,'clone','--bare',str(a),str(remote))
         delivery.deliver(a,str(remote),task_id=task['id'])

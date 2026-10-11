@@ -1,6 +1,6 @@
 ---
 id: runtime
-version: 6
+version: 7
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
@@ -11,7 +11,13 @@ CLI вызывается через launcher выбранной [среды](../
 
 Для сохраняемой action-summary: intake задачи сводки → `summary --task id` → сохранить JSON-кандидат → execute → validate → общий commit/deliver. Sources результата указывают на неизменяемый snapshot в work/id/inputs с наблюдёнными revisions/hashes исходных задач; текущие task.json не являются источником исторического результата. Без --task команда только показывает текущее состояние. Подмена snapshot отвергается общим hash-validator.
 
+Сводка показывает delivery/application/effect и точный output {path,sha256} независимо у каждой записи и в сохраняемом snapshot. Доставка не подтверждает применение; observed означает наличие свидетельства, включая отсутствие применения или отрицательный эффект, а не положительный исход. Старые schema1 snapshots без новых полей остаются читаемыми и проверяются по сохранённым bytes.
+
 Наблюдения application/effect содержат evidence/actor/at/result_sha256 для точного output. Новый результат сбрасывает их в unknown; прежние подтверждения и доставка сохраняются в history. Подтверждение старой версии не переносится на новую.
+
+Перед подготовкой результата или наблюдения один раз прочитать `context --task id` и task.json (для новой задачи допустим ответ intake/decide). Сохранить revision как версию намерения, а для наблюдения также точный output.sha256 из этого чтения. `execute --expected-revision N` и `observe --expected-revision N --expected-result-sha256 HEX` сравнивают эти значения под общим lock сразу после загрузки задачи, до записи/проверки кандидата/повтора. N обязателен, целый и неотрицательный; bool, пропуск, None и неверные типы в Python API отвергаются. HEX — ровно 64 строчных шестнадцатеричных символа текущего output.sha256. При отсутствующем, неверном или устаревшем token task/history/errors/results сохраняют исходные bytes. Кандидат остаётся на диске. После конфликта перечитать контекст, разобраться в чужом изменении и пересмотреть кандидат или принадлежность свидетельства; просто получить последние tokens и повторить прежнее намерение запрещено. Изменённые зависимости по-прежнему требуют принятого owner resume. Корректный повтор execute с текущей revision сохраняет прежнюю идемпотентность.
+
+Python API сохраняет позиционные аргументы: `execute(root, id, artifact, critical, independent_review=None, *, expected_revision=None)` и `observe(root, id, layer, evidence, actor, *, expected_revision=None, expected_result_sha256=None)`. Defaults нужны для явного отказа старому небезопасному вызову, не для автоматического получения текущей версии. Чтение прежних task/result/snapshot schema1 не мигрирует и не переписывает их.
 
 Одна программа: `python3 scripts/system.py [--root <company>] <operation>`. JSON stdout содержит фактический результат; exit2 и stderr — отказ, не PASS. Python3.12+, PyYAML6.0.1, Git2.43+; выбор ОС/первый запуск — adapters/README.md. Никаких shell-команд из YAML, собственного scheduler-сервиса или автоматически исполняемых migrations. Нужный метод выбирает агент; CLI выполняет точный известный шаг.
 
@@ -21,8 +27,8 @@ CLI вызывается через launcher выбранной [среды](../
 | Вход и проверка | `context [--task id]`, `validate`, `self-test` (изолированные known-bad примеры), `summary [--task id]` |
 | Принять сообщение | `intake id --request text --owner name --acceptance file.json [--confirmed] [--unknown text] [--input relative-path] [--independent-required] [--skill canonical-id] [--harness codex/claude] [--source-id accepted-id]` |
 | Решение владельца | `decide id confirm/cancel/resume --revision N --reason text --actor owner` |
-| Результат и проверка | `execute id --artifact result.json --critical critical.json [--review review.json]` |
-| Наблюдение применения | `observe id application/effect --evidence text --actor owner` |
+| Результат и проверка | `execute id --artifact result.json --critical critical.json --expected-revision N [--review review.json]` |
+| Наблюдение применения | `observe id application/effect --evidence text --actor owner --expected-revision N --expected-result-sha256 HEX` |
 | Источники / сверка | `source-read source-id`, `reconcile left.json right.json`, `episodes envelope.json --denominator N` |
 | Проактивность / инцидент | `tick`, `incident id --observed text --assumption text --proposal text` |
 | Знания | `search query`, `kb-read source-id` |

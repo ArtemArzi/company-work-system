@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-organization
-version: 1
+version: 2
 owner: process-owner-selected-by-company
 standards:
 - standards/system-evolution.md
@@ -18,7 +18,11 @@ output: Read-only organization report OR verified, linked and repeatable reposit
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца, карты, права и действующую задачу один раз; использовать уже полученный preflight этой задачи, пока версия не изменилась.
+  instruction: >-
+    Прочитать владельца, карты, права и действующую задачу один раз; использовать уже полученный
+    preflight этой задачи, пока версия не изменилась. При подготовке намерения один раз прочитать
+    task/context (для новой задачи использовать ответ intake/decide), сохранить revision и текущий
+    output; не подставлять новую revision в прежний кандидат.
   depends_on: []
 - id: inspect-organization
   operation: organization
@@ -32,7 +36,12 @@ steps:
   - inspect-organization
 - id: execute-organization
   operation: execute
-  instruction: Только для сохранённого изменения передать Result, critical и обязательный review в один execute; затем validate и общий commit/deliver. Read-only аудит этот шаг пропускает.
+  instruction: >-
+    Только для сохранённого изменения передать Result, critical и обязательный review в один
+    execute; затем validate и общий commit/deliver. Read-only аудит этот шаг пропускает. Передать
+    сохранённую при подготовке намерения revision через --expected-revision N. При конфликте
+    перечитать task/context, сверить новые данные с намерением и заново подготовить кандидат; просто
+    взять последнюю revision и повторить прежний кандидат запрещено.
   depends_on:
   - choose-organization
 on_error: Сохранить observed failure и исходные bytes у owning task; зависимые изменения остановить

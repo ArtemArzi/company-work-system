@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-episodes
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/data-access.md
@@ -15,9 +15,11 @@ output: Verified episode analysis with agreed denominator, provenance and explic
 steps:
 - id: read-context
   operation: context
-  instruction: Прочитать владельца задачи и действующие права один раз; использовать
-    уже полученный контекст этой задачи, если он не изменился. Частота входного preflight
-    — task-validation.
+  instruction: >-
+    Прочитать владельца задачи и действующие права один раз; использовать уже полученный контекст
+    этой задачи, если он не изменился. Частота входного preflight — task-validation. При подготовке
+    намерения один раз прочитать task/context (для новой задачи использовать ответ intake/decide),
+    сохранить revision и текущий output; не подставлять новую revision в прежний кандидат.
   depends_on: []
 - id: analyze-episodes
   operation: episodes
@@ -28,8 +30,12 @@ steps:
   - read-context
 - id: execute-episode-result
   operation: execute
-  instruction: Один execute подготовленного Result, critical и обязательного review.
-    Сырой транспортный envelope или receipt не заменяет Result.
+  instruction: >-
+    Один execute подготовленного Result, critical и обязательного review. Сырой транспортный
+    envelope или receipt не заменяет Result. Передать сохранённую при подготовке намерения revision
+    через --expected-revision N. При конфликте перечитать task/context, сверить новые данные с
+    намерением и заново подготовить кандидат; просто взять последнюю revision и повторить прежний
+    кандидат запрещено.
   depends_on:
   - analyze-episodes
 on_error: Record observed failure at owning task; block dependent action; preserve
