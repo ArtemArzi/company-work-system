@@ -182,6 +182,51 @@ class LinkedDocuments(unittest.TestCase):
         with patch.object(linked, 'MAX_DOCUMENTS', 1), self.assertRaises(Rejected):
             self.check()
 
+    def test_expanded_template_rejected_before_substitution(self):
+        self.cfg['definitions']['payload'] = 'x' * 32768
+        self.spec['template'] = '${payload}' * 100
+        self.spec['values'] = {'payload': {'source': ['definitions', 'payload'], 'format': 'text'}}
+        with patch.object(linked.Template, 'substitute', side_effect=AssertionError('unsafe expansion')) as substitute:
+            with self.assertRaisesRegex(Rejected, 'byte limit'):
+                linked.render(self.cfg, 'storage-policy')
+            substitute.assert_not_called()
+        with patch.object(linked.Template, 'substitute', side_effect=AssertionError('unsafe expansion')) as substitute:
+            with self.assertRaisesRegex(Rejected, 'byte limit'):
+                self.check()
+            substitute.assert_not_called()
+
+    def test_render_exact_utf8_byte_boundary(self):
+        self.cfg['definitions']['payload'] = 'é😀'
+        self.spec['template'] = '前${payload}後${payload}'
+        self.spec['values'] = {'payload': {'source': ['definitions', 'payload'], 'format': 'text'}}
+        expected = '<!-- cws:storage-policy:begin -->\n前é😀後é😀\n<!-- cws:storage-policy:end -->'
+        size = len(expected.encode('utf-8'))
+        self.assertGreater(size, len(expected))
+        with patch.object(linked, 'MAX_DOCUMENT_BYTES', size):
+            self.assertEqual(linked.render(self.cfg, 'storage-policy'), expected)
+        with patch.object(linked, 'MAX_DOCUMENT_BYTES', size - 1):
+            with patch.object(linked.Template, 'substitute', side_effect=AssertionError('unsafe expansion')) as substitute:
+                with self.assertRaisesRegex(Rejected, 'byte limit'):
+                    linked.render(self.cfg, 'storage-policy')
+                substitute.assert_not_called()
+
+    def test_distinct_expected_blocks_aggregate_checked_before_expansion(self):
+        self.spec['consumers'] = ['README.md']
+        second = copy.deepcopy(self.spec)
+        second['template'] += ' Дополнение.'
+        self.cfg['documentation']['rules']['second-rule'] = second
+        first_block = linked.render(self.cfg, 'storage-policy')
+        second_block = linked.render(self.cfg, 'second-rule')
+        total = len(first_block.encode('utf-8')) + len(second_block.encode('utf-8'))
+        docs = {'README.md': first_block + second_block}
+        with patch.object(linked, 'MAX_TOTAL_BYTES', total):
+            self.assertEqual(linked.check_config(self.cfg, docs.__getitem__)['status'], 'verified')
+        with patch.object(linked, 'MAX_TOTAL_BYTES', total - 1):
+            with patch.object(linked.Template, 'substitute', side_effect=AssertionError('unsafe aggregate expansion')) as substitute:
+                with self.assertRaisesRegex(Rejected, 'byte limit'):
+                    linked.check_config(self.cfg, docs.__getitem__)
+                substitute.assert_not_called()
+
     def test_dependency_scope_minimal_and_raw_value_drift(self):
         extra, selected = linked.dependency_scope(self.cfg, ['plain.md'], {'permissions': {}})
         self.assertEqual((extra, selected), (set(), {}))
