@@ -101,7 +101,7 @@ def git(root, *arguments, check=True, timeout=None, noninteractive=False, binary
         environment["GIT_INDEX_FILE"] = str(private_index)
     stage = next((a for a in arguments if a in {"clone", "fetch", "push", "commit", "merge", "read-tree", "update-ref"}), "git")
     if stage in {"clone", "fetch", "push"}:
-        timeout = 30 if timeout is None else timeout
+        timeout = (120 if stage == "clone" else 30) if timeout is None else timeout
         noninteractive = True
     if noninteractive:
         environment.update(GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="never")

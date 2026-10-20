@@ -390,3 +390,20 @@ class MetadataDiagnostics(unittest.TestCase):
                 with self.assertRaises(delivery.GitFailure) as raised:delivery.install_commit_index(marker,index,delivery.lock_identity(marker))
             self.assertEqual(raised.exception.diagnostic['reason_code'],'unknown')
             self.assertNotIn('Synthetic private detail',str(raised.exception))
+
+    def test_network_deadlines_preserve_override_and_noninteractive(self):
+        with tempfile.TemporaryDirectory(prefix='cws-network-deadline-') as temporary:
+            root=Path(temporary)
+            for stage,default in [('clone',120),('fetch',30),('push',30)]:
+                for override in [None,7,0]:
+                    with self.subTest(stage=stage,override=override):
+                        with patch.object(delivery.subprocess,'run',return_value=subprocess.CompletedProcess([],0,'','')) as run:
+                            delivery.git(root,stage,**({} if override is None else {'timeout':override}))
+                        self.assertEqual(run.call_args.kwargs['timeout'],default if override is None else override)
+                        self.assertEqual(run.call_args.kwargs['env']['GIT_TERMINAL_PROMPT'],'0')
+                        self.assertEqual(run.call_args.kwargs['env']['GCM_INTERACTIVE'],'never')
+            with patch.object(delivery.subprocess,'run',side_effect=subprocess.TimeoutExpired(['git','clone'],120)):
+                with self.assertRaises(delivery.GitFailure) as raised:delivery.git(root,'clone')
+                self.assertEqual(raised.exception.diagnostic['reason_code'],'timeout')
+                self.assertEqual(raised.exception.diagnostic['stage'],'clone')
+                with self.assertRaises(subprocess.TimeoutExpired):delivery.git(root,'clone',check=False)
