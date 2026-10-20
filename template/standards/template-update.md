@@ -1,13 +1,13 @@
 ---
 id: template-update
-version: 3
+version: 4
 owner: product-maintainer
 ---
 # Общий выпуск и местное развитие
 
 Продукт выпускает только split template history в отдельный release-only repo. Clone companies из product repo запрещён: даже чистый HEAD может сохранять чужие refs/objects. Company/work/локальные решения/источники принадлежат компании. Источник основы и SHA находятся в .system/base.json; это происхождение установки, не второй статус задач.
 
-Один Git-механизм для результата, обновления и предложения: отдельный кандидат от свежей общей версии → точные проверки → обычный fast-forward push → remote SHA/файлы readback. Грязную чужую работу не stage/reset. Stale candidate остановить/подготовить от новой базы; push отказ/timeout сверить перед повтором. Конфликт сохраняет обе работы; даже чистый merge не принимает спорный смысл. Внешний remote требует действительного разрешения и allowlist; local tests не доказывают GitHub доступ.
+Один Git-механизм для результата, обновления и предложения: отдельный кандидат от свежей общей версии → точные проверки → обычный fast-forward push → remote SHA/файлы readback. Грязную чужую работу не stage/reset. Stale candidate, которого нет в общей истории, остановить/подготовить от новой базы; уже включённую версию подтвердить readback без нового push; push отказ/timeout сверить перед повтором. Конфликт сохраняет обе работы; даже чистый merge не принимает спорный смысл. Внешний remote требует действительного разрешения и allowlist; local tests не доказывают GitHub доступ.
 
 Update готовится отдельно с общим предком; merge new release сохраняет local delta. Проверять protected company/work и все local binding base hashes, потребителей/переименование/удаление и старые активные задачи. Активная задача с несовместимой версией останавливается до rebind, историческая проверка не переносится. Изменение основного стандарта/местного binding требует принятой сверки exact hash. Не назначать всем обновлениям auto-merge. Повтор по SHA не создаёт дубль.
 
@@ -37,3 +37,10 @@ ignored dedup/trust не копируются и не являются необ�
 Обратное предложение hooks: отдельно написанные обезличенные hooks/manifest.yaml, hooks/README.md, scripts/hooks.py и checks проходят exact owner hash approval и общий content/path guard. Компания, native settings, ownership proof и её Git history исключены. proposal-candidate готовит отдельную product копию; для точных hook replacements возвращает base/candidate hashes, исходный метод остаётся в Git base. Trusted structural validator не импортирует donated handler и не запускает donated tests. До maintainer review это предложение, не выпуск и не подтверждение нового native handler.
 
 Backup schema1 сохраняется: exact tracked bytes в проверенном tar + Git bundle. Restore в новый каталог проверяет состав manifest/Git/tar, пути, modes и SHA; не выполняет extractall. Единственное допустимое различие представления — доказанный canonical skills symlink/точный Windows Git placeholder. Исторические задачи/receipts/settings остаются byte-exact; ignored runtime/cache не копируются. Восстановление старого выпуска не расширяет его прежнюю совместимость с ОС. Перенесённым native settings нужны re-project/trust; Git filters/EOL не разрешают пересчитать доказательства.
+
+
+## Завершение исходной рабочей папки
+
+Prepare выбирает новую ignored копию и хранит private source witness в Git admin. Явный путь внутри checkout тоже должен быть ignored; старые/чужие копии не перемещать и не удалять. Для его обычного кандидата deliver --finish разделяет подтверждённую доставку и workspace_reconciled. Native Git обновляет чистую исходную папку под HEAD/index locks через отдельный admin и captured branch CAS; target включает acknowledgment commit. После прерывания checkout не повторяется поверх новых bytes: exact target позволяет завершить ref/index, иначе сохраняются обе работы и delivered-local-pending. Подменённые/оставшиеся locks не очищаются автоматически. Другой Work profile использует свой прежний owned sync route; update/proposal сохраняют собственные гарантии подготовки.
+
+stage/reason_code/next_action дают безопасную причину и следующий шаг без raw stderr/credentials. При неизвестном исходе внешней записи сначала remote readback. Снижение блокировок не разрешает обходить полномочия, locks или сохранять чужое staging. Успех доставки не объявляет согласованной исходную папку при local pending.

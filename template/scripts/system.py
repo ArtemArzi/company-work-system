@@ -42,9 +42,9 @@ def main():
     p = sub.add_parser("search"); p.add_argument("query")
     p = sub.add_parser("kb-read"); p.add_argument("id")
     p = sub.add_parser("create"); p.add_argument("release", type=Path); p.add_argument("destination", type=Path); p.add_argument("--id", required=True); p.add_argument("--owner", required=True)
-    p = sub.add_parser("prepare"); p.add_argument("remote"); p.add_argument("destination", type=Path); p.add_argument("--branch", default="main")
+    p = sub.add_parser("prepare"); p.add_argument("remote"); p.add_argument("destination", type=Path, nargs="?"); p.add_argument("--branch", default="main"); p.add_argument("--task")
     p = sub.add_parser("commit"); p.add_argument("paths", nargs="+"); p.add_argument("--message", required=True)
-    p = sub.add_parser("deliver"); p.add_argument("remote"); p.add_argument("--branch", default="main"); p.add_argument("--expected-base"); p.add_argument("--task")
+    p = sub.add_parser("deliver"); p.add_argument("remote"); p.add_argument("--branch", default="main"); p.add_argument("--expected-base"); p.add_argument("--task"); p.add_argument("--finish", action="store_true")
     p = sub.add_parser("update"); p.add_argument("release", type=Path); p.add_argument("destination", type=Path)
     p = sub.add_parser("finish-update"); p.add_argument("--target", required=True); p.add_argument("--company-base", required=True)
     p = sub.add_parser("rollback"); p.add_argument("destination", type=Path)
@@ -91,9 +91,9 @@ def main():
     elif c == "search": result = knowledge.search(root, args.query)
     elif c == "kb-read": result = knowledge.read_kb(root, args.id)
     elif c == "create": result = lifecycle.create(args.release, args.destination, args.id, args.owner)
-    elif c == "prepare": result = delivery.prepare(root, args.remote, args.branch, args.destination)
+    elif c == "prepare": result = delivery.prepare(root, args.remote, args.branch, args.destination, args.task)
     elif c == "commit": result = {"sha256": delivery.commit(root, args.paths, args.message)}
-    elif c == "deliver": result = delivery.deliver(root, args.remote, args.branch, args.expected_base, args.task)
+    elif c == "deliver": result = delivery.deliver(root, args.remote, args.branch, args.expected_base, args.task, args.finish)
     elif c == "update": result = lifecycle.update(root, args.release, args.destination)
     elif c == "finish-update": result = lifecycle.finish_update(root, args.target, args.company_base)
     elif c == "rollback": result = lifecycle.rollback(root, args.destination)
@@ -118,7 +118,7 @@ def main():
         else:
             result = organization.inspect(root, selected, args.task)
     else: raise ValueError("unsupported operation")
-    if c == "preflight" and result["status"] == "blocked":
+    if (c == "preflight" and result["status"] == "blocked") or result.get("status") == "delivered-local-pending":
         print(json.dumps(result, ensure_ascii=False, indent=2), file=sys.stderr)
         sys.exit(2)
     print(json.dumps(result, ensure_ascii=False, indent=2))
@@ -128,5 +128,6 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        print(json.dumps({"status": "rejected", "reason": str(exc)}, ensure_ascii=False), file=sys.stderr)
+        extra = exc.diagnostic if isinstance(exc, delivery.GitFailure) else {}
+        print(json.dumps({"status": "rejected", "reason": str(exc), **extra}, ensure_ascii=False), file=sys.stderr)
         sys.exit(2)

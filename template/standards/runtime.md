@@ -1,6 +1,6 @@
 ---
 id: runtime
-version: 8
+version: 9
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
@@ -35,7 +35,7 @@ Python API сохраняет позиционные аргументы: `execut
 | Знания | `search query`, `kb-read source-id` |
 | Организация файлов | `organization-check --paths-file paths.json [--task id] [--expect snapshot.json]`: read-only место, карты, ссылки, structured consumers, immutable pins и exact pre/postimage; манифесты только внутри компании |
 | Чистая компания | `create release.git new-directory --id company-id --owner owner` |
-| Общая доставка | `prepare remote new-candidate`, `commit path... --message text`, `deliver remote --expected-base SHA [--task id]` для сохранения readback у задачи |
+| Общая доставка | `prepare remote [new-candidate] [--task id]`, `commit path... --message text`, `deliver remote --expected-base SHA [--task id] [--finish]` для сохранения readback у задачи |
 | Обновление | `update release.git new-candidate`, при принятом разрешении конфликта `finish-update --target SHA --company-base SHA`; потом тот же deliver |
 | Восстановление | `rollback new-candidate`, `backup new-outside-directory`, `restore backup new-directory` |
 | Обратный поток | `proposal sanitized-package new-output-directory`; `proposal-candidate package product-root product-remote new-candidate` для новых standards или точных hooks/manifest.yaml, hooks/README.md, scripts/hooks.py и checks; потом те же commit/deliver. Hook replacement сохраняет base/candidate hashes и требует maintainer review; donated code при подготовке не исполняется. Другие виды пакетов требуют явной связи потребителей у сопровождающего |
@@ -136,3 +136,6 @@ Release структурно проверяет все refs с отдельны�
 Relative state paths всегда POSIX, unsafe Windows names и case/NFC collisions отклоняются без auto rename. Junction/reparse aliases не являются canonical источниками. Git attributes не нормализуют company/work/raw/evidence/native settings; LF объявлен только для общих методов. Локальные overrides диагностирует doctor; старые hashes/receipts не пересчитывать.
 
 `doctor` читает prerequisites без PyYAML, не пишет и не синхронизирует. Setup отдельно получает закреплённые зависимости в ignored local runtime; повтор не требует загрузки. Источники — bootstrap.lock/requirements.txt; ограничения профилей — adapters. Native hooks имеют bounded process deadline, timeout завершает только их owned процесс, не фонового работника. Основные CLI проверки остаются обязательны.
+
+
+Для обычного prepare-кандидата --finish завершает исходный checkout после remote readback; workspace_reconciled проверяется отдельно от status доставки. Default destination ignored; --task у prepare задаёт место в папке дела, --task у deliver допустим только для verified result и его acknowledgment. delivered-local-pending возвращает exit2, сохраняет readback и candidate; stage/reason_code/next_action указывают безопасное продолжение. Для Work сохраняется местный sync. Частично обновлённые bytes автоматически не перезаписываются при повторе.

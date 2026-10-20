@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-deliver
-version: 3
+version: 4
 owner: process-owner-selected-by-company
 standards:
 - standards/template-update.md
@@ -11,7 +11,7 @@ capabilities:
 inputs:
 - accepted request, company identity/scope, exact versions, allowed sources
 output: Confirmed delivery receipt and task acknowledgment when requested; successful
-  readback is terminal
+  readback and explicit source completion are distinct
 steps:
 - id: read-context
   operation: context
@@ -25,7 +25,9 @@ steps:
   operation: deliver
   instruction: Использовать готовый проверенный результат либо принятый кандидат.
     При необходимости prepare и commit только точных разрешённых paths по template-update/runtime.
-    Выполнить общую deliver; readback-confirmed завершает процесс. Receipt доставки
+    Для обычного prepare-кандидата использовать ignored default и deliver --finish; remote readback
+    и workspace_reconciled проверять отдельно. Work использует local sync. При delivered-local-pending
+    сохранить candidate/readback и завершить только допустимый локальный шаг, не повторять push вслепую. Receipt доставки
     не является новым Result, execute после доставки не нужен.
   depends_on:
   - read-context

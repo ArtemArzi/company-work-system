@@ -7,9 +7,74 @@ import subprocess
 import sys
 import tempfile
 from contextlib import contextmanager
-from core import Rejected, config, digest, ident, load, lock, path, require
+from core import Rejected, config, digest, ident, load, lock, object_hash, path, require, write
 import validation
 from platform_runtime import atomic_text
+
+
+def diagnostic(stage, error="", *, code=None, timed_out=False):
+    """Classify evidence, never include subprocess output or credentials."""
+    text = error.decode(errors="replace") if isinstance(error, bytes) else str(error)
+    text = text.lower()
+    if code is None:
+        if timed_out:
+            code = "timeout"
+        elif any(s in text for s in ("could not resolve host", "could not resolve hostname", "name or service not known")):
+            code = "network_dns"
+        elif any(s in text for s in ("failed to connect", "connection refused", "network is unreachable", "connection timed out")):
+            code = "network_connection"
+        elif any(s in text for s in ("authentication failed", "could not read username", "terminal prompts disabled", "permission denied (publickey)")):
+            code = "authentication"
+        elif any(s in text for s in ("http 403", "error: 403", "write access to repository not granted")):
+            code = "authorization"
+        elif ".lock" in text and ("file exists" in text or "another git process" in text):
+            code = "git_locked"
+        elif (".git" in text or "index.lock" in text) and ("permission denied" in text or "read-only file system" in text):
+            code = "git_metadata_write"
+        else:
+            code = "unknown"
+    actions = {
+        "network_dns": "Preserve the candidate; verify DNS/network in this execution scope, then retry with authorized network access.",
+        "network_connection": "Preserve the candidate; restore the connection before retrying.",
+        "authentication": "Use the approved Git identity and credential mechanism; never put credentials in commands or files.",
+        "authorization": "Verify repository and branch permission with the owner; preserve the candidate.",
+        "git_locked": "Preserve existing Git locks; identify their owner before resuming the same candidate.",
+        "git_metadata_write": "Verify write permission for this repository's Git metadata in the current execution scope.",
+        "timeout": "Outcome may be unknown; inspect the remote before repeating an external write.",
+        "local_pending": "Preserve local edits and the delivered candidate; reconcile the original checkout before claiming complete saving.",
+        "source_changed": "Preserve both versions; reconcile the captured source branch, index and candidate before resuming.",
+        "candidate_not_ignored": "Choose the default ignored candidate directory or an explicit directory outside this checkout.",
+        "source_witness_missing": "Preserve this candidate; use a witnessed prepare candidate for automatic local completion.",
+        "wrong_identity": "Check the accepted company, repository and branch; do not retarget this candidate.",
+        "work_route_required": "Use the installed Work system.py sync route; ordinary checkout completion cannot replace its owned Git route.",
+        "remote_diverged": "Preserve both histories and prepare a separately checked reconciliation candidate.",
+        "unknown": "Preserve the candidate; inspect the failed stage in the authorized environment before retrying.",
+    }
+    result = {"stage": stage, "reason_code": code, "next_action": actions.get(code, actions["unknown"])}
+    if stage == "readback":
+        result["next_action"] = "Delivery is not confirmed; read the remote before repeating the push. " + result["next_action"]
+    return result
+
+
+class GitFailure(Rejected):
+    def __init__(self, stage, error="", *, timed_out=False, code=None):
+        self.diagnostic = diagnostic(stage, error, timed_out=timed_out, code=code)
+        suffix = " (concurrent Git operation; preserve existing locks)" if self.diagnostic["reason_code"] == "git_locked" else ""
+        super().__init__("Git operation failed at " + stage + ": " + self.diagnostic["reason_code"] + suffix)
+
+
+def metadata_error(stage, error):
+    import errno
+    denied = isinstance(error, PermissionError) or error.errno in {errno.EACCES, errno.EPERM, errno.EROFS}
+    return GitFailure(stage, code="git_metadata_write" if denied else "unknown")
+
+
+def write_delivery_record(file, value):
+    """Keep confirmed delivery available when private Git metadata is read-only."""
+    try:
+        write(file, value)
+    except OSError as exc:
+        raise metadata_error("delivery_record", exc) from None
 
 
 def scope_root(root):
@@ -34,11 +99,21 @@ def git(root, *arguments, check=True, timeout=None, noninteractive=False, binary
         private_index = Path(private_index)
         require(private_index.is_absolute() and private_index.parent.name.startswith("company-export-index-") and private_index.name == "index" and not private_index.is_symlink(), "owned temporary export index required")
         environment["GIT_INDEX_FILE"] = str(private_index)
+    stage = next((a for a in arguments if a in {"clone", "fetch", "push", "commit", "merge", "read-tree", "update-ref"}), "git")
+    if stage in {"clone", "fetch", "push"}:
+        timeout = 30 if timeout is None else timeout
+        noninteractive = True
     if noninteractive:
         environment.update(GIT_TERMINAL_PROMPT="0", GCM_INTERACTIVE="never")
-    value = subprocess.run(command, capture_output=True, text=not binary, encoding=None if binary else "utf-8", errors=None if binary else "replace", timeout=timeout, env=environment)
+    try:
+        value = subprocess.run(command, capture_output=True, text=not binary, encoding=None if binary else "utf-8", errors=None if binary else "replace", timeout=timeout, env=environment)
+    except subprocess.TimeoutExpired:
+        if not check:
+            raise
+        raise GitFailure(stage, timed_out=True) from None
     if check:
-        require(value.returncode == 0, "Git operation failed: " + (value.stderr.decode(errors="replace") if binary else value.stderr).strip()[:1500])
+        if value.returncode:
+            raise GitFailure(stage, value.stderr)
     return (value.stdout if binary else value.stdout.strip()) if check else value
 
 
@@ -81,14 +156,43 @@ def remote_allowed(root, remote):
     return local
 
 
-def prepare(root, remote, branch, destination):
+def prepare(root, remote, branch, destination=None, task_id=None):
+    import uuid
+    import platform_runtime
+    import history
+    root = Path(root).resolve()
     remote_allowed(root, remote)
     ident(branch)
-    destination = Path(destination).resolve()
-    require(not destination.exists(), "candidate destination already exists")
+    if destination is None:
+        parent = root / "work" / ident(task_id) if task_id else root
+        if task_id:
+            require(path(root, f"work/{task_id}/task.json").is_file(), "owning task missing")
+        destination = parent / ".local/delivery" / uuid.uuid4().hex
+    destination = Path(destination).absolute()
+    platform_runtime.no_alias_parents(Path(destination.anchor), destination)
+    destination = destination.resolve()
+    require(not destination.exists() and not destination.is_symlink(), "candidate destination already exists")
+    if destination.is_relative_to(root):
+        if git(root, "check-ignore", "--quiet", "--", destination.relative_to(root).as_posix(), check=False).returncode != 0:
+            raise GitFailure("prepare", code="candidate_not_ignored")
+    witness = None
+    if git(root, "rev-parse", "--show-toplevel", check=False).returncode == 0:
+        location = history.repository_location(root)
+        index = Path(location["gitdir"]) / "index"
+        witness = {"source": str(root), "location": object_hash(location), "head": git(root, "rev-parse", "HEAD"),
+                   "head_bytes": (Path(location["gitdir"]) / "HEAD").read_bytes().hex(),
+                   "index": digest(index) if index.is_file() else None,
+                   "branch": git(root, "symbolic-ref", "--quiet", "HEAD", check=False).stdout.strip(),
+                   "company": config(scope_root(root))["id"], "remote": remote, "remote_branch": branch,
+                   "native": native_fingerprint(root)}
     git(root, "clone", "--no-local", "--single-branch", "--branch", branch, remote, str(destination))
     identity(destination)
-    return {"path": str(destination), "base": git(destination, "rev-parse", "HEAD"), "branch": branch}
+    base = git(destination, "rev-parse", "HEAD")
+    if witness:
+        witness.update(candidate=str(destination), candidate_location=object_hash(history.repository_location(destination)),
+                       candidate_branch=git(destination, "symbolic-ref", "HEAD"), base=base)
+        write_delivery_record(destination / ".git/cws-prepare.json", witness)
+    return {"path": str(destination), "base": base, "branch": branch, "source_witness": bool(witness)}
 
 
 def preflight(root, remote=None, branch="main", authorize=remote_allowed):
@@ -118,9 +222,9 @@ def preflight(root, remote=None, branch="main", authorize=remote_allowed):
         try:
             fetched = git(root, "-c", "credential.interactive=false", "fetch", "--no-tags", remote, f"refs/heads/{branch}", check=False, timeout=30, noninteractive=True)
         except subprocess.TimeoutExpired:
-            return blocked("Shared version fetch timed out; local snapshot is not confirmed fresh")
+            return blocked("Shared version fetch timed out; local snapshot is not confirmed fresh", **diagnostic("fetch", timed_out=True))
         if fetched.returncode:
-            return blocked("Shared version unavailable; local snapshot is not confirmed fresh")
+            return blocked("Shared version unavailable; local snapshot is not confirmed fresh", **diagnostic("fetch", fetched.stderr))
         actual = git(root, "rev-parse", "FETCH_HEAD")
         relative = "template/company/config.yaml" if scope_root(root) != root else "company/config.yaml"
         observed = git(root, "show", f"{actual}:{relative}", check=False)
@@ -132,7 +236,7 @@ def preflight(root, remote=None, branch="main", authorize=remote_allowed):
         if not isinstance(other, dict) or other.get("id") != config(scope_root(root))["id"]:
             return blocked("Shared repository belongs to a different company/product scope", remote_head=actual)
         if dirty:
-            return blocked("Uncommitted local work; do not auto-commit, stash or overwrite it", remote_head=actual)
+            return blocked("Uncommitted local work; do not auto-commit, stash or overwrite it", remote_head=actual, **diagnostic("preflight", code="local_pending"))
         # A Git process outside our lock may have changed the checkout during fetch.
         if git(root, "rev-parse", "HEAD") != head or git(root, "status", "--porcelain", "--untracked-files=all"):
             return blocked("Checkout changed during preflight; repeat against the preserved current state", remote_head=actual)
@@ -146,7 +250,7 @@ def preflight(root, remote=None, branch="main", authorize=remote_allowed):
                 return blocked("Fast-forward refused; preserve checkout and reconcile", remote_head=actual)
             mode = "updated"
         else:
-            return blocked("Local and shared histories diverged; prepare a reconciliation candidate", remote_head=actual)
+            return blocked("Local and shared histories diverged; prepare a reconciliation candidate", remote_head=actual, **diagnostic("preflight", code="remote_diverged"))
         if mode == "updated":
             actual_root = scope_root(root)
             try:
@@ -171,11 +275,17 @@ def commit_context(root):
     require(not hooks_path.stdout.strip() or Path(hooks_path.stdout.strip()).is_absolute(), "relative native hooksPath cannot be preserved in an isolated commit")
     hookdir = Path(git(root, "rev-parse", "--path-format=absolute", "--git-path", "hooks")).resolve()
     fingerprints = {}
-    for name in ("pre-commit", "prepare-commit-msg", "commit-msg", "post-commit", "reference-transaction", "post-index-change"):
+    for name in ("pre-commit", "prepare-commit-msg", "commit-msg", "post-commit", "reference-transaction", "post-index-change", "pre-merge-commit", "post-merge", "post-checkout"):
         file = hookdir / name
         if file.is_file() and os.access(file, os.X_OK):
             fingerprints[name] = (str(file.resolve()), digest(file))
     return (settings, str(hookdir), fingerprints)
+
+
+def native_fingerprint(root):
+    import hashlib
+    settings, hookdir, hooks = commit_context(root)
+    return object_hash({"config": hashlib.sha256(settings).hexdigest(), "hookdir": hookdir, "hooks": hooks})
 
 
 @contextmanager
@@ -188,7 +298,9 @@ def commit_locks(gitdir):
             try:
                 descriptor = os.open(file, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
             except FileExistsError:
-                raise Rejected("concurrent Git operation; preserve existing locks and retry")
+                raise GitFailure("git_lock", code="git_locked") from None
+            except OSError as exc:
+                raise metadata_error("git_lock", exc) from None
             stat = os.fstat(descriptor)
             os.close(descriptor)
             owned.append((file, (stat.st_dev, stat.st_ino)))
@@ -203,8 +315,57 @@ def commit_locks(gitdir):
                 file.unlink()
 
 
-def install_commit_index(index_lock, index):
-    os.replace(index_lock, index)
+def lock_identity(file):
+    import stat
+    value = Path(file).lstat()
+    require(stat.S_ISREG(value.st_mode), "Git lock is no longer an owned regular file")
+    return value.st_dev, value.st_ino
+
+
+def write_owned_index(index_lock, data, identity):
+    try:
+        descriptor = os.open(index_lock, os.O_WRONLY | getattr(os, "O_NOFOLLOW", 0))
+    except OSError as exc:
+        raise metadata_error("git_index", exc) from None
+    try:
+        value = os.fstat(descriptor)
+        require((value.st_dev, value.st_ino) == identity, "Git lock changed; preserve foreign lock")
+        os.ftruncate(descriptor, 0)
+        with os.fdopen(descriptor, "wb", closefd=False) as stream:
+            stream.write(data); stream.flush(); os.fsync(stream.fileno())
+    except OSError as exc:
+        raise metadata_error("git_index", exc) from None
+    finally:
+        os.close(descriptor)
+
+
+def install_commit_index(index_lock, index, identity=None):
+    if identity is not None:
+        require(lock_identity(index_lock) == identity, "Git lock changed; preserve foreign lock")
+    try:
+        os.replace(index_lock, index)
+    except OSError as exc:
+        raise metadata_error("git_index", exc) from None
+
+
+@contextmanager
+def native_admin(root, head, worktree=None):
+    """Use native Git/config/hooks with private HEAD/index and the same store."""
+    import history
+    location = history.repository_location(root)
+    with tempfile.TemporaryDirectory(prefix="company-native-admin-") as temporary:
+        scratch, admin = Path(temporary) / "work", Path(temporary) / "admin"
+        scratch.mkdir(); admin.mkdir()
+        atomic_text(scratch / ".git", "gitdir: " + str(admin) + "\n")
+        atomic_text(admin / "commondir", location["common"] + "\n")
+        atomic_text(admin / "gitdir", str(scratch / ".git") + "\n")
+        atomic_text(admin / "HEAD", (head or "ref: refs/worktree/company-guarded") + "\n")
+        worktree_config = Path(location["gitdir"]) / "config.worktree"
+        if worktree_config.exists():
+            (admin / "config.worktree").write_bytes(worktree_config.read_bytes())
+        def private_git(*arguments, **options):
+            return git(scratch, "--git-dir", str(admin), "--work-tree", str(worktree or scratch), *arguments, **options)
+        yield scratch, admin, private_git
 
 
 def commit(root, relative_paths, message):
@@ -251,19 +412,7 @@ def commit(root, relative_paths, message):
     unchanged()
     if old_head and git(root, "rev-parse", old_head + "^{tree}") == candidate_tree:
         return old_head
-    with tempfile.TemporaryDirectory(prefix="company-guarded-commit-") as temporary:
-        scratch = Path(temporary) / "work"
-        admin = Path(temporary) / "admin"
-        scratch.mkdir(); admin.mkdir()
-        atomic_text(scratch / ".git", "gitdir: " + str(admin) + "\n")
-        atomic_text(admin / "commondir", location["common"] + "\n")
-        atomic_text(admin / "gitdir", str(scratch / ".git") + "\n")
-        atomic_text(admin / "HEAD", (old_head or "ref: refs/worktree/company-guarded") + "\n")
-        worktree_config = gitdir / "config.worktree"
-        if worktree_config.exists():
-            (admin / "config.worktree").write_bytes(worktree_config.read_bytes())
-        def private_git(*arguments, **options):
-            return git(scratch, "--git-dir", str(admin), "--work-tree", str(scratch), *arguments, **options)
+    with native_admin(root, old_head) as (scratch, admin, private_git):
         require(commit_context(scratch) == native_context, "isolated native config/hooks differ; preserve original work")
         private_git("read-tree", candidate_tree)
         private_git("checkout-index", "--all")
@@ -275,23 +424,156 @@ def commit(root, relative_paths, message):
         require(private_git("show", "--format=%P", "--no-patch", new_head) == (old_head or ""), "isolated commit parent changed; original branch preserved")
         require(private_git("write-tree") == candidate_tree, "native hook changed candidate index; original branch preserved")
         with commit_locks(gitdir) as index_lock:
+            owned_index = lock_identity(index_lock)
             unchanged()
             require(commit_context(scratch) == native_context, "isolated native config/hooks changed before publication")
-            with index_lock.open("wb") as stream:
-                stream.write((admin / "index").read_bytes()); stream.flush(); os.fsync(stream.fileno())
+            write_owned_index(index_lock, (admin / "index").read_bytes(), owned_index)
             # A captured branch and old object ID make publication atomic. No hook is bypassed.
             private_git("update-ref", "--no-deref", "-m", "guarded commit: " + message, branch, new_head, old_head or "0" * len(new_head))
             require(git(root, "rev-parse", branch) == new_head, "published branch changed; preserve candidate and reconcile")
             require((gitdir / "HEAD").read_bytes() == head_before, "HEAD association changed after publication; reconcile")
-            install_commit_index(index_lock, index)
+            install_commit_index(index_lock, index, owned_index)
             require(git(root, "write-tree") == candidate_tree and git(root, "rev-parse", "HEAD") == new_head, "published commit/index readback mismatch; preserve and reconcile")
     # No index backing file may depend on the now-removed scratch admin.
     require(git(root, "write-tree") == candidate_tree and git(root, "rev-parse", "HEAD") == new_head, "commit changed after isolated cleanup; preserve and reconcile")
     return new_head
 
 
-def deliver(root, remote, branch="main", expected_base=None, task_id=None):
+def completion_guard(condition, code="source_changed"):
+    if not condition:
+        raise GitFailure("local_completion", code=code)
+
+
+def complete_source(witness, target, state, state_file):
+    """Native checkout with private admin; publish captured branch under real locks."""
+    import history
+    source = Path(witness["source"])
+    completion_guard(config(source, True).get("workspace", {}).get("profile") != "work", "work_route_required")
+    with lock(source):
+        location = history.repository_location(source)
+        gitdir = Path(location["gitdir"])
+        index = gitdir / "index"
+        head_file = gitdir / "HEAD"
+        completion_guard(object_hash(location) == witness["location"], "wrong_identity")
+        completion_guard(config(source)["id"] == witness["company"], "wrong_identity")
+        # Fetch objects locally only. Publication/readback has already completed.
+        git(source, "fetch", "--no-tags", witness["candidate"], target)
+        with commit_locks(gitdir) as index_lock:
+            locks = {file: lock_identity(file) for file in (index_lock, gitdir / "HEAD.lock")}
+            def unchanged():
+                completion_guard(all(lock_identity(file) == identity for file, identity in locks.items()))
+                completion_guard(object_hash(history.repository_location(source)) == witness["location"])
+                completion_guard(head_file.read_bytes().hex() == witness["head_bytes"])
+                completion_guard(git(source, "symbolic-ref", "--quiet", "HEAD") == witness["branch"])
+                completion_guard(native_fingerprint(source) == witness["native"])
+                completion_guard(not any((gitdir / name).exists() for name in
+                                         ("MERGE_HEAD", "CHERRY_PICK_HEAD", "REVERT_HEAD", "rebase-merge", "rebase-apply")))
+            unchanged()
+            current = git(source, "rev-parse", "HEAD")
+            completion_guard(current in {witness["head"], target})
+            original_index = digest(index) == witness["index"]
+            target_index = current == target and git(source, "diff", "--cached", "--quiet", target, check=False).returncode == 0
+            completion_guard(original_index or target_index)
+            completion_guard(git(source, "merge-base", "--is-ancestor", witness["head"], target, check=False).returncode == 0)
+            context = commit_context(source)
+            with native_admin(source, witness["head"], source) as (scratch, admin, private_git):
+                completion_guard(commit_context(scratch) == context)
+                def exact_worktree():
+                    return (private_git("update-index", "--refresh", check=False).returncode == 0 and
+                            private_git("diff-files", "--quiet", check=False).returncode == 0 and
+                            not private_git("ls-files", "--others", "--exclude-standard"))
+                if state["phase"] == "readback-confirmed" and current != target:
+                    completion_guard(not git(source, "status", "--porcelain", "--untracked-files=all"), "local_pending")
+                    private_git("read-tree", witness["head"])
+                    state["phase"] = "checkout-started"
+                    write_delivery_record(state_file, state)
+                    unchanged()
+                    private_git("merge", "--ff-only", "--no-autostash", "--no-overwrite-ignore", "--no-edit", "--no-stat", target)
+                    completion_guard(private_git("rev-parse", "HEAD") == target)
+                else:
+                    # After an interruption, never replay the checkout over edits.
+                    private_git("read-tree", target)
+                completion_guard(private_git("write-tree") == private_git("rev-parse", target + "^{tree}"))
+                completion_guard(exact_worktree(), "local_pending")
+                unchanged()
+                completion_guard(digest(index) == witness["index"] or target_index)
+                state["phase"] = "worktree-updated"
+                write_delivery_record(state_file, state)
+                if current != target:
+                    private_git("update-ref", "--no-deref", "-m", "Complete confirmed delivery", witness["branch"], target, witness["head"])
+                state["phase"] = "ref-published"
+                write_delivery_record(state_file, state)
+                unchanged()
+                completion_guard(git(source, "rev-parse", witness["branch"]) == target)
+                completion_guard(exact_worktree(), "local_pending")
+                write_owned_index(index_lock, (admin / "index").read_bytes(), locks[index_lock])
+                unchanged()
+                install_commit_index(index_lock, index, locks[index_lock])
+            completion_guard(git(source, "rev-parse", "HEAD") == target)
+            completion_guard(git(source, "write-tree") == git(source, "rev-parse", target + "^{tree}"))
+            completion_guard(not git(source, "status", "--porcelain", "--untracked-files=all"), "local_pending")
+            validation.repository(source)
+        state["phase"] = "complete"
+        state.pop("diagnostic", None)
+        write_delivery_record(state_file, state)
+    return {"workspace_reconciled": True, "local_head": target, "source": str(source)}
+
+
+def finish_delivery(root, remote, branch, expected_base, task_id):
+    import history
+    root = Path(root).resolve()
+    gitdir = Path(history.repository_location(root)["gitdir"])
+    witness_file = gitdir / "cws-prepare.json"
+    completion_guard(witness_file.is_file() and not witness_file.is_symlink(), "source_witness_missing")
+    witness = load(witness_file)
+    completion_guard(witness["candidate"] == str(root) and witness["candidate_location"] == object_hash(history.repository_location(root)), "wrong_identity")
+    completion_guard(git(root, "symbolic-ref", "HEAD") == witness["candidate_branch"], "wrong_identity")
+    completion_guard(witness["branch"].startswith("refs/heads/"), "wrong_identity")
+    completion_guard(remote == witness["remote"] and branch == witness["remote_branch"], "wrong_identity")
+    source = Path(witness["source"])
+    completion_guard(config(source).get("workspace", {}).get("profile") != "work", "work_route_required")
+    remote_allowed(source, remote)
+    expected_base = expected_base or witness["base"]
+    state_file = gitdir / "cws-finish.json"
+    with lock(gitdir / "cws-finish-lock"):
+        if state_file.exists():
+            completion_guard(not state_file.is_symlink())
+            state = load(state_file)
+            completion_guard(state["target"] == git(root, "rev-parse", "HEAD") and state["task_id"] == task_id)
+            completion_guard(state["witness"] == object_hash(witness))
+            receipt = state["receipt"]
+        else:
+            # Reject a retargeted source before an external write, even if clean.
+            completion_guard(object_hash(history.repository_location(source)) == witness["location"], "wrong_identity")
+            completion_guard(git(source, "symbolic-ref", "HEAD", check=False).stdout.strip() == witness["branch"], "wrong_identity")
+            completion_guard(config(source, True)["id"] == witness["company"], "wrong_identity")
+            completion_guard(native_fingerprint(source) == witness["native"])
+            completion_guard(not git(source, "diff", "--cached", "--name-only"))
+            completion_guard(git(source, "rev-parse", "HEAD") in {witness["head"], git(root, "rev-parse", "HEAD")})
+            completion_guard(git(root, "merge-base", "--is-ancestor", witness["head"], "HEAD", check=False).returncode == 0)
+            receipt = deliver(root, remote, branch, expected_base, task_id)
+            state = {"witness": object_hash(witness), "target": git(root, "rev-parse", "HEAD"),
+                     "task_id": task_id, "receipt": receipt, "phase": "readback-confirmed"}
+        try:
+            completion_guard(not git(root, "status", "--porcelain", "--untracked-files=all"), "local_pending")
+            write_delivery_record(state_file, state)
+            local = complete_source(witness, state["target"], state, state_file)
+            return {**receipt, **local, "completion_phase": state["phase"]}
+        except Exception as exc:
+            detail = exc.diagnostic if isinstance(exc, GitFailure) else diagnostic("local_completion", code="source_changed")
+            state["diagnostic"] = detail
+            try:
+                write_delivery_record(state_file, state)
+            except (OSError, GitFailure):
+                pass  # Return the confirmed receipt even when the journal cannot be written.
+            return {**receipt, "status": "delivered-local-pending", "workspace_reconciled": False,
+                    "completion_phase": state["phase"], **detail}
+
+
+def deliver(root, remote, branch="main", expected_base=None, task_id=None, finish=False):
     """Fail on stale base. Never force/rebase/reset; retry first reconciles remote."""
+    if finish:
+        return finish_delivery(root, remote, branch, expected_base, task_id)
     remote_allowed(root, remote)
     ident(branch)
     clean(root)
@@ -315,8 +597,8 @@ def deliver(root, remote, branch="main", expected_base=None, task_id=None):
         history.unchanged(scope_root(root), snapshot)
         require(git(root, "rev-parse", "HEAD") == head, "HEAD changed during guarded delivery")
         clean(root)
-    if current == head:
-        receipt = {"status": "readback-confirmed", "sha256": head, "repeated": True}
+    if git(root, "merge-base", "--is-ancestor", head, current, check=False).returncode == 0:
+        receipt = {"status": "readback-confirmed", "sha256": head, "remote_head": current, "newer_remote": current != head, "repeated": True}
         return acknowledge(root, remote, branch, task_id, receipt) if task_id else receipt
     require(not expected_base or current == expected_base, "stale candidate; latest common version changed")
     require(git(root, "merge-base", "--is-ancestor", current, head, check=False).returncode == 0, "candidate conflicts with current common version; preserve both")
@@ -324,10 +606,17 @@ def deliver(root, remote, branch="main", expected_base=None, task_id=None):
     history.unchanged(scope_root(root), snapshot)
     require(history.repository_location(root)==location, 'repository identity changed before push')
     require(git(root, "rev-parse", "HEAD") == head, "HEAD changed before push")
-    pushed = git(root, "push", remote, f"{head}:refs/heads/{branch}", check=False)
+    try:
+        pushed = git(root, "push", remote, f"{head}:refs/heads/{branch}", check=False)
+    except subprocess.TimeoutExpired:
+        pushed = subprocess.CompletedProcess([], 124, "", "")
     # Success is not inferred from push text/exit code; unknown outcomes read back.
-    fetched = git(root, "fetch", remote, f"refs/heads/{branch}", check=False)
-    require(fetched.returncode == 0, "delivery outcome unknown; inspect remote before retry")
+    try:
+        fetched = git(root, "fetch", remote, f"refs/heads/{branch}", check=False)
+    except subprocess.TimeoutExpired:
+        raise GitFailure("readback", timed_out=True) from None
+    if fetched.returncode:
+        raise GitFailure("readback", fetched.stderr)
     actual = git(root, "rev-parse", "FETCH_HEAD")
     require(git(root, "merge-base", "--is-ancestor", head, actual, check=False).returncode == 0, "candidate not included; preserve it and refresh common base")
     files = git(root, "diff-tree", "--no-commit-id", "--name-only", "-r", head).splitlines()
