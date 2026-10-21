@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-organization
-version: 2
+version: 3
 owner: process-owner-selected-by-company
 standards:
 - standards/system-evolution.md

@@ -6,7 +6,7 @@ from core import Rejected, config_snapshot, digest, ident, load, method_bindings
 KINDS = {'metrics': 'company-source-read', 'marketing': 'company-marketing',
          'research': 'company-research', 'action-summary': 'company-summary'}
 KERNEL = {'.gitattributes', 'requirements.txt', 'scripts/bootstrap.py', 'scripts/bootstrap.lock', 'scripts/run.sh', 'scripts/run.ps1', 'scripts/platform_runtime.py', 'scripts/core.py', 'scripts/dependencies.py', 'scripts/operations.py',
-          'scripts/validation.py', 'scripts/system.py', 'scripts/hooks.py',
+          'scripts/validation.py', 'scripts/system.py', 'scripts/hooks.py', 'scripts/navigation.py', 'scripts/research_evidence.py',
           'hooks/manifest.yaml', 'standards/task-validation.md', 'standards/runtime.md'}
 ADMISSION_FIELDS = ('type', 'approved_by', 'account', 'scope', 'period', 'unit',
                     'max_age_seconds', 'max_pages', 'timeout_seconds')
@@ -66,6 +66,10 @@ def projected(root, cfg, selection, include_documentation=True):
     facets = {'identity': {key: cfg.get(key) for key in ('schema_version', 'id', 'owner')},
               'permissions': cfg.get('permissions'), 'sources': sources,
               'bindings': {key: value for key, value in cfg.get('bindings', {}).items() if key in operations}}
+    navigation = cfg.get('workspace', {}).get('navigation', {})
+    facets['navigation'] = navigation
+    facets['state_owners'] = cfg.get('workspace', {}).get('state_owners', [])
+    files.update(relative for relative in navigation.get('consumers', []) if relative != 'company/config.yaml')
     for binding in facets['bindings'].values():
         files.update([binding['base'], binding['local']])
         files.update(binding.get('dependency_paths', []))
@@ -79,6 +83,9 @@ def projected(root, cfg, selection, include_documentation=True):
             meta = load(source_file)
             if meta.get('material'):
                 files.add(meta['material'])
+            if meta.get('selected_result'):
+                from research_evidence import selected_result
+                files.add(selected_result(root, meta)['path'])
         facets.update(knowledge_base=cfg.get('knowledge_base'),
                       features={key: cfg.get('features', {}).get(key) for key in ('graph', 'knowledge_base')})
     if 'tick' in operations:

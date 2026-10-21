@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-research
-version: 3
+version: 4
 owner: process-owner-selected-by-company
 standards:
 - standards/data-access.md
@@ -25,6 +25,10 @@ steps:
   instruction: Это подготовка агентом, а не одноимённая команда CLI. Выбрать профильный
     поиск, первичные источники и контрпример; подготовить Result research по принятому
     критерию. Команды и источники — только в разрешённой области.
+    Для нового существенного сохраняемого исследования выбрать acceptance research_evidence_version1
+    и при обязательном независимом review research_review_process_required. Подготовить точные
+    evidence spans, решение, условия применения, gaps и recheck по runtime; review должен
+    проверять смысловую поддержку всех ключевых выводов и сохранять фактический process report.
   depends_on:
   - read-context
 - id: execute-research-result
@@ -42,4 +46,6 @@ stop: Missing authority/definition, changed version, cancelled task or two attem
   without new evidence
 dependency_paths:
 - scripts/operations.py
+- scripts/research_evidence.py
+- standards/runtime.md
 - standards/data-access.md

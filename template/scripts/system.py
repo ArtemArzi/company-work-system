@@ -29,6 +29,10 @@ def main():
     sub.add_parser("self-test")
     p = sub.add_parser("preflight"); p.add_argument("--remote"); p.add_argument("--branch", default="main")
     p = sub.add_parser("context"); p.add_argument("--task")
+    p = sub.add_parser("route-check"); p.add_argument("--paths-file", type=Path); p.add_argument("--path")
+    p = sub.add_parser("preservation"); p.add_argument("--paths-file", type=Path, required=True); p.add_argument("--task")
+    p = sub.add_parser("snapshot"); p.add_argument("--paths-file", type=Path, required=True); p.add_argument("destination", type=Path)
+    p = sub.add_parser("restore-snapshot"); p.add_argument("snapshot", type=Path); p.add_argument("destination", type=Path)
     p = sub.add_parser("intake"); p.add_argument("id"); p.add_argument("--request", required=True); p.add_argument("--owner", required=True); p.add_argument("--acceptance", type=Path, required=True); p.add_argument("--confirmed", action="store_true"); p.add_argument("--unknown", action="append", default=[]); p.add_argument("--input", action="append", default=[]); p.add_argument("--independent-required", action="store_true"); p.add_argument("--skill"); p.add_argument("--harness", choices=['codex', 'claude']); p.add_argument("--source-id", action='append', default=[])
     p = sub.add_parser("decide"); p.add_argument("id"); p.add_argument("action", choices=["confirm", "cancel", "resume"]); p.add_argument("--revision", type=int, required=True); p.add_argument("--reason", required=True); p.add_argument("--actor", required=True)
     p = sub.add_parser("execute"); p.add_argument("id"); p.add_argument("--artifact", type=Path, required=True); p.add_argument("--critical", type=Path, required=True); p.add_argument("--review", type=Path); p.add_argument("--expected-revision", type=int, required=True)
@@ -78,6 +82,15 @@ def main():
     elif c == "self-test": result = validation.self_test()
     elif c == "preflight": result = delivery.preflight(root, args.remote, args.branch)
     elif c == "context": result = operations.context(root, args.task)
+    elif c == "route-check":
+        import navigation
+        require(not (args.path and args.paths_file), "choose route path or exact consumer list")
+        result = navigation.resolve(root, args.path) if args.path else navigation.check(root, load(args.paths_file) if args.paths_file else None)
+    elif c in {"preservation", "snapshot", "restore-snapshot"}:
+        import preservation
+        if c == "preservation": result = preservation.inspect(root, load(args.paths_file), args.task)
+        elif c == "snapshot": result = preservation.snapshot(root, load(args.paths_file), args.destination)
+        else: result = preservation.restore(args.snapshot, args.destination)
     elif c == "intake": result = operations.intake(root, args.id, args.request, args.owner, load(args.acceptance), args.confirmed, args.unknown, args.input, args.independent_required, args.skill, args.harness, args.source_id)
     elif c == "decide": result = operations.decide(root, args.id, args.revision, args.action, args.reason, args.actor)
     elif c == "execute": result = operations.execute(root, args.id, load(args.artifact), load(args.critical), load(args.review) if args.review else None, expected_revision=args.expected_revision)

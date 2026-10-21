@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-knowledge
-version: 3
+version: 4
 owner: process-owner-selected-by-company
 standards:
 - standards/system-evolution.md
@@ -25,7 +25,9 @@ steps:
   operation: knowledge
   instruction: 'Это выбор агентом реальной команды: search query для локальных источников/производного
     графа либо kb-read source-id для включённой и разрешённой KB. Вернуть ответ с
-    основанием; недоступная KB не означает доступный источник.'
+    основанием; недоступная KB не означает доступный источник. Для повторного вывода использовать
+    явно выбранный selected_result; проверить условия применения и recheck, не считать hash
+    результата доказательством свежести его первичных источников.'
   depends_on:
   - read-context
 - id: execute-saved-answer
@@ -44,4 +46,5 @@ stop: Missing authority/definition, changed version, cancelled task or two attem
   without new evidence
 dependency_paths:
 - scripts/knowledge.py
+- scripts/research_evidence.py
 - standards/runtime.md

@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-context
-version: 5
+version: 6
 owner: process-owner-selected-by-company
 standards:
 - standards/runtime.md
@@ -27,7 +27,9 @@ steps:
     Прочитать фактический контекст/владельца с диска; вернуть контекст. Просмотр не создаёт
     отдельную задачу результата и не вызывает execute. При подготовке намерения один раз прочитать
     task/context (для новой задачи использовать ответ intake/decide), сохранить revision и текущий
-    output; не подставлять новую revision в прежний кандидат.
+    output; не подставлять новую revision в прежний кандидат. Проверить navigation и сохранённые
+    слои результата; при встреченном старом пути исправить доказанные текущие ссылки по
+    system-evolution до подготовки нового намерения, сохраняя исторические свидетельства.
   depends_on:
   - receive-shared-state
 on_error: Record observed failure at owning task; block dependent action; preserve
@@ -36,3 +38,5 @@ stop: Missing authority/definition, changed version, cancelled task or two attem
   without new evidence
 dependency_paths:
 - scripts/operations.py
+- scripts/navigation.py
+- standards/system-evolution.md

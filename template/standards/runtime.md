@@ -1,9 +1,34 @@
 ---
 id: runtime
-version: 9
+version: 10
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
+
+## Текущие маршруты и сохранение документов
+
+Дополнительные команды того же scripts/system.py:
+
+| Операция | Вызов |
+| --- | --- |
+| Действующие маршруты | route-check [--paths-file exact-paths.json] либо route-check --path relative/path |
+| Наблюдение сохранения | preservation --paths-file exact-paths.json [--task id] |
+| Выбранная локальная копия | --root source-root snapshot --paths-file exact-paths.json new-snapshot-directory |
+| Восстановление копии | restore-snapshot snapshot-directory new-restore-directory |
+
+workspace.navigation необязателен: redirects object задаёт old-path: current-path, consumers list выбирает текущие документы, local_only list объясняет известные недоступные в clone цели. Пути канонические относительные. Команды маршрутов только читают; доказанное исправление выполняет агент по system-evolution/organization. context возвращает navigation и записанные слои задачи, output_local отдельно проверяет наличие и совпадение hash. preservation читает только перечисленные пути, не делает fetch и не объявляет доставку по одному Git commit. recorded-readback относится к точным текущим bytes результата и сохранённому readback, не к свежести remote или независимому удостоверению JSON.
+
+Selected snapshot имеет kind selected-files-snapshot, schema_version1 и manifest files {relative-path: {sha256, size}}. Пределы:128 regular document files,8MiB на файл,32MiB всего,24компонента пути; допустимы md/json/yaml/yml/txt. Источник и назначение не пересекаются; назначение новое, его родитель существует. Snapshot не создаёт company config и не исполняет YAML/код. Частичная ошибка сохраняет неполный каталог без завершённого manifest; его нельзя объявлять готовой копией. Restore проверяет точный payload, переносимые пути, отсутствие aliases/collisions и hashes, затем копирует в новую папку. Manifest остаётся в исходной копии; источник восстановления и его bytes сохраняются.
+
+## Явные свидетельства исследования
+
+Новый research Result может иметь research_evidence {schema_version:1, outcome:findings|no-findings|inconclusive, reason, decision, conditions:[], gaps:[], recheck:[]}. Acceptance research_evidence_version:1 требует этот блок; переданный блок всегда проверяется. Пустые findings требуют явной причины и no-findings/inconclusive. Старые результаты без блока читаются без миграции и нового обязательства.
+
+Enhanced finding сохраняет claim/source/level и добавляет уникальный id, outcome:supported|contradicted|unknown. Supported/contradicted имеют evidence:[{path,sha256,start_line,end_line,quote}]; unknown содержит конкретный gap. Ссылка/hash совпадают с Result.sources. Нумерация строк начинается с1, границы целые, quote точно равен выбранным UTF-8 строкам, соединённым LF; hash относится к исходным bytes, поэтому EOL-изменение обнаруживается. Совпадение цитаты подтверждает происхождение, а смысловую поддержку вывода оценивает reviewer.
+
+Optional independent_review.process_reference {path,sha256} закрепляет retained JSON report: schema_version1, run_id, reviewer, artifact_hash, verdict, reviewed_claim_ids и challenge. Он связан с точным Result и проверяется при наличии; acceptance research_review_process_required:true требует его. Это сохранённое свидетельство запуска/содержательного review, не криптографическая проверка личности. Не прикладывать вымышленный запуск; synthetic примеры явно обозначают synthetic. Прежний review без нового требования работает по прежнему контракту.
+
+Source metadata может выбрать selected_result:{path,sha256} вместо material. Индексируются только question,summary,claims/outcomes,decision,conditions,gaps,recheck этого research Result той же компании. Raw sources, quotes и произвольные дополнительные поля не индексируются; перехода по ссылкам в них нет. Выдача сохраняет канонический Result/hash и предел применимости; свежесть первичных источников при search не перепроверяется. Изменившийся pinned Result или одновременные material/selected_result отвергаются. Индекс производный и не заменяет владельца результата.
 
 CLI вызывается через launcher выбранной [среды](../adapters/README.md). Примеры `python3 scripts/system.py <операция> ...` обозначают тот же CLI: в подготовленном локальном окружении заменить этот префикс на `sh scripts/run.sh` (POSIX) либо `& ./scripts/run.ps1` (PowerShell), сохранив операцию и аргументы. Глобальный python3, активация .venv и изменение PATH не требуются. Перед первой операцией агент выполняет setup, если окружение отсутствует; обычные команды сами зависимости не устанавливают.
 

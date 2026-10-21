@@ -1,6 +1,6 @@
 schema_version: 1
 id: company-deliver
-version: 4
+version: 5
 owner: process-owner-selected-by-company
 standards:
 - standards/template-update.md
@@ -29,6 +29,9 @@ steps:
     и workspace_reconciled проверять отдельно. Work использует local sync. При delivered-local-pending
     сохранить candidate/readback и завершить только допустимый локальный шаг, не повторять push вслепую. Receipt доставки
     не является новым Result, execute после доставки не нужен.
+    При необходимости сверить exact paths через preservation; локальный файл, Git HEAD,
+    recorded readback и резервная копия означают разные наблюдения. Вне-Git документы
+    копировать только явно выбранным snapshot по template-update, без расширения экспорта.
   depends_on:
   - read-context
 on_error: Record observed failure at owning task; block dependent action; preserve
@@ -38,4 +41,5 @@ stop: Missing authority/definition, changed version, cancelled task or two attem
 dependency_paths:
 - scripts/delivery.py
 - scripts/history.py
+- scripts/preservation.py
 - standards/runtime.md

@@ -80,6 +80,9 @@ def entity_contract(root, relative, kind, meta):
         recipe_contract(root, meta)
     elif kind == 'source':
         require(meta.get('origin') and meta.get('status'), 'source provenance missing')
+        if 'selected_result' in meta:
+            from research_evidence import selected_result
+            selected_result(root, meta)
     else:
         require(meta.get('version'), 'standard version missing')
     return entity
@@ -226,6 +229,8 @@ def result(root, value, acceptance, admission=None, fresh=True):
         require(value.get("question") and value.get("coverage") and isinstance(value.get("findings"), list), "research question/coverage missing")
         allowed_refs = {r["path"] for r in refs}
         require(all(f.get("claim") and f.get("source") in allowed_refs and f.get("level") in {"observation", "inference", "unknown"} for f in value["findings"]), "research claim without qualified source")
+        from research_evidence import validate_research
+        validate_research(root, value, acceptance)
     if value["kind"] == "metrics":
         admission = admission if admission is not None else source_admission(root, value)
         require(admission.get("schema_version") == 1 and admission.get("source_id"), "source admission format")
@@ -287,7 +292,8 @@ def task(root, value, freshness=True):
             if scope is not None:
                 from dependencies import admission_contract
                 admission_contract(scope, admission)
-        result(root, load(path(root, artifact["path"])), value["acceptance"], admission, fresh=freshness and value["delivery"]["status"] != "delivered")
+        artifact_value = load(path(root, artifact["path"]))
+        result(root, artifact_value, value["acceptance"], admission, fresh=freshness and value["delivery"]["status"] != "delivered")
         require(evidence.get("exit_code") == 0 and evidence.get("critical_sha256") == object_hash(value["critical"]) and evidence.get("result_sha256") == artifact["sha256"], "unbound evidence")
         require(evidence.get("acceptance_sha256") == value["acceptance_hash"], "evidence criterion mismatch")
         if freshness and value["delivery"]["status"] != "delivered":
@@ -297,6 +303,11 @@ def task(root, value, freshness=True):
         if value.get("independent_required"):
             review = value.get("independent_review") or {}
             require(review.get("reviewer") and review["reviewer"] != value["owner"] and review.get("verdict") == "pass" and review.get("result_sha256") == artifact["sha256"], "independent acceptance missing")
+        review = value.get("independent_review") or {}
+        if 'process_reference' in review or value['acceptance'].get('research_review_process_required'):
+            require('process_reference' in review, 'accepted research review process report missing')
+            from research_evidence import validate_review
+            validate_review(root, review, artifact_value)
     return True
 
 
@@ -388,6 +399,8 @@ def repository(root, freshness=True):
             require(path(root, binding["local"]).is_file(), "local rule missing")
     except Exception as exc:
         errors.append(str(exc))
+    import navigation
+    check(lambda: navigation.validate(root), "navigation")
     require(not errors, "\n".join(errors))
     return {"checked": True, "entities": len(identities), "skills": len(canonical_skills), "tasks": len(tasks(root))}
 

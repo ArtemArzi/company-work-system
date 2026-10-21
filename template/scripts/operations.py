@@ -7,13 +7,21 @@ import validation
 
 
 def context(root, task_id=None):
+    import navigation
     cfg = config(root)
     result = {"company_id": cfg["id"], "release": load(path(root, "release.yaml")), "map": "company/README.md", "active_standards": cfg.get("bindings", {}), "native_memory": "not-used", "tasks": []}
+    result["navigation"] = navigation.check(root)
     for file in tasks(root):
         t = load(file)
         if task_id and t["id"] != task_id:
             continue
         result["tasks"].append({"path": file.relative_to(root).as_posix(), "id": t["id"], "status": t["status"], "revision": t["revision"], "output": t.get("output"), "next_action": t["next_action"], "blocker": t.get("blocker"), "changed_dependencies": changed_bindings(root, t["bindings"], t.get("binding_scope"))})
+        entry = result["tasks"][-1]
+        entry.update(delivery=t.get("delivery", {"status": "local"}), application=t.get("application", {"status": "unknown"}), effect=t.get("effect", {"status": "unknown"}))
+        if t.get("output"):
+            output = path(root, t["output"]["path"])
+            present = output.is_file()
+            entry["output_local"] = {"present": present, "matches_recorded": present and digest(output) == t["output"]["sha256"]}
     if task_id:
         require(result["tasks"], "task not found")
     return result

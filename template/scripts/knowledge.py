@@ -9,6 +9,11 @@ def build(root):
         meta = load(file)
         relative = file.relative_to(root).as_posix()
         node = {"id": meta["id"], "aliases": meta.get("aliases", []), "path": relative, "sha256": digest(file), "origin": meta["origin"], "status": meta["status"], "text": meta.get("summary", "")}
+        if "selected_result" in meta:
+            from research_evidence import selected_result
+            selected = selected_result(root, meta)
+            node.update(selected_result={key: selected[key] for key in ["path", "sha256"]},
+                        text=selected["text"], result_limitations=selected["limitations"])
         if meta.get("material"):
             material = path(root, meta["material"])
             require(material.is_file(), "knowledge material missing")
