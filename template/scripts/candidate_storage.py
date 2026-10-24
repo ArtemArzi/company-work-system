@@ -498,6 +498,17 @@ def _rename(source, destination):
         if rename(-100, os.fsencode(source), -100, os.fsencode(destination), 1):
             error = ctypes.get_errno()
             raise OSError(error, os.strerror(error))
+    elif sys.platform == "darwin":
+        # Apple ABI and RENAME_EXCL: apple-oss-distributions/xnu, bsd/sys/stdio.h.
+        # https://github.com/apple-oss-distributions/xnu/blob/main/bsd/sys/stdio.h
+        native = ctypes.CDLL(None, use_errno=True)
+        rename = getattr(native, "renamex_np", None)
+        require(rename is not None, "atomic no-replace rename unavailable; retain candidate")
+        rename.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint]
+        rename.restype = ctypes.c_int
+        if rename(os.fsencode(source), os.fsencode(destination), 4):  # RENAME_EXCL
+            error = ctypes.get_errno()
+            raise OSError(error, os.strerror(error))
     else:
         raise Rejected("atomic no-replace rename unsupported; retain candidate")
 
