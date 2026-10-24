@@ -372,6 +372,8 @@ def _locks_clear(root):
 def _source_proof(record, candidate):
     source = _canonical(record["source"])
     require(_standalone(source) == record["source_identity"], "source repository identity changed")
+    require(_git(source, "symbolic-ref", "--quiet", "HEAD").decode().strip() == record["source_branch"],
+            "source branch association changed")
     target = record["target"]
     require(re.fullmatch(r"[0-9a-f]{40}|[0-9a-f]{64}", target), "storage target missing")
     _git(source, "merge-base", "--is-ancestor", target, "HEAD")
@@ -398,6 +400,10 @@ def _safe_candidate(base, record, candidate, *, renamed=False):
     require(marker == _pointer(record), "candidate storage marker changed")
     require(not record.get("keep"), "candidate explicitly pinned")
     _locks_clear(candidate)
+    require(_git(candidate, "for-each-ref", "--format=%(refname)").decode().splitlines() == record["ref_names"],
+            "candidate reference names changed since preparation")
+    require(_git(candidate, "symbolic-ref", "--quiet", "HEAD").decode().strip() == record["candidate_branch"],
+            "candidate branch association changed")
     _known_files(candidate)
     if not renamed:
         require(_native(candidate) == record["native"], "native config/hooks changed since preparation")
@@ -520,6 +526,7 @@ def reserve(source, destination, *, kind="prepare", keep=False):
                   "candidate": str(destination), "kind": kind, "keep": bool(keep),
                   "state": "reserved", "phase": "reserved", "reason": "preparation not registered",
                   "source_identity": identity, "source_head": _git(source, "rev-parse", "HEAD").decode().strip(),
+                  "source_branch": _git(source, "symbolic-ref", "--quiet", "HEAD").decode().strip(),
                   "parents": _parents(destination), "created_at": now()}
         _save(base, record, guard)
         return record
@@ -541,6 +548,11 @@ def register(source, destination, reservation):
             require(record.get("candidate_identity", identity) == identity and record.get("native", native) == native,
                     "interrupted registration identity/native state changed")
             record["candidate_identity"], record["native"] = identity, native
+            refs = _git(destination, "for-each-ref", "--format=%(refname)").decode().splitlines()
+            branch = _git(destination, "symbolic-ref", "--quiet", "HEAD").decode().strip()
+            require(record.get("ref_names", refs) == refs and record.get("candidate_branch", branch) == branch,
+                    "interrupted registration branch/references changed")
+            record["ref_names"], record["candidate_branch"] = refs, branch
             marker = destination / ".git" / _MARKER
             if marker.exists() or marker.is_symlink():
                 require(_read(marker) == _pointer(record), "candidate marker already exists with other ownership")
