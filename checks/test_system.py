@@ -324,6 +324,7 @@ class GitAcceptance(Fixture):
     def product_release(self):
         p = self.base / "product"; p.mkdir()
         shutil.copytree(TEMPLATE, p / "template", symlinks=True, ignore=shutil.ignore_patterns("__pycache__"))
+        (p / ".gitignore").write_bytes((PRODUCT / ".gitignore").read_bytes())
         (p / "PRIVATE-DEVELOPMENT.md").write_text("Do not send product development to companies\n", encoding="utf-8", newline="\n")
         self.seed(p)
         release = self.base / "release.git"

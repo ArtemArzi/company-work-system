@@ -1,6 +1,6 @@
 ---
 id: runtime
-version: 10
+version: 11
 owner: product-maintainer
 ---
 # Форматы и подготовленные команды
@@ -60,7 +60,9 @@ Python API сохраняет позиционные аргументы: `execut
 | Знания | `search query`, `kb-read source-id` |
 | Организация файлов | `organization-check --paths-file paths.json [--task id] [--expect snapshot.json]`: read-only место, карты, ссылки, structured consumers, immutable pins и exact pre/postimage; манифесты только внутри компании |
 | Чистая компания | `create release.git new-directory --id company-id --owner owner` |
-| Общая доставка | `prepare remote [new-candidate] [--task id]`, `commit path... --message text`, `deliver remote --expected-base SHA [--task id] [--finish]` для сохранения readback у задачи |
+| Общая доставка | `prepare remote [new-candidate] [--task id] [--keep-candidate]`, `commit path... --message text`, `deliver remote --expected-base SHA [--task id] [--finish]` для сохранения readback у задачи |
+| Временные копии | `candidate-status` читает только новые зарегистрированные попытки и причины удержания. Завершённые неизменённые копии закрываются при следующем prepare/update/rollback; старые копии не обходятся |
+| Не начатая подготовка | `candidate-release ID` закрывает только собственную reserved-запись с отсутствующим каталогом и без связанной Git identity. Файлы не удаляются; для existing/partial каталога команда отказывает |
 | Обновление | `update release.git new-candidate`, при принятом разрешении конфликта `finish-update --target SHA --company-base SHA`; потом тот же deliver |
 | Восстановление | `rollback new-candidate`, `backup new-outside-directory`, `restore backup new-directory` |
 | Обратный поток | `proposal sanitized-package new-output-directory`; `proposal-candidate package product-root product-remote new-candidate` для новых standards или точных hooks/manifest.yaml, hooks/README.md, scripts/hooks.py и checks; потом те же commit/deliver. Hook replacement сохраняет base/candidate hashes и требует maintainer review; donated code при подготовке не исполняется. Другие виды пакетов требуют явной связи потребителей у сопровождающего |
@@ -164,3 +166,21 @@ Relative state paths всегда POSIX, unsafe Windows names и case/NFC collis
 
 
 Для обычного prepare-кандидата --finish завершает исходный checkout после remote readback; workspace_reconciled проверяется отдельно от status доставки. Default destination ignored; --task у prepare задаёт место в папке дела, --task у deliver допустим только для verified result и его acknowledgment. delivered-local-pending возвращает exit2, сохраняет readback и candidate; stage/reason_code/next_action указывают безопасное продолжение. Для Work сохраняется местный sync. Частично обновлённые bytes автоматически не перезаписываются при повторе.
+
+### Хранение временных копий с 1.8.0
+
+Новый prepare/update/rollback регистрирует принадлежащую CWS временную копию у исходного checkout, в ignored `.local/cws-candidates`. После полного `deliver --finish` её свидетельство сохраняется там же, отдельно от удаляемой `.git`. Перед созданием следующей копии CWS закрывает прежние подтверждённо завершённые, если их данные и Git-состояние не изменились. Последний успешный кандидат остаётся до следующей подготовки, поэтому обычный повтор finish по тому же пути сохраняется.
+
+Кандидат временный даже при явно заданном пути. `prepare --keep-candidate` закрепляет намеренно сохраняемую копию. Чистая компания из create, постоянный backup и legacy-каталоги без нового marker в эту уборку не входят. Managed-кандидат нельзя использовать как общий источник objects/alternates для другого инструмента. Для постоянной работы используется исходная компания.
+
+Неизвестный readback, незавершённое местное применение, unique Git objects, дополнительные worktrees, новые файлы, изменённые config/hooks, чужие locks и закреплённые копии сохраняются. Исторический success или возраст сами по себе не разрешают удаление. При четырёх незавершённых/сохраняемых новых копиях source создание следующей блокируется до завершения существующих; `candidate-status` показывает пути. Доставка и storage_status раздельны: подтверждённый результат остаётся доставленным, даже если последующая уборка невозможна.
+
+Неизвестные или изменённые Git-admin файлы также сохраняются с момента регистрации; первый seal не разрешает стирать произвольные данные внутри `.git`. Отказ clone без созданного каталога можно повторить обычным prepare с тем же путём, remote, веткой и неизменной исходной версией: используется прежняя reservation под общим lock. Если исходное намерение изменилось, `candidate-release ID` освобождает только отсутствующую не связанную с Git попытку без удаления данных. Непроверенный partial clone сохраняется для разбора и не перезаписывается повтором.
+
+Для принятого update/rollback CWS сохраняет точные bytes промежуточного index tree в той же исходной записи до изменения base.json. Git hash и каждый дочерний объект проверяются заново перед уборкой. Это компактное доказательство сохраняется после закрытия copy; произвольные dangling blobs/commits/trees таким способом автоматически не принимаются. Повреждённое доказательство удерживает candidate.
+
+Проверяются также ignored-файлы. Только узкие воспроизводимые CWS/Python caches являются disposable; личные `.env`, произвольные `.local` и окружения не объявляются мусором. Запускать CLI кандидата готовым Python исходной компании: `/source/scripts/run.sh python /candidate/scripts/system.py --root /candidate <operation>`; в Windows тот же аргумент `python` у run.ps1. Так исполняется полученный код кандидата без установки ещё одной среды Python в каждой временной копии. Для update нужен origin исходной компании, указывающий на её общий рабочий Git. При отсутствии принятого origin witness завершения не угадывается, копия сохраняется.
+
+Изменяющие CWS CLI-операции и Git entry points managed-кандидата используют общий внешний operation lock; sealing использует тот же lock. Read-only CLI validate занимает отдельный validation lock; уборка и её продолжение получают оба lock. Родитель preflight сохраняет operation lock до окончания дочерней проверки полученной версии. Самостоятельный validate не обещает атомарный снимок при параллельной записи и не заменяет проверки внутри сохранения или доставки.
+
+Свидетельства и точные пути quarantine позволяют продолжить известный этап после сбоя. Изменённая или частично удалённая неизвестная quarantine сохраняется для разбора. Сторонние программы, обходящие эти locks, не становятся изолированными этим правилом; их неизвестные изменения блокируют уборку. Native поведение новой функции на конкретной ОС подтверждается отдельным прогоном.

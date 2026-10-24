@@ -2,6 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import os
+import json
 import re
 import subprocess
 import sys
@@ -9,6 +10,7 @@ import tempfile
 from contextlib import contextmanager
 from core import Rejected, config, digest, ident, load, lock, object_hash, path, require, write
 import validation
+import candidate_storage
 from platform_runtime import atomic_text
 
 
@@ -72,6 +74,10 @@ def metadata_error(stage, error):
 def write_delivery_record(file, value):
     """Keep confirmed delivery available when private Git metadata is read-only."""
     try:
+        file = Path(file)
+        expected = (json.dumps(value, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+        if file.suffix == '.json' and file.is_file() and not file.is_symlink() and file.read_bytes() == expected:
+            return
         write(file, value)
     except OSError as exc:
         raise metadata_error("delivery_record", exc) from None
@@ -92,6 +98,7 @@ def git_environment():
     return env
 
 
+@candidate_storage.guarded
 def git(root, *arguments, check=True, timeout=None, noninteractive=False, binary=False, private_index=None):
     command = ["git", "-C", str(root), *arguments]
     environment = git_environment()
@@ -156,7 +163,35 @@ def remote_allowed(root, remote):
     return local
 
 
-def prepare(root, remote, branch, destination=None, task_id=None):
+def prepare_witness(root, remote, branch):
+    """Capture the unchanged source contract before creating a disposable copy."""
+    import history
+    root = Path(root).resolve()
+    if git(root, "rev-parse", "--show-toplevel", check=False).returncode:
+        return None
+    location = history.repository_location(root)
+    index = Path(location["gitdir"]) / "index"
+    return {"source": str(root), "location": object_hash(location), "head": git(root, "rev-parse", "HEAD"),
+            "head_bytes": (Path(location["gitdir"]) / "HEAD").read_bytes().hex(),
+            "index": digest(index) if index.is_file() else None,
+            "branch": git(root, "symbolic-ref", "--quiet", "HEAD", check=False).stdout.strip(),
+            "company": config(scope_root(root))["id"], "remote": remote, "remote_branch": branch,
+            "native": native_fingerprint(root)}
+
+
+def record_prepare(root, destination, witness, reservation):
+    import history
+    base = git(destination, "rev-parse", "HEAD")
+    if witness:
+        witness.update(candidate=str(destination), candidate_location=object_hash(history.repository_location(destination)),
+                       candidate_branch=git(destination, "symbolic-ref", "HEAD"), base=base)
+        write_delivery_record(destination / ".git/cws-prepare.json", witness)
+    candidate_storage.register(root, destination, reservation)
+    return base
+
+
+@candidate_storage.guarded
+def prepare(root, remote, branch, destination=None, task_id=None, keep_candidate=False):
     import uuid
     import platform_runtime
     import history
@@ -175,26 +210,18 @@ def prepare(root, remote, branch, destination=None, task_id=None):
     if destination.is_relative_to(root):
         if git(root, "check-ignore", "--quiet", "--", destination.relative_to(root).as_posix(), check=False).returncode != 0:
             raise GitFailure("prepare", code="candidate_not_ignored")
-    witness = None
-    if git(root, "rev-parse", "--show-toplevel", check=False).returncode == 0:
-        location = history.repository_location(root)
-        index = Path(location["gitdir"]) / "index"
-        witness = {"source": str(root), "location": object_hash(location), "head": git(root, "rev-parse", "HEAD"),
-                   "head_bytes": (Path(location["gitdir"]) / "HEAD").read_bytes().hex(),
-                   "index": digest(index) if index.is_file() else None,
-                   "branch": git(root, "symbolic-ref", "--quiet", "HEAD", check=False).stdout.strip(),
-                   "company": config(scope_root(root))["id"], "remote": remote, "remote_branch": branch,
-                   "native": native_fingerprint(root)}
-    git(root, "clone", "--no-local", "--single-branch", "--branch", branch, remote, str(destination))
-    identity(destination)
-    base = git(destination, "rev-parse", "HEAD")
-    if witness:
-        witness.update(candidate=str(destination), candidate_location=object_hash(history.repository_location(destination)),
-                       candidate_branch=git(destination, "symbolic-ref", "HEAD"), base=base)
-        write_delivery_record(destination / ".git/cws-prepare.json", witness)
+    reservation = candidate_storage.reserve(root, destination, keep=keep_candidate,
+                                            intent={"remote": remote, "branch": branch})
+    with candidate_storage.preparation(root, reservation) as guard:
+        witness = prepare_witness(root, remote, branch)
+        git(root, "clone", "--no-local", "--single-branch", "--branch", branch, remote, str(destination))
+        guard.check()
+        identity(destination)
+        base = record_prepare(root, destination, witness, reservation)
     return {"path": str(destination), "base": base, "branch": branch, "source_witness": bool(witness)}
 
 
+@candidate_storage.guarded
 def preflight(root, remote=None, branch="main", authorize=remote_allowed):
     """Receive shared state without staging, publishing or discarding local work."""
     root = Path(root).resolve()
@@ -368,6 +395,7 @@ def native_admin(root, head, worktree=None):
         yield scratch, admin, private_git
 
 
+@candidate_storage.guarded
 def commit(root, relative_paths, message):
     require(relative_paths and message.strip(), "explicit changed paths and message required")
     root = Path(root).resolve()
@@ -475,6 +503,11 @@ def complete_source(witness, target, state, state_file):
             target_index = current == target and git(source, "diff", "--cached", "--quiet", target, check=False).returncode == 0
             completion_guard(original_index or target_index)
             completion_guard(git(source, "merge-base", "--is-ancestor", witness["head"], target, check=False).returncode == 0)
+            if state["phase"] == "complete" and target_index:
+                completion_guard(not git(source, "status", "--porcelain", "--untracked-files=all"), "local_pending")
+                validation.repository(source)
+                unchanged()
+                return {"workspace_reconciled": True, "local_head": target, "source": str(source)}
             context = commit_context(source)
             with native_admin(source, witness["head"], source) as (scratch, admin, private_git):
                 completion_guard(commit_context(scratch) == context)
@@ -519,6 +552,7 @@ def complete_source(witness, target, state, state_file):
     return {"workspace_reconciled": True, "local_head": target, "source": str(source)}
 
 
+@candidate_storage.guarded
 def finish_delivery(root, remote, branch, expected_base, task_id):
     import history
     root = Path(root).resolve()
@@ -558,7 +592,7 @@ def finish_delivery(root, remote, branch, expected_base, task_id):
             completion_guard(not git(root, "status", "--porcelain", "--untracked-files=all"), "local_pending")
             write_delivery_record(state_file, state)
             local = complete_source(witness, state["target"], state, state_file)
-            return {**receipt, **local, "completion_phase": state["phase"]}
+            result = {**receipt, **local, "completion_phase": state["phase"]}
         except Exception as exc:
             detail = exc.diagnostic if isinstance(exc, GitFailure) else diagnostic("local_completion", code="source_changed")
             state["diagnostic"] = detail
@@ -568,8 +602,10 @@ def finish_delivery(root, remote, branch, expected_base, task_id):
                 pass  # Return the confirmed receipt even when the journal cannot be written.
             return {**receipt, "status": "delivered-local-pending", "workspace_reconciled": False,
                     "completion_phase": state["phase"], **detail}
+    return {**result, **candidate_storage.seal(root, result)}
 
 
+@candidate_storage.guarded
 def deliver(root, remote, branch="main", expected_base=None, task_id=None, finish=False):
     """Fail on stale base. Never force/rebase/reset; retry first reconciles remote."""
     if finish:

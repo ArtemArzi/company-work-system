@@ -232,20 +232,29 @@ def _pointer(record):
 
 
 @contextmanager
-def operation(root):
-    """Yield a callable .check() guard; unmanaged roots keep their old behavior."""
+def _activity(root, suffix):
     managed = _managed(root)
     if managed is None:
         yield _UnmanagedGuard()
         return
     base, record = managed
-    with _lease(base / "locks" / (record["id"] + ".lock")) as guard:
+    with _lease(base / "locks" / (record["id"] + suffix)) as guard:
         current = _managed(root)
         require(current and current[1]["id"] == record["id"], "candidate storage identity changed")
         require(current[1]["state"] not in {"closed", "retiring"}, "candidate is being retired")
         require(_repository(Path(root)) == record["candidate_identity"], "candidate repository identity changed")
         guard.check()
         yield guard
+
+
+def operation(root):
+    """Keep managed mutations exclusive for the whole public operation."""
+    return _activity(root, ".lock")
+
+
+def validation_operation(root):
+    """Protect read-only CLI validation from retirement, including child runs."""
+    return _activity(root, ".validation.lock")
 
 
 def guarded(function):
@@ -591,8 +600,9 @@ def _rename(source, destination):
 
 def _sweep_one(base, record, registry_guard):
     try:
-        with _lease(base / "locks" / (record["id"] + ".lock")) as guard:
-            registry_guard.check(); guard.check()
+        with _lease(base / "locks" / (record["id"] + ".lock")) as guard, \
+                _lease(base / "locks" / (record["id"] + ".validation.lock")) as reading:
+            registry_guard.check(); guard.check(); reading.check()
             original = Path(record["candidate"])
             if record["state"] == "sealed":
                 candidate = _safe_candidate(base, record, original)
@@ -600,7 +610,7 @@ def _sweep_one(base, record, registry_guard):
                 quarantine = candidate.with_name(".cws-quarantine-" + record["id"] + "-" + uuid.uuid4().hex)
                 record.update(state="retiring", phase="rename-planned", quarantine=str(quarantine))
                 _save(base, record, registry_guard)
-                registry_guard.check(); guard.check()
+                registry_guard.check(); guard.check(); reading.check()
                 _safe_candidate(base, record, candidate)
                 _not_running(candidate)
                 _rename(candidate, quarantine)
@@ -624,14 +634,14 @@ def _sweep_one(base, record, registry_guard):
                 require(not original.exists(), "original candidate reappeared; preserve quarantine")
             _not_running(quarantine)
             _safe_candidate(base, record, quarantine, renamed=True)
-            registry_guard.check(); guard.check()
+            registry_guard.check(); guard.check(); reading.check()
             record["phase"] = "removing"
             _save(base, record, registry_guard)
             # The second full proof is immediately before destructive traversal.
             _safe_candidate(base, record, quarantine, renamed=True)
-            registry_guard.check(); guard.check()
+            registry_guard.check(); guard.check(); reading.check()
             shutil.rmtree(quarantine)
-            registry_guard.check(); guard.check()
+            registry_guard.check(); guard.check(); reading.check()
             record.update(state="closed", phase="closed", reason="owned quarantine removed")
             _save(base, record, registry_guard)
     except Exception as exc:

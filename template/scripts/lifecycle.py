@@ -7,8 +7,10 @@ from pathlib import Path
 import shutil
 import subprocess
 import tarfile
+from contextlib import contextmanager
 from core import config, digest, ident, load, lock, now, object_hash, path, require, tasks, write
 from delivery import clean, commit, git, git_environment, identity, prepare, remote_allowed
+import candidate_storage
 import validation
 
 
@@ -57,23 +59,38 @@ def _protected_snapshot(root):
     return result
 
 
-def _company_candidate(root, destination, source_head):
+@contextmanager
+def _company_candidate(root, destination, source_head, kind="update"):
     """Clone with a source witness; checkout conversion never defines truth."""
     protected = _protected_snapshot(root)
     candidate = Path(destination).resolve()
     require(not candidate.exists(), 'company candidate already exists; no overwrite')
-    git(root, 'clone', '-c', 'core.autocrlf=false', '--no-local', str(Path(root).resolve()), str(candidate))
-    identity(candidate)
-    issues = []
-    if git(candidate, 'rev-parse', 'HEAD') != source_head or git(root, 'rev-parse', 'HEAD') != source_head:
-        issues.append('source HEAD changed during candidate preparation')
-    if _protected_snapshot(root) != protected:
-        issues.append('source company bytes changed during candidate preparation')
-    if _protected_snapshot(candidate) != protected:
-        issues.append('checkout changed tracked company/settings/proof inventory or bytes')
-    return candidate, protected, issues
+    reservation = candidate_storage.reserve(root, candidate, kind=kind,
+                                            intent={"operation": kind, "source_head": source_head})
+    with candidate_storage.preparation(root, reservation) as guard:
+        origin = git(root, 'remote', 'get-url', 'origin', check=False)
+        witness = None
+        if origin.returncode == 0:
+            from delivery import prepare_witness
+            remote = origin.stdout.strip()
+            remote_allowed(root, remote)
+            witness = prepare_witness(root, remote, 'main')
+        git(root, 'clone', '-c', 'core.autocrlf=false', '--no-local', str(Path(root).resolve()), str(candidate))
+        guard.check()
+        identity(candidate)
+        from delivery import record_prepare
+        record_prepare(root, candidate, witness, reservation)
+        issues = []
+        if git(candidate, 'rev-parse', 'HEAD') != source_head or git(root, 'rev-parse', 'HEAD') != source_head:
+            issues.append('source HEAD changed during candidate preparation')
+        if _protected_snapshot(root) != protected:
+            issues.append('source company bytes changed during candidate preparation')
+        if _protected_snapshot(candidate) != protected:
+            issues.append('checkout changed tracked company/settings/proof inventory or bytes')
+        yield candidate, protected, issues
 
 
+@candidate_storage.guarded
 def update(root, release, destination):
     """Always prepare independently. Current/dirty workspace is never mutated."""
     config(root, True)
@@ -84,42 +101,45 @@ def update(root, release, destination):
     checked = release_isolated(release)
     expected_release = checked["ref_tips"].get("refs/heads/main")
     require(expected_release, "release lacks checked main")
-    candidate, protected, issues = _company_candidate(root, destination, source_head)
-    if issues:
-        return {'status': 'needs-reconciliation', 'phase': 'clone', 'candidate': str(candidate), 'target': expected_release,
-                'issues': issues, 'next_action': 'Preserve original bytes and candidate; reconcile Git representation with the owner, then prepare a new candidate'}
-    previous_head = git(candidate, "rev-parse", "HEAD")
-    git(candidate, "fetch", str(Path(release).resolve()), "main")
-    target = git(candidate, "rev-parse", "FETCH_HEAD")
-    require(target == expected_release, "release changed after validation; preserve unmerged candidate")
-    require(git(candidate, "merge-base", "--is-ancestor", metadata["installed"], target, check=False).returncode == 0, "release lacks installed ancestry")
-    if target == metadata["installed"]:
-        return {"status": "already-installed", "candidate": str(candidate), "target": target}
-    require(git(candidate, "merge-base", "--is-ancestor", metadata["installed"], previous_head, check=False).returncode == 0, "company lost template ancestry")
-    changes = git(candidate, "diff", "--name-only", metadata["installed"], target).splitlines()
-    require(not any(p.startswith(("company/", "work/")) for p in changes), "release changes company-owned paths; separate adaptation decision required")
-    merged = git(candidate, "merge", "--no-ff", "--no-commit", target, check=False)
-    if merged.returncode != 0:
-        return {"status": "conflict", "candidate": str(candidate), "target": target, "files": git(candidate, "diff", "--name-only", "--diff-filter=U").splitlines(), "next_action": "Resolve with the method/company owner; both sides retained in Git"}
-    failures = []
-    if _protected_snapshot(candidate) != protected:
-        failures.append('tracked company/settings/proof inventory or bytes changed')
-    try:
-        # Historical evidence is preserved; currently active tasks are separately blocked.
-        validation.repository(candidate, freshness=False)
-    except Exception as exc:
-        failures.append(str(exc))
-    for file in tasks(candidate):
-        t = load(file)
-        if t["status"] in {"active", "blocked", "waiting"}:
-            from core import changed_bindings
-            if changed_bindings(candidate, t["bindings"], t.get("binding_scope")):
-                failures.append("active task pinned to previous version: " + t["id"])
-    if failures:
-        return {"status": "needs-reconciliation", "candidate": str(candidate), "target": target, "issues": failures, "next_action": "Keep exact candidate; reconcile bindings and old sessions; finish-update"}
-    return finish_update(candidate, target, previous_head)
+    if expected_release == metadata["installed"]:
+        return {"status": "already-installed", "candidate": None, "target": expected_release}
+    with _company_candidate(root, destination, source_head) as (candidate, protected, issues):
+        if issues:
+            return {'status': 'needs-reconciliation', 'phase': 'clone', 'candidate': str(candidate), 'target': expected_release,
+                    'issues': issues, 'next_action': 'Preserve original bytes and candidate; reconcile Git representation with the owner, then prepare a new candidate'}
+        previous_head = git(candidate, "rev-parse", "HEAD")
+        git(candidate, "fetch", str(Path(release).resolve()), "main")
+        target = git(candidate, "rev-parse", "FETCH_HEAD")
+        require(target == expected_release, "release changed after validation; preserve unmerged candidate")
+        require(git(candidate, "merge-base", "--is-ancestor", metadata["installed"], target, check=False).returncode == 0, "release lacks installed ancestry")
+        if target == metadata["installed"]:
+            return {"status": "already-installed", "candidate": str(candidate), "target": target}
+        require(git(candidate, "merge-base", "--is-ancestor", metadata["installed"], previous_head, check=False).returncode == 0, "company lost template ancestry")
+        changes = git(candidate, "diff", "--name-only", metadata["installed"], target).splitlines()
+        require(not any(p.startswith(("company/", "work/")) for p in changes), "release changes company-owned paths; separate adaptation decision required")
+        merged = git(candidate, "merge", "--no-ff", "--no-commit", target, check=False)
+        if merged.returncode != 0:
+            return {"status": "conflict", "candidate": str(candidate), "target": target, "files": git(candidate, "diff", "--name-only", "--diff-filter=U").splitlines(), "next_action": "Resolve with the method/company owner; both sides retained in Git"}
+        failures = []
+        if _protected_snapshot(candidate) != protected:
+            failures.append('tracked company/settings/proof inventory or bytes changed')
+        try:
+            # Historical evidence is preserved; currently active tasks are separately blocked.
+            validation.repository(candidate, freshness=False)
+        except Exception as exc:
+            failures.append(str(exc))
+        for file in tasks(candidate):
+            t = load(file)
+            if t["status"] in {"active", "blocked", "waiting"}:
+                from core import changed_bindings
+                if changed_bindings(candidate, t["bindings"], t.get("binding_scope")):
+                    failures.append("active task pinned to previous version: " + t["id"])
+        if failures:
+            return {"status": "needs-reconciliation", "candidate": str(candidate), "target": target, "issues": failures, "next_action": "Keep exact candidate; reconcile bindings and old sessions; finish-update"}
+        return finish_update(candidate, target, previous_head)
 
 
+@candidate_storage.guarded
 def finish_update(candidate, target, expected_company):
     require(git(candidate, "rev-parse", "HEAD") == expected_company, "company candidate head changed")
     require(not git(candidate, "diff", "--name-only", "--diff-filter=U"), "unresolved update conflict")
@@ -130,6 +150,7 @@ def finish_update(candidate, target, expected_company):
         t = load(file)
         require(t["status"] not in {"active", "waiting", "blocked"} or not changed_bindings(candidate, t["bindings"], t.get("binding_scope")), "active task must explicitly reconcile methods")
     version = load(path(candidate, "release.yaml"))["version"]
+    candidate_storage.preserve_index_tree(candidate)
     metadata = load(path(candidate, ".system/base.json"))
     if metadata["installed"] != target:
         metadata.update(installed=target, version=version, previous=metadata["installed"])
@@ -256,30 +277,32 @@ def restore(backup_path, destination):
     return {"path": str(destination), "status": "restored-and-verified", "head": manifest["head"], "boundary": "exact tracked bytes; native settings/trust may require re-projection at the new root; restored old runtime keeps its original OS limitations"}
 
 
+@candidate_storage.guarded
 def rollback(root, destination):
     clean(root)
     source_head = git(root, 'rev-parse', 'HEAD')
     metadata = load(path(root, ".system/base.json"))
     require(metadata.get("previous"), "no previous installed method version")
-    candidate, protected, issues = _company_candidate(root, destination, source_head)
-    if issues:
-        return {'status': 'needs-reconciliation', 'phase': 'clone', 'candidate': str(candidate), 'issues': issues,
-                'next_action': 'Preserve original bytes and candidate; reconcile Git representation with the owner, then prepare a new candidate'}
-    current, previous = metadata["installed"], metadata["previous"]
-    delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "hooks", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude/skills", ".gitignore", "requirements.txt", ".gitattributes", "docs/company-system-guide.html", "docs/first-company.md", "docs/observations.md", check=False, binary=True)
-    require(delta.returncode == 0, "rollback diff unavailable")
-    # Git's binary patch is a byte protocol. Text stdin converts LF to CRLF
-    # on Windows and can silently prevent an otherwise compatible rollback.
-    patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, capture_output=True, env=git_environment())
-    if patch.returncode:
-        return {"status": "conflict", "candidate": str(candidate), "reason": patch.stderr.decode('utf-8', errors='replace')[:1500], "next_action": "Preserve local methods and resolve reverse patch"}
-    require(_protected_snapshot(candidate) == protected, 'rollback touched tracked company/settings/proof inventory or bytes')
-    validation.repository(candidate, freshness=False)
-    metadata.update(installed=previous, previous=current, version=load(path(candidate, "release.yaml"))["version"])
-    write(path(candidate, ".system/base.json"), metadata)
-    git(candidate, "add", "--", ".system/base.json")
-    git(candidate, "commit", "-m", "Restore previous methods; keep current company work")
-    return {"status": "verified-candidate", "candidate": str(candidate), "sha256": git(candidate, "rev-parse", "HEAD")}
+    with _company_candidate(root, destination, source_head, kind="rollback") as (candidate, protected, issues):
+        if issues:
+            return {'status': 'needs-reconciliation', 'phase': 'clone', 'candidate': str(candidate), 'issues': issues,
+                    'next_action': 'Preserve original bytes and candidate; reconcile Git representation with the owner, then prepare a new candidate'}
+        current, previous = metadata["installed"], metadata["previous"]
+        delta = git(candidate, "diff", "--binary", current, previous, "--", "standards", "skills", "workflows", "scripts", "adapters", "hooks", "release.yaml", "README.md", "AGENTS.md", ".agents", ".claude/skills", ".gitignore", "requirements.txt", ".gitattributes", "docs/company-system-guide.html", "docs/first-company.md", "docs/observations.md", check=False, binary=True)
+        require(delta.returncode == 0, "rollback diff unavailable")
+        # Git's binary patch is a byte protocol. Text stdin converts LF to CRLF
+        # on Windows and can silently prevent an otherwise compatible rollback.
+        patch = subprocess.run(["git", "-C", str(candidate), "apply", "--3way", "--index"], input=delta.stdout, capture_output=True, env=git_environment())
+        if patch.returncode:
+            return {"status": "conflict", "candidate": str(candidate), "reason": patch.stderr.decode('utf-8', errors='replace')[:1500], "next_action": "Preserve local methods and resolve reverse patch"}
+        require(_protected_snapshot(candidate) == protected, 'rollback touched tracked company/settings/proof inventory or bytes')
+        validation.repository(candidate, freshness=False)
+        candidate_storage.preserve_index_tree(candidate)
+        metadata.update(installed=previous, previous=current, version=load(path(candidate, "release.yaml"))["version"])
+        write(path(candidate, ".system/base.json"), metadata)
+        git(candidate, "add", "--", ".system/base.json")
+        git(candidate, "commit", "-m", "Restore previous methods; keep current company work")
+        return {"status": "verified-candidate", "candidate": str(candidate), "sha256": git(candidate, "rev-parse", "HEAD")}
 
 
 def proposal(root, package, destination):

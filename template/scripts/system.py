@@ -16,6 +16,7 @@ from core import load, require
 import delivery
 import operations
 import validation
+import candidate_storage
 
 
 def main():
@@ -46,7 +47,9 @@ def main():
     p = sub.add_parser("search"); p.add_argument("query")
     p = sub.add_parser("kb-read"); p.add_argument("id")
     p = sub.add_parser("create"); p.add_argument("release", type=Path); p.add_argument("destination", type=Path); p.add_argument("--id", required=True); p.add_argument("--owner", required=True)
-    p = sub.add_parser("prepare"); p.add_argument("remote"); p.add_argument("destination", type=Path, nargs="?"); p.add_argument("--branch", default="main"); p.add_argument("--task")
+    p = sub.add_parser("prepare"); p.add_argument("remote"); p.add_argument("destination", type=Path, nargs="?"); p.add_argument("--branch", default="main"); p.add_argument("--task"); p.add_argument("--keep-candidate", action="store_true")
+    sub.add_parser("candidate-status")
+    p = sub.add_parser("candidate-release"); p.add_argument("id")
     p = sub.add_parser("commit"); p.add_argument("paths", nargs="+"); p.add_argument("--message", required=True)
     p = sub.add_parser("deliver"); p.add_argument("remote"); p.add_argument("--branch", default="main"); p.add_argument("--expected-base"); p.add_argument("--task"); p.add_argument("--finish", action="store_true")
     p = sub.add_parser("update"); p.add_argument("release", type=Path); p.add_argument("destination", type=Path)
@@ -61,6 +64,12 @@ def main():
     p = sub.add_parser('organization-check'); p.add_argument('--paths-file', type=Path, required=True); p.add_argument('--task'); p.add_argument('--expect', type=Path)
     args = parser.parse_args()
     root = args.root.resolve()
+    lease = candidate_storage.validation_operation if args.command == "validate" else candidate_storage.operation
+    with lease(root):
+        dispatch(root, args)
+
+
+def dispatch(root, args):
     c = args.command
     if c == "doctor":
         from doctor import diagnose
@@ -104,7 +113,9 @@ def main():
     elif c == "search": result = knowledge.search(root, args.query)
     elif c == "kb-read": result = knowledge.read_kb(root, args.id)
     elif c == "create": result = lifecycle.create(args.release, args.destination, args.id, args.owner)
-    elif c == "prepare": result = delivery.prepare(root, args.remote, args.branch, args.destination, args.task)
+    elif c == "prepare": result = delivery.prepare(root, args.remote, args.branch, args.destination, args.task, args.keep_candidate)
+    elif c == "candidate-status": result = candidate_storage.status(root)
+    elif c == "candidate-release": result = candidate_storage.release_missing(root, args.id)
     elif c == "commit": result = {"sha256": delivery.commit(root, args.paths, args.message)}
     elif c == "deliver": result = delivery.deliver(root, args.remote, args.branch, args.expected_base, args.task, args.finish)
     elif c == "update": result = lifecycle.update(root, args.release, args.destination)
