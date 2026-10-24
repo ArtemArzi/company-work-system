@@ -117,7 +117,7 @@ def process_lock(file):
             except OSError as exc:
                 raise BlockingIOError("company operation already running") from exc
             try:
-                yield
+                yield stream
             finally:
                 stream.seek(0)
                 msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
@@ -125,7 +125,7 @@ def process_lock(file):
             import fcntl
             fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
             try:
-                yield
+                yield stream
             finally:
                 fcntl.flock(stream, fcntl.LOCK_UN)
 
