@@ -325,6 +325,64 @@ def _fingerprint(root, caches=True):
     return {"sha256": digest.hexdigest(), "files": count, "bytes": size}
 
 
+
+def _admin_baseline(root, record):
+    """Hash immutable/unknown Git administration outside the narrow runtime set.
+
+    Git owns HEAD/index, ordinary commit/fetch journals, existing refs and their
+    reflogs, and well-named object payloads/derived pack indexes. CWS owns its
+    finish journal, marker and empty finish lock. Everything else, including
+    description, info/exclude and arbitrary objects/info files, stays immutable
+    from registration through disposal. No broad .git subtree is disposable.
+    """
+    gitdir = root / ".git"
+    refs = set(record["ref_names"])
+    mutable_files = {"HEAD", "index", "COMMIT_EDITMSG", "FETCH_HEAD", "ORIG_HEAD", "packed-refs",
+                     _MARKER, "cws-finish.json", "cws-finish-lock/.system/lock"}
+    mutable_files |= refs | {"logs/HEAD"} | {"logs/" + ref for ref in refs}
+    mutable_dirs = {"objects", "objects/pack", "refs", "logs", "cws-finish-lock", "cws-finish-lock/.system"}
+    for relative in mutable_files:
+        mutable_dirs.update(str(parent) for parent in Path(relative).parents if str(parent) != ".")
+    width = 64 if _git(root, "rev-parse", "--show-object-format").strip() == b"sha256" else 40
+    loose = re.compile(r"objects/[0-9a-f]{2}/[0-9a-f]{" + str(width - 2) + r"}")
+    pack = re.compile(r"objects/pack/pack-[0-9a-f]{" + str(width) + r"}\.(?:pack|idx|rev|bitmap)")
+    digest = hashlib.sha256()
+    count = size = 0
+    for directory, names, files in os.walk(gitdir, followlinks=False):
+        names.sort()
+        for name in sorted(names + files):
+            file = Path(directory) / name
+            relative = file.relative_to(gitdir).as_posix()
+            metadata = file.lstat()
+            require(not platform.alias(file), "aliased Git administration must be retained")
+            if stat.S_ISDIR(metadata.st_mode):
+                if relative in mutable_dirs or re.fullmatch(r"objects/[0-9a-f]{2}", relative):
+                    continue
+                value = [relative, metadata.st_mode]
+            else:
+                require(stat.S_ISREG(metadata.st_mode), "special Git administration must be retained")
+                packed = pack.fullmatch(relative)
+                pack_owned = packed and file.with_suffix(".pack").is_file() and file.with_suffix(".idx").is_file()
+                if relative in mutable_files or loose.fullmatch(relative) or pack_owned:
+                    continue
+                value = [relative, metadata.st_mode, metadata.st_size, metadata.st_mtime_ns,
+                         metadata.st_ctime_ns, metadata.st_dev, metadata.st_ino, metadata.st_nlink]
+            count += 1
+            digest.update(json.dumps(value).encode() + b"\0")
+            if stat.S_ISREG(metadata.st_mode):
+                with file.open("rb") as stream:
+                    while chunk := stream.read(1024 * 1024):
+                        digest.update(chunk)
+                        size += len(chunk)
+                after = file.lstat()
+                require((metadata.st_dev, metadata.st_ino, metadata.st_mode, metadata.st_size,
+                         metadata.st_mtime_ns, metadata.st_ctime_ns) ==
+                        (after.st_dev, after.st_ino, after.st_mode, after.st_size,
+                         after.st_mtime_ns, after.st_ctime_ns),
+                        "Git administration changed while fingerprinting")
+    return {"sha256": digest.hexdigest(), "files": count, "bytes": size}
+
+
 def _known_files(root):
     require(not _git(root, "diff", "--name-only").strip() and
             not _git(root, "diff", "--cached", "--name-only").strip(),
@@ -383,6 +441,7 @@ def _source_proof(record, candidate):
             "candidate target changed")
     # Every object, including abandoned blobs/trees/commits, needs an enduring
     # reference in the source; mere object existence would not survive source GC.
+    _git(candidate, "fsck", "--full", "--strict", "--no-reflogs")
     inventory = set(_git(candidate, "cat-file", "--batch-all-objects", "--batch-check=%(objectname)").splitlines())
     reachable = {line.split(b" ", 1)[0] for line in
                  _git(source, "rev-list", "--objects", "--all", "--reflog", target).splitlines()}
@@ -406,6 +465,8 @@ def _safe_candidate(base, record, candidate, *, renamed=False):
     require(_git(candidate, "symbolic-ref", "--quiet", "HEAD").decode().strip() == record["candidate_branch"],
             "candidate branch association changed")
     _known_files(candidate)
+    require(record.get("admin_baseline") == _admin_baseline(candidate, record),
+            "unknown/immutable Git administration changed since preparation")
     if not renamed:
         require(_native(candidate) == record["native"], "native config/hooks changed since preparation")
     _source_proof(record, candidate)
@@ -496,9 +557,76 @@ def _sweep_one(base, record, registry_guard):
         _save(base, record, registry_guard)
 
 
-def reserve(source, destination, *, kind="prepare", keep=False):
+
+def _missing_preparation(source, record, *, same_head):
+    require(record["source"] == str(source) and record["state"] == "reserved" and
+            "candidate_identity" not in record and "native" not in record,
+            "only an unbound reserved preparation can be retried or released")
+    destination = _canonical(record["candidate"])
+    _check_parents(record["parents"])
+    require(not destination.exists() and not destination.is_symlink(),
+            "existing/partial candidate must be preserved")
+    require(_standalone(source) == record["source_identity"], "source repository identity changed")
+    if same_head:
+        require(_git(source, "rev-parse", "HEAD").decode().strip() == record["source_head"] and
+                _git(source, "symbolic-ref", "--quiet", "HEAD").decode().strip() == record["source_branch"],
+                "source changed; explicitly release the missing reservation first")
+    return destination
+
+
+@contextmanager
+def preparation(source, reservation):
+    """Hold the external lease across clone, identity setup and register.
+
+    reserve alone reserves quota. Every caller must enter this context before
+    creating the destination; an absent-path retry shares the same record lock.
+    """
+    source = _canonical(source)
+    base = _registry(source)
+    token = reservation["id"] if isinstance(reservation, dict) else reservation
+    _record_path(base, token)
+    lease_file = _canonical(base / "locks" / (token + ".lock"))
+    with _MUTEX:
+        require(str(lease_file) not in _LEASES, "candidate preparation already running")
+    with _lease(lease_file) as operation_guard:
+        with _lease(base / "registry.lock") as guard:
+            record = _read(_record_path(base, token))
+            _missing_preparation(source, record, same_head=True)
+            record.update(phase="preparing", reason="preparation in progress or interrupted")
+            operation_guard.check()
+            _save(base, record, guard)
+        operation_guard.check()
+        yield operation_guard
+        operation_guard.check()
+
+
+def release_missing(source, token):
+    """Explicitly close only an absent, unbound reservation; delete no bytes."""
+    source = _canonical(source)
+    base = _registry(source)
+    _record_path(base, token)
+    lease_file = _canonical(base / "locks" / (token + ".lock"))
+    with _MUTEX:
+        require(str(lease_file) not in _LEASES, "candidate preparation already running")
+    with _lease(lease_file) as operation_guard:
+        with _lease(base / "registry.lock") as guard:
+            record = _read(_record_path(base, token))
+            _missing_preparation(source, record, same_head=False)
+            record.update(state="closed", phase="closed", reason="missing preparation explicitly released")
+            operation_guard.check()
+            _save(base, record, guard)
+            return {"status": "closed", "storage_id": token, "candidate": record["candidate"], "reason": record["reason"]}
+
+
+def reserve(source, destination, *, kind="prepare", keep=False, intent=None):
     source, destination = _canonical(source), _canonical(destination)
     require(kind in {"prepare", "update", "rollback"}, "unknown candidate kind")
+    require(intent is None or isinstance(intent, dict), "candidate intent must be a JSON object")
+    try:
+        normalized_intent = json.loads(json.dumps({} if intent is None else intent, sort_keys=True, allow_nan=False))
+    except (ValueError, TypeError) as exc:
+        raise Rejected("candidate intent must contain immutable JSON values") from exc
+    require(intent is None or normalized_intent == intent, "candidate intent requires canonical JSON keys")
     require(not destination.exists() and not destination.is_symlink(), "candidate destination already exists")
     require(source != destination and not source.is_relative_to(destination), "candidate cannot contain its source")
     identity = _standalone(source)
@@ -512,8 +640,16 @@ def reserve(source, destination, *, kind="prepare", keep=False):
     destination = _canonical(destination)
     with _lease(base / "registry.lock") as guard:
         records = _records(base)
-        require(not any(item["candidate"] == str(destination) and item["state"] != "closed" for item in records),
-                "candidate path already reserved")
+        existing = [item for item in records if item["candidate"] == str(destination) and item["state"] != "closed"]
+        if existing:
+            require(len(existing) == 1, "candidate path has conflicting reservations")
+            record = existing[0]
+            _missing_preparation(source, record, same_head=True)
+            require(record["kind"] == kind and record["keep"] == bool(keep) and
+                    record.get("intent", {}) == normalized_intent,
+                    "candidate retry intent changed; explicitly release the missing reservation first")
+            guard.check()
+            return record
         for item in records:
             if item["state"] in {"sealed", "retiring"}:
                 _sweep_one(base, item, guard)
@@ -524,7 +660,7 @@ def reserve(source, destination, *, kind="prepare", keep=False):
         require(_standalone(source) == identity, "source identity changed while reserving")
         require(not destination.exists() and not destination.is_symlink(), "candidate destination already exists")
         record = {"format": _FORMAT, "id": uuid.uuid4().hex, "source": str(source),
-                  "candidate": str(destination), "kind": kind, "keep": bool(keep),
+                  "candidate": str(destination), "kind": kind, "keep": bool(keep), "intent": normalized_intent,
                   "state": "reserved", "phase": "reserved", "reason": "preparation not registered",
                   "source_identity": identity, "source_head": _git(source, "rev-parse", "HEAD").decode().strip(),
                   "source_branch": _git(source, "symbolic-ref", "--quiet", "HEAD").decode().strip(),
@@ -554,6 +690,10 @@ def register(source, destination, reservation):
             require(record.get("ref_names", refs) == refs and record.get("candidate_branch", branch) == branch,
                     "interrupted registration branch/references changed")
             record["ref_names"], record["candidate_branch"] = refs, branch
+            baseline = _admin_baseline(destination, record)
+            require(record.get("admin_baseline", baseline) == baseline,
+                    "interrupted registration Git administration changed")
+            record["admin_baseline"] = baseline
             marker = destination / ".git" / _MARKER
             if marker.exists() or marker.is_symlink():
                 require(_read(marker) == _pointer(record), "candidate marker already exists with other ownership")
