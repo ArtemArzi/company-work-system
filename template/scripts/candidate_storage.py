@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 from functools import wraps
+import base64
+import binascii
 import ctypes
 import hashlib
 import json
@@ -427,6 +429,78 @@ def _locks_clear(root):
                 guard.check()
 
 
+
+def _verified_tree_proofs(candidate, record):
+    """Only actual, hash-verified raw tree bytes supplement source reachability."""
+    object_format = _git(candidate, "rev-parse", "--show-object-format").decode().strip()
+    require(object_format in {"sha1", "sha256"}, "unsupported Git tree proof format")
+    width = 64 if object_format == "sha256" else 40
+    proofs = record.get("tree_proofs", {})
+    require(isinstance(proofs, dict), "stored index tree proof format changed")
+    children = set()
+    for oid, encoded in proofs.items():
+        require(isinstance(oid, str) and re.fullmatch(r"[0-9a-f]{" + str(width) + "}", oid) and
+                isinstance(encoded, str), "stored index tree proof identity/type changed")
+        try:
+            raw = base64.b64decode(encoded.encode("ascii"), validate=True)
+        except (ValueError, UnicodeError, binascii.Error) as exc:
+            raise Rejected("stored index tree proof payload is invalid") from exc
+        require(base64.b64encode(raw).decode("ascii") == encoded,
+                "stored index tree proof payload is not canonical")
+        actual = hashlib.new(object_format, b"tree " + str(len(raw)).encode("ascii") + b"\0" + raw,
+                             usedforsecurity=False).hexdigest()
+        require(actual == oid, "stored index tree proof hash changed")
+        cursor = 0
+        while cursor < len(raw):
+            space = raw.find(b" ", cursor)
+            nul = raw.find(b"\0", space + 1) if space >= cursor else -1
+            require(space > cursor and nul > space + 1 and
+                    raw[cursor:space] in {b"40000", b"100644", b"100755", b"120000", b"160000"},
+                    "stored index tree proof is not a canonical tree")
+            name = raw[space + 1:nul]
+            require(b"/" not in name and name not in {b".", b".."},
+                    "stored index tree proof entry is invalid")
+            end = nul + 1 + width // 2
+            require(end <= len(raw), "stored index tree proof child is truncated")
+            children.add(raw[nul + 1:end].hex().encode("ascii"))
+            cursor = end
+    return {oid.encode("ascii") for oid in proofs}, children
+
+
+def preserve_index_tree(candidate):
+    """Keep the accepted lifecycle index tree before base metadata replaces it.
+
+    This is called only by guarded update/rollback completion after index
+    validation. It never archives unknown dangling objects or creates Git refs.
+    """
+    managed = _managed(candidate)
+    if managed is None:
+        return {"storage_status": "unmanaged", "storage_reason": "legacy candidate has no ownership marker"}
+    base, record = managed
+    candidate = _canonical(candidate)
+    with operation(candidate) as operation_guard:
+        with _lease(base / "registry.lock") as guard:
+            record = _read(_record_path(base, record["id"]))
+            require(record["kind"] in {"update", "rollback"}, "index tree proof requires a lifecycle candidate")
+            _check_parents(record["parents"])
+            require(_standalone(Path(record["source"])) == record["source_identity"],
+                    "source repository identity changed")
+            _verified_tree_proofs(candidate, record)  # Never repair/rebind a corrupt proof.
+            oid = _git(candidate, "write-tree").decode().strip()
+            require(_git(candidate, "cat-file", "-t", oid).strip() == b"tree", "index proof is not a tree")
+            raw = _git(candidate, "cat-file", "tree", oid)
+            encoded = base64.b64encode(raw).decode("ascii")
+            proofs = record.setdefault("tree_proofs", {})
+            require(oid not in proofs or proofs[oid] == encoded, "stored index tree proof differs")
+            if oid not in proofs:
+                proofs[oid] = encoded
+                _verified_tree_proofs(candidate, record)
+                operation_guard.check()
+                _save(base, record, guard)
+            operation_guard.check(); guard.check()
+            return {"storage_status": "tree-preserved", "storage_id": record["id"], "tree": oid}
+
+
 def _source_proof(record, candidate):
     source = _canonical(record["source"])
     _locks_clear(source)
@@ -445,7 +519,9 @@ def _source_proof(record, candidate):
     inventory = set(_git(candidate, "cat-file", "--batch-all-objects", "--batch-check=%(objectname)").splitlines())
     reachable = {line.split(b" ", 1)[0] for line in
                  _git(source, "rev-list", "--objects", "--all", "--reflog", target).splitlines()}
-    require(inventory <= reachable, "candidate contains Git objects not preserved by source history")
+    preserved_trees, proof_children = _verified_tree_proofs(candidate, record)
+    require(inventory | proof_children <= reachable | preserved_trees,
+            "candidate contains Git objects not preserved by source history or verified index tree proof")
 
 
 def _safe_candidate(base, record, candidate, *, renamed=False):
