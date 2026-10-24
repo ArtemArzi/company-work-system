@@ -371,6 +371,7 @@ def _locks_clear(root):
 
 def _source_proof(record, candidate):
     source = _canonical(record["source"])
+    _locks_clear(source)
     require(_standalone(source) == record["source_identity"], "source repository identity changed")
     require(_git(source, "symbolic-ref", "--quiet", "HEAD").decode().strip() == record["source_branch"],
             "source branch association changed")
