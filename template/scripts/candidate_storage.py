@@ -286,6 +286,12 @@ def _cache(relative):
 def _fingerprint(root, caches=True):
     """Compact hash of names, metadata and content; never store private manifests."""
     digest = hashlib.sha256()
+    metadata = root.lstat()
+    # Directory rename changes root ctime; all other stable root metadata remains
+    # covered, together with full child ctime values below.
+    digest.update(json.dumps([metadata.st_mode, metadata.st_size, metadata.st_mtime_ns,
+        metadata.st_dev, metadata.st_ino, metadata.st_nlink,
+        getattr(metadata, "st_uid", None), getattr(metadata, "st_gid", None)]).encode() + b"\0")
     count = size = 0
     def visit(directory):
         nonlocal count, size
@@ -489,6 +495,9 @@ def reserve(source, destination, *, kind="prepare", keep=False):
     require(not destination.exists() and not destination.is_symlink(), "candidate destination already exists")
     require(source != destination and not source.is_relative_to(destination), "candidate cannot contain its source")
     identity = _standalone(source)
+    _git(source, "check-ignore", "--quiet", "--", ".local/cws-candidates/")
+    if destination.is_relative_to(source):
+        _git(source, "check-ignore", "--quiet", "--", destination.relative_to(source).as_posix())
     base = _registry(source, create=True)
     require(not destination.is_relative_to(base) and not destination.is_relative_to(source / ".git"),
             "candidate destination overlaps storage metadata")
@@ -525,18 +534,24 @@ def register(source, destination, reservation):
         with _lease(base / "registry.lock") as guard:
             record = _read(_record_path(base, token))
             require(record["source"] == str(source) and record["candidate"] == str(destination) and
-                    record["state"] == "reserved", "candidate reservation changed")
+                    record["state"] in {"reserved", "prepared"}, "candidate reservation changed")
             _check_parents(record["parents"])
             require(_standalone(source) == record["source_identity"], "source repository identity changed")
-            record["candidate_identity"] = _standalone(destination)
-            record["native"] = _native(destination)
+            identity, native = _standalone(destination), _native(destination)
+            require(record.get("candidate_identity", identity) == identity and record.get("native", native) == native,
+                    "interrupted registration identity/native state changed")
+            record["candidate_identity"], record["native"] = identity, native
             marker = destination / ".git" / _MARKER
-            require(not marker.exists() and not marker.is_symlink(), "candidate marker already exists")
+            if marker.exists() or marker.is_symlink():
+                require(_read(marker) == _pointer(record), "candidate marker already exists with other ownership")
+            else:
+                require(record["state"] == "reserved", "prepared candidate ownership marker missing")
             operation_guard.check(); guard.check()
             # Save the identity before publishing the pointer, keeping interrupted
             # registration visible and counted even if pointer creation fails.
             _save(base, record, guard)
-            write(marker, _pointer(record))
+            if not marker.exists():
+                write(marker, _pointer(record))
             operation_guard.check(); guard.check()
             record["prepared_footprint"] = _fingerprint(destination)
             record.update(state="prepared", phase="prepared", reason="not sealed")
@@ -564,6 +579,7 @@ def seal(candidate, result):
                 record["target"] = target
                 record["receipt"] = {key: receipt[key] for key in
                     ("status", "sha256", "remote_head", "acknowledgment_commit", "newer_remote", "repeated") if key in receipt}
+                record["receipt"].update(workspace_reconciled=True, source=record["source"], local_head=target)
                 require(receipt.get("acknowledgment_commit", receipt.get("sha256")) == target,
                         "receipt does not retain the completed target")
                 # Repeated finish is valid until the next reserve; recapture only
